@@ -1,0 +1,58 @@
+{
+  "sources": [
+    {
+      "id": "client-chat",
+      "name": "Запрос клиента POST /v1/chat/completions",
+      "format": "JSON, OpenAI-compatible",
+      "frequency": "каждый вызов",
+      "volume": "тело до лимита ID24_API-53",
+      "owner": "клиент",
+      "access": "HTTPS, API-ключ"
+    },
+    {
+      "id": "provider-response",
+      "name": "Ответ провайдера",
+      "format": "JSON провайдера",
+      "frequency": "каждый разрешённый вызов",
+      "volume": "один ответ на генерацию в срезе без стрима",
+      "owner": "провайдер модели",
+      "access": "HTTPS из адаптера, ключ провайдера из секрет-хранилища"
+    },
+    {
+      "id": "model-catalog",
+      "name": "Каталог моделей",
+      "format": "строки PostgreSQL",
+      "frequency": "чтение на запрос, запись из админки",
+      "volume": "десятки моделей",
+      "owner": "Ерофеев Илья",
+      "access": "PostgreSQL"
+    },
+    {
+      "id": "ledger",
+      "name": "Проводки",
+      "format": "ledger_entries в schema/001_init.sql",
+      "frequency": "hold, capture или release на генерацию",
+      "volume": "не больше одной записи каждого kind на generation_id",
+      "owner": "сервис биллинга",
+      "access": "транзакция PostgreSQL"
+    },
+    {
+      "id": "usage",
+      "name": "Usage",
+      "format": "schema/usage-event.schema.json",
+      "frequency": "одна запись на успешную генерацию",
+      "volume": "без текста промпта и ответа",
+      "owner": "сервис биллинга",
+      "access": "PostgreSQL, таблица usage_events"
+    },
+    {
+      "id": "cbr-rate",
+      "name": "Курс ЦБ РФ",
+      "format": "число и дата курса",
+      "frequency": "не реже раза в сутки",
+      "volume": "одна строка на валюту в день",
+      "owner": "Банк России",
+      "access": "HTTP API ЦБ"
+    }
+  ]
+}

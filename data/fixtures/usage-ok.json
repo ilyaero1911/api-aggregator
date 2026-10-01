@@ -1,0 +1,11 @@
+{
+  "generation_id": "gen-us04",
+  "api_key_id": "k1",
+  "model": "demo",
+  "provider": "mock",
+  "prompt_tokens": 12,
+  "completion_tokens": 20,
+  "latency_ms": 40,
+  "amount_minor": 200,
+  "finish_reason": "stop"
+}
