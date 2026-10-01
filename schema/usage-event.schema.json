@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://neurogateway.local/schema/usage-event.schema.json",
+  "title": "UsageEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "generation_id",
+    "api_key_id",
+    "model",
+    "provider",
+    "prompt_tokens",
+    "completion_tokens",
+    "latency_ms",
+    "amount_minor"
+  ],
+  "properties": {
+    "generation_id": { "type": "string", "minLength": 1 },
+    "api_key_id": { "type": "string", "minLength": 1 },
+    "model": { "type": "string", "minLength": 1 },
+    "provider": { "type": "string", "minLength": 1 },
+    "prompt_tokens": { "type": "integer", "minimum": 0 },
+    "completion_tokens": { "type": "integer", "minimum": 0 },
+    "latency_ms": { "type": "integer", "minimum": 0 },
+    "amount_minor": { "type": "integer" },
+    "finish_reason": { "type": ["string", "null"] }
+  }
+}
