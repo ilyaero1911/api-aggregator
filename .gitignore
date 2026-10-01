@@ -1,2 +1,4 @@
 .DS_Store
 Тема+*.pdf
+__pycache__/
+*.pyc
