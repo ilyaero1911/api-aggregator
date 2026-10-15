@@ -29,3 +29,5 @@
 Риск переводится в «снижен», только когда есть ссылка на коммит и проверку критерия. «Закрыт» применяется после исчезновения причины или окончания соответствующей фазы. Наличие задачи и зеленые несвязанные тесты не являются доказательством снижения риска.
 
 Связанные карточки исходного бэклога: [ID24_API-95](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-95), [ID24_API-182](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-182), [ID24_API-185](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-185), [ID24_API-26](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-26), [ID24_API-36](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-36).
+
+Для конкретных мер семинара 6 созданы [ID24_API-204](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-204) (hold), [ID24_API-205](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-205) (целостность ledger и изоляция) и [ID24_API-206](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-206) (отказы источника и контракт). Обратная ссылка на отчет — [ID24_API-203](https://fa.saas.sferaplatform.ru/tasks/task/ID24_API-203).
