@@ -6,10 +6,10 @@
 
 | Канал | Что должен установить договор/юрист |
 |---|---|
-| OpenAI direct | Допустимость приложения для end users отдельно от перепродажи account/API key, территория и contracting entity |
+| Основной внешний поставщик | Допустимость приложения для end users отдельно от перепродажи account/API key, территория и contracting entity |
 | Anthropic direct | Commercial terms, end-user access, supported regions, DPA и модельные политики |
 | Gemini direct | Paid/free разные условия данных, территории, downstream rights |
-| Azure OpenAI/Foundry | Кто продавец модели, соглашение организации, model-specific terms, доступный регион/deployment |
+| Azure / Foundry | Кто продавец модели, соглашение организации, model-specific terms, доступный регион/deployment |
 | AWS Bedrock | Provider/model EULA дополнительно к AWS, entitlement региона, reseller rights |
 | Vertex AI | Google Cloud contract, model garden publisher terms, data residency каждой функции |
 | Reseller | Цепочка прав именно на API-агрегацию, upstream authorisation и ответственность, не только обещание сайта |
@@ -17,7 +17,7 @@
 | GigaChat | Тариф юрлица/договор, downstream use, права на ключ, обработка данных |
 | Self-hosted | Лицензия каждого веса/кода отдельно, commercial redistribution/use restrictions, модельный паспорт |
 
-Проверенные [OpenAI Services Agreement](https://openai.com/policies/services-agreement/) различают интеграцию в приложения и ограничения перепродажи доступа/передачи ключей. Из одного этого нельзя вывести разрешение данного бизнеса или географии. [Anthropic commercial terms](https://www.anthropic.com/legal/commercial-terms) и [Gemini additional terms](https://ai.google.dev/gemini-api/terms) также требуют оценки конкретного субъекта, продукта и региона. [Bedrock FAQ](https://aws.amazon.com/bedrock/faqs/) и [Azure overview](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview) описывают каналы, но обзор не заменяет подписанный договор. Все ссылки в реестре — исходные материалы для разбора, не свидетельство заключённой сделки.
+Проверенные [Условия основного поставщика](https://openai.com/policies/services-agreement/) различают интеграцию в приложения и ограничения перепродажи доступа/передачи ключей. Из одного этого нельзя вывести разрешение данного бизнеса или географии. [Anthropic commercial terms](https://www.anthropic.com/legal/commercial-terms) и [Gemini additional terms](https://ai.google.dev/gemini-api/terms) также требуют оценки конкретного субъекта, продукта и региона. [Bedrock FAQ](https://aws.amazon.com/bedrock/faqs/) и [Azure overview](https://learn.microsoft.com/en-us/azure/ai-services/openai/overview) описывают каналы, но обзор не заменяет подписанный договор. Все ссылки в реестре — исходные материалы для разбора, не свидетельство заключённой сделки.
 
 ## Решение по структуре — пока pending
 

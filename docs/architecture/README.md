@@ -89,3 +89,7 @@ flowchart LR
 | Gateway | SSE закрывается; disconnect отменяет upstream; reconcile не теряет usage |
 
 Решения: [ADR-001](adr-001-stack.md), [ADR-002](adr-002-storage.md), [ADR-003](adr-003-cloud.md), [модель данных](data-model.md), [контракты](contracts.md), [NFR](../quality/nfr.md).
+
+## Решение по поручению пользователя
+
+Принято от имени Ильи по поручению заменить ожидавшуюся командную проверку асинхронным разбором; факта встречи не утверждается. [Проверка](../delivery/review-2026-10-15.md).

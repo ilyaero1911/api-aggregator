@@ -36,7 +36,7 @@ make bench
 make hooks
 ```
 
-Make gen строит OAS/JSON Schema и генерирует Go модели, TS типы public/control plane. SDK wrappers в packages/sdk/src и apps/web/src/internal-client.ts. Make test: Go race,16 проверок миграций PGlite, official OpenAI SDK HTTP и16 schema cases,5 исходных Python тестов. Make build собирает все Go services и Next production. Бенчмарк Go/Node открывает1000 SSE×3прогона, raw measurements в docs/architecture/benchmarks; это не product SLO.
+Make gen строит OAS/JSON Schema и генерирует Go модели, TS типы public/control plane. SDK wrappers в packages/sdk/src и apps/web/src/internal-client.ts. Make test: Go race,16 проверок миграций PGlite, compatible SDK HTTP и16 schema cases,5 исходных Python тестов. Make build собирает все Go services и Next production. Бенчмарк Go/Node открывает1000 SSE×3прогона, raw measurements в docs/architecture/benchmarks; это не product SLO.
 
 Проблемы запуска: конфликт порта → освободить указанный loopback порт/переопределить compose override; недостаток памяти CH/build → увеличить Docker resource limits; первый MinIO build долгий → официальный upstream распространяется из source, версия закреплена; stale node_modules → pnpm install --frozen-lockfile с правильной версиейpnpm. TypeScript5.9.3 намеренно зафиксирован для compiler API генератора. На Windows запускать make/Python/Go из WSL2 с Docker integration; такой onboarding всей команды ещё не подтверждён.
 

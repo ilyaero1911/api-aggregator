@@ -6,7 +6,7 @@ ID24_API-24/25. Источник схем — `tools/generate-contracts.py`; и�
 
 Base URL `/v1`. Public: POST chat/completions, responses, messages, embeddings, rerank, images/generations, audio/speech, audio/transcriptions; GET models, models/{id}/endpoints, generation, key, credits. Это контракт целевого продукта, **не заявление о реализации 13 методов**. Каркас gateway возвращает 501; mock поддерживает только ограниченные chat/completions и responses для разработки. Responses input/output items не подменяются chat choices.
 
-OpenAI SDK: заменить baseURL на `http://127.0.0.1:8089/v1` и использовать синтетический apiKey. SDK-тест делает настоящий HTTP round trip chat, SSE и responses к mock. Реальные ключи не нужны. Собственный TS SDK генерируется openapi-typescript + openapi-fetch; Go модели — oapi-codegen. Область совместимости — явно перечисленные схемой поля, а не полный OpenAI/Anthropic API.
+совместимый SDK: заменить baseURL на `http://127.0.0.1:8089/v1` и использовать синтетический apiKey. SDK-тест делает настоящий HTTP round trip chat, SSE и responses к mock. Реальные ключи не нужны. Собственный TS SDK генерируется openapi-typescript + openapi-fetch; Go модели — oapi-codegen. Область совместимости — явно перечисленные схемой поля, а не полный API всех поставщиков.
 
 ## Канонические данные
 

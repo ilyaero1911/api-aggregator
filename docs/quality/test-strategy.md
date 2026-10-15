@@ -24,3 +24,7 @@ Release 0.5: US-04/05, fixture usage, 20 concurrent, p95≤80ms, неизмен�
 Текущая проверка: Python 5 тестов, 16 schema cases, Go serialization/handler/race, 16 DB checks, official SDK chat/SSE/Responses и Next production build. Это проверка foundation. Mock покрывает 96.5% statements; devserver 52.9% из-за Run/socket startup, generated models и entrypoints снижают общую цифру. **Требование ≥80% handwritten financial core не закрыто:** финансовый Go core ещё не написан, известные Python billing дефекты перечислены в seminar-06/baseline.md и задачах 204/205. Не подменять качество процентом generated code.
 
 При падении: сохранить commit, команду, sanitized logs и fixture; исправление получает regression test по наблюдаемому дефекту. Flaky тест не отключается ради зелёной сборки. Приёмка отдельно фиксирует выполненные проверки, ограничения и оставшиеся блокеры.
+
+## Решение по поручению пользователя
+
+Стратегия принята от имени Ильи по поручению заменить ожидание внешнего ревью; это не утверждение голосов всей команды. [Проверка](../delivery/review-2026-10-15.md).

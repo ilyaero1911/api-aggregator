@@ -5,7 +5,7 @@
 | Метрика | Release 0.5 учебный срез | MVP | Beta | GA |
 |---|---|---|---|---|
 | Доступность gateway, 30 дней | локальная приёмка | внутреннее измерение | 99.5% | 99.9% |
-| Накладная latency p95 gateway | ≤80 мс из seminar-04 | <30 мс | <30 мс | <30 мс |
+| Pre-provider latency p95 gateway | ≤80 мс из seminar-04 | <30 мс | <30 мс | <30 мс |
 | Накладная TTFT p95 | вне среза | <50 мс | <50 мс | <50 мс |
 | Нагрузка | 20 параллельных запросов | 100 RPS, 500 SSE | не ниже MVP | 2000 RPS, 20 000 SSE |
 | Потерянные usage | 0 | 0 | 0 | 0 |
@@ -17,8 +17,10 @@ Release 0.5 не заменён задним числом более широк�
 
 Доступность = 1 − (gateway-origin неуспешные валидные запросы / все валидные запросы). Исключение provider-origin ошибок допускается только по trace/evidence; отдельно публикуется полная пользовательская доступность со всеми upstream ошибками. При нулевом трафике нет искусственных 100%; synthetic probe каждые 30 сек. За 30 дней бюджет gateway downtime: Beta 216 мин, GA 43.2 мин. HTTP 4xx по ошибке клиента не включаются; собственные ложные 4xx входят как дефект.
 
-Latency overhead измеряется span ingress→egress за вычетом provider span; TTFT overhead — paired тест mock без/через gateway с одинаковыми токенами. Время поставщика не вычитается из пользовательского p95 dashboard. Нагрузка 15 мин steady после 2 мин warmup, 3 независимых прогона; hardware/commit/config, ошибки и размер payload фиксируются. Локальный SSE benchmark ADR-001 не доказывает эти пороги.
+Gateway pre-provider overhead измеряется span ingress→upstream dispatch, без ожидания провайдера; TTFT overhead — paired тест mock без/через gateway с одинаковыми токенами. Время поставщика не вычитается из пользовательского p95 dashboard. Нагрузка 15 мин steady после 2 мин warmup, 3 независимых прогона; hardware/commit/config, ошибки и размер payload фиксируются. Локальный SSE benchmark ADR-001 не доказывает эти пороги.
 
 `deploy/observability/nfr-alerts.yaml` содержит проект правил для availability, latency, usage mismatch, outbox age и backup age. Метрики должны быть добавлены в реализацию до включения alerts; отсутствующие series нельзя считать здоровьем. `tests/load/run.mjs` — воспроизводимый synthetic workload, пишет JSON и завершает с ошибкой при провале порогов/501. Для финансовых проверок требуется отдельная сверка ledger/usage, HTTP тест её не заменяет. Режимы и числовые значения в profiles.json.
 
 На 15.10: проверены схемы/миграции/mock/transport benchmark; product SLO, restore и paid billing ещё не доказаны. Этот документ — готовая спецификация для реализации и приёмки, а не сертификат GA.
+
+Load gate требует фактические tracing/reconciliation measurements в TRACES_FILE: gateway_pre_provider_p95_ms,ttft_overhead_p95_ms,lost_usage_events,billing_mismatch_ratio. Неполные измерения,underload,RPS ниже95% целевого,потерянный usage и равенство строгому пределу дают failure. Три unit-case проверяют граничные условия gate, а не имитируют достигнутый product SLO. Уведомления о availability/RPO/RTO проверяются на длительном периоде и restore drill, не коротким HTTP прогоном.

@@ -29,3 +29,7 @@ Kafka/Redpanda полезны для больших долговременных
 ## Проверка и отказы
 
 Compose содержит PG/Redis/CH/NATS/MinIO. Версии и image digests в deploy/image-lock.json, MinIO собирается из официального release source. При NATS down — outbox backlog; при PG down — fail closed платным вызовам; при CH down — replay; при Redis down — безопасная деградация; при S3 down — недоступна выдача документов. Нужны реальные kill/restart и restore прогоны по тестовой стратегии; schema-тесты не заменяют их.
+
+## Решение по поручению пользователя
+
+ADR002 принят от имени Ильи по делегированному поручению; фактическая готовность Docker подтверждается отдельно CI. [Проверка](../delivery/review-2026-10-15.md).

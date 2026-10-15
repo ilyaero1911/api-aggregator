@@ -1,5 +1,5 @@
 competitor,criterion,value,evidence,source,checked_at
-OpenRouter,OpenAI SDK,Документирован,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,совместимый SDK,Документирован,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
 OpenRouter,Chat API,Документирован,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
 OpenRouter,SSE,Документирован,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
 OpenRouter,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
@@ -35,7 +35,7 @@ OpenRouter,Prompt retention,НД — не подтверждено в просм
 OpenRouter,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
 OpenRouter,Support channel,Support page,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
 OpenRouter,Independent feedback,"Trustpilot: смешанные пользовательские сообщения, не верифицированы",unverified-anecdote,https://uk.trustpilot.com/review/openrouter.ai,2026-10-15
-AITUNNEL,OpenAI SDK,Документирован baseURL,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,совместимый SDK,Документирован baseURL,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
 AITUNNEL,Chat API,Документирован,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
 AITUNNEL,SSE,Раздел Streaming,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
 AITUNNEL,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
@@ -71,7 +71,7 @@ AITUNNEL,Prompt retention,Нужна проверка privacy и условий;
 AITUNNEL,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
 AITUNNEL,Support channel,Email на официальной странице,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
 AITUNNEL,Independent feedback,"Один отзыв Otzovik о простоте доступа, авторство/репрезентативность не проверены",unverified-anecdote,https://otzovik.com/review_18563292.html,2026-10-15
-GenAPI,OpenAI SDK,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,совместимый SDK,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
 GenAPI,Chat API,Есть текстовые модели; совместимость endpoint проверить,docs-claim,https://gen-api.ru/,2026-10-15
 GenAPI,SSE,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
 GenAPI,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
@@ -107,8 +107,8 @@ GenAPI,Prompt retention,НД — не подтверждено в просмот
 GenAPI,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
 GenAPI,Support channel,Официальный сайт/документация,docs-claim,https://gen-api.ru/,2026-10-15
 GenAPI,Independent feedback,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
-ProxyAPI,OpenAI SDK,Замена адреса и ключа по homepage,docs-claim,https://proxyapi.ru/,2026-10-15
-ProxyAPI,Chat API,Поставщики OpenAI/Claude/Gemini/DeepSeek,docs-claim,https://proxyapi.ru/,2026-10-15
+ProxyAPI,совместимый SDK,Замена адреса и ключа по homepage,docs-claim,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Chat API,Поставщики основной API/Claude/Gemini/DeepSeek,docs-claim,https://proxyapi.ru/,2026-10-15
 ProxyAPI,SSE,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
 ProxyAPI,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
 ProxyAPI,Anthropic Messages,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
@@ -143,7 +143,7 @@ ProxyAPI,Prompt retention,НД — не подтверждено в просмо
 ProxyAPI,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
 ProxyAPI,Support channel,Официальный сайт/документация,docs-claim,https://proxyapi.ru/,2026-10-15
 ProxyAPI,Independent feedback,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
-VseGPT,OpenAI SDK,Документированы примеры,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,совместимый SDK,Документированы примеры,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
 VseGPT,Chat API,Документирован,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
 VseGPT,SSE,Документирован,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
 VseGPT,Responses API,Противоречие версий: fetched docs говорят planned; требует ручного теста,conflicting,https://vsegpt.ru/Docs/API,2026-10-15
@@ -179,7 +179,7 @@ VseGPT,Prompt retention,НД — не подтверждено в просмот
 VseGPT,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
 VseGPT,Support channel,Руководство подключения,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
 VseGPT,Independent feedback,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
-BotHub,OpenAI SDK,OpenAI-compatible baseURL опубликован,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,совместимый SDK,совместимый baseURL опубликован,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
 BotHub,Chat API,Для разработчиков,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
 BotHub,SSE,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
 BotHub,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15

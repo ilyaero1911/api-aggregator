@@ -1,3 +1,4 @@
+import { evaluateLoad } from "./gates.mjs";
 import { readFile, writeFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 const profileName = process.env.PROFILE || "mvp";
@@ -90,11 +91,14 @@ const streams = Array.from({ length: p.streams }, async () => {
   }
 });
 const inflight = new Set();
+let measuredStart;
+let measuredEnd;
 try {
   for (const record of [false, true]) {
     const until =
       performance.now() +
       (record ? p.duration_seconds : p.warmup_seconds) * 1000;
+    if (record) measuredStart = performance.now();
     let next = performance.now();
     while (performance.now() < until) {
       if (inflight.size > p.rps * 30)
@@ -107,6 +111,7 @@ try {
     }
   }
   await Promise.all(inflight);
+  measuredEnd = performance.now();
 } finally {
   cancel.abort();
   await Promise.allSettled(streams);
@@ -117,13 +122,27 @@ const result = {
   at: new Date().toISOString(),
   requests: completed,
   errors,
+  achieved_rps: completed / ((measuredEnd - measuredStart) / 1000),
   max_concurrent_streams: maxActive,
   user_end_to_end_p95_ms: latency[Math.floor(latency.length * 0.95)],
   note: "HTTP latency includes provider. Gateway/TTFT overhead and ledger loss require trace/DB reconciliation.",
 };
+// TRACES_FILE is a sanitized result from actual tracing and DB reconciliation.
+// No default zero/estimated timings: missing measurements fail the gate.
+let measurements = {};
+if (process.env.TRACES_FILE)
+  measurements = JSON.parse(await readFile(process.env.TRACES_FILE, "utf8"));
+for (const name of [
+  "gateway_pre_provider_p95_ms",
+  "ttft_overhead_p95_ms",
+  "lost_usage_events",
+  "billing_mismatch_ratio",
+])
+  result[name] = measurements[name];
+result.failed_gates = evaluateLoad(p, result);
 await writeFile(
   process.env.RESULT_FILE || "benchmark-local.json",
   JSON.stringify(result, null, 2) + "\n",
 );
 console.log(result);
-if (errors || maxActive < p.streams) process.exitCode = 1;
+if (result.failed_gates.length) process.exitCode = 1;

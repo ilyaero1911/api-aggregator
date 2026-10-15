@@ -1,1 +1,10 @@
-<clickhouse><max_server_memory_usage>536870912</max_server_memory_usage><max_thread_pool_size>64</max_thread_pool_size><logger><level>warning</level></logger></clickhouse>
+<clickhouse>
+  <!-- Small local/CI host: scheduling pools must fit within the global pool. -->
+  <max_server_memory_usage>2147483648</max_server_memory_usage>
+  <max_thread_pool_size>1024</max_thread_pool_size>
+  <background_schedule_pool_size>16</background_schedule_pool_size>
+  <background_message_broker_schedule_pool_size>4</background_message_broker_schedule_pool_size>
+  <background_distributed_schedule_pool_size>4</background_distributed_schedule_pool_size>
+  <background_buffer_flush_schedule_pool_size>4</background_buffer_flush_schedule_pool_size>
+  <logger><level>warning</level><console>1</console></logger>
+</clickhouse>

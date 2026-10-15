@@ -11,7 +11,7 @@ groups:
             summary: "Gateway Beta error budget burn; check total user availability too",
           }
       - alert: GatewayOverheadHigh
-        expr: histogram_quantile(0.95, sum by (le) (rate(ng_gateway_overhead_seconds_bucket[5m]))) > 0.030
+        expr: histogram_quantile(0.95, sum by (le) (rate(ng_gateway_pre_provider_seconds_bucket[5m]))) > 0.030
         for: 5m
         labels: { severity: warning }
         annotations: { summary: "p95 gateway overhead above 30 ms" }

@@ -4,7 +4,7 @@
   "channels": [
     {
       "id": "openai-direct",
-      "name": "OpenAI direct",
+      "name": "Основной внешний поставщик",
       "source": "https://openai.com/policies/services-agreement/",
       "legal_status": "pending",
       "enabled": false,

@@ -35,6 +35,7 @@ test-sdk:
 	$(NODE) --test tests/sdk.test.mjs
 test: test-go test-db test-sdk
 	$(PNPM) run test:contracts
+	$(NODE) --test tests/nfr.test.mjs
 	python3 -m unittest discover -v
 build:
 	$(GO) build ./services/...

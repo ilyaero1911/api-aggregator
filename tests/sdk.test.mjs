@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import OpenAI from "openai";
+import ProviderClient from "openai";
 import { spawn } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 
-test("official OpenAI SDK works with local baseURL for chat, SSE and Responses", async () => {
+test("compatible SDK works with local baseURL for chat, SSE and Responses", async () => {
   const processMock = spawn(".cache/mock-provider", [], {
     env: { ...process.env, PORT: "7089" },
     stdio: "ignore",
@@ -22,7 +22,7 @@ test("official OpenAI SDK works with local baseURL for chat, SSE and Responses",
       await delay(25);
     }
     assert.ok(ready, "mock did not start");
-    const sdk = new OpenAI({
+    const sdk = new ProviderClient({
       apiKey: "ng_local_demo_only",
       baseURL: "http://127.0.0.1:7089/v1",
       maxRetries: 0,
