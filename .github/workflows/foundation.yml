@@ -51,6 +51,8 @@ jobs:
         run: |
           docker compose ps -a
           docker compose logs --tail=100
+          for id in $(docker compose ps -aq); do docker inspect --format '{{.Name}} {{json .State.Health}}' "$id"; done
+          docker compose exec -T clickhouse sh -c 'tail -100 /var/log/clickhouse-server/clickhouse-server.err.log' || true
       - name: Stop disposable CI stack
         if: always()
         run: docker compose down
