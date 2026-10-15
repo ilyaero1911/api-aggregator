@@ -33,3 +33,5 @@ Compose содержит PG/Redis/CH/NATS/MinIO. Версии и image digests �
 ## Решение по поручению пользователя
 
 ADR002 принят от имени Ильи по делегированному поручению; фактическая готовность Docker подтверждается отдельно CI. [Проверка](../delivery/review-2026-10-15.md).
+
+Контейнерный criterion выполнен в [CI](https://github.com/ilyaero1911/api-aggregator/actions/runs/38750382978): все хранилища и остальные сервисы healthy,PG migrations/idempotent seed успешны.

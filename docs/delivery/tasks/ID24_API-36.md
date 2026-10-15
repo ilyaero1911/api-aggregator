@@ -10,6 +10,6 @@
 
 ## Приёмка и ограничения
 
-На Mac нет Docker Engine; compose config прошёл. Фактический полный Docker run должен подтвердить CI, не PGlite.
+Статус: **Выполнено**. На чистом runner `make up` собрал и поднял11сервисов; healthchecks успешны,PG migrations/seed выполнены,повторный seed сохранил один synthetic journal. [Полный CI](https://github.com/ilyaero1911/api-aggregator/actions/runs/38750382978), [машинный отчёт](../../verification/ci-foundation.json). README содержит одну команду запуска и troubleshooting. Отсутствие Docker Engine на Mac не выдано за локальный container run: фактическая проверка состоялась в CI.
 
-Статус по критериям: **Тестирование**. Закрытие схемы/API не утверждает реализацию13 маршрутов. Остальные задачи не считаются полностью завершёнными до устранения указанного конкретного критерия. [Контрольный список общей поставки](../2026-10-15.md).
+HTTP gateway/API/worker остаются foundation-каркасами. Зелёный healthcheck не означает реализованный auth/billing.
