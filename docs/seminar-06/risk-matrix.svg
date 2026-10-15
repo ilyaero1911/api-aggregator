@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="780" viewBox="0 0 1060 780" role="img" aria-labelledby="title description">
+<title id="title">NeuroGateway — матрица рисков</title>
+<desc id="description">Пять уровней вероятности и влияния. Идентификаторы рисков расположены по исходной оценке, до выполнения мер.</desc>
+<rect width="1060" height="780" fill="#f8fafc"/>
+<g font-family="Arial, sans-serif" fill="#0f172a">
+<text x="52" y="52" font-size="27" font-weight="bold">NeuroGateway · матрица рисков</text>
+<text x="52" y="84" font-size="16">15.10.2026 · исходная экспертная оценка · S = вероятность × влияние</text>
+<text x="52" y="123" font-size="17">Вероятность ↑</text>
+<text x="62" y="200" font-size="20">5</text>
+<rect x="100" y="148" width="168" height="87" rx="8" fill="#fef3c7"/>
+<text x="112" y="171" font-size="13" fill="#475569">S = 5</text>
+<rect x="276" y="148" width="168" height="87" rx="8" fill="#fed7aa"/>
+<text x="288" y="171" font-size="13" fill="#475569">S = 10</text>
+<rect x="452" y="148" width="168" height="87" rx="8" fill="#fed7aa"/>
+<text x="464" y="171" font-size="13" fill="#475569">S = 15</text>
+<rect x="628" y="148" width="168" height="87" rx="8" fill="#fecaca"/>
+<text x="640" y="171" font-size="13" fill="#475569">S = 20</text>
+<rect x="804" y="148" width="168" height="87" rx="8" fill="#fecaca"/>
+<text x="816" y="171" font-size="13" fill="#475569">S = 25</text>
+<text x="62" y="295" font-size="20">4</text>
+<rect x="100" y="243" width="168" height="87" rx="8" fill="#dcfce7"/>
+<text x="112" y="266" font-size="13" fill="#475569">S = 4</text>
+<rect x="276" y="243" width="168" height="87" rx="8" fill="#fef3c7"/>
+<text x="288" y="266" font-size="13" fill="#475569">S = 8</text>
+<rect x="452" y="243" width="168" height="87" rx="8" fill="#fed7aa"/>
+<text x="464" y="266" font-size="13" fill="#475569">S = 12</text>
+<rect x="628" y="243" width="168" height="87" rx="8" fill="#fecaca"/>
+<text x="640" y="266" font-size="13" fill="#475569">S = 16</text>
+<text x="640" y="292" font-size="16" font-weight="bold">R02, R05</text>
+<rect x="804" y="243" width="168" height="87" rx="8" fill="#fecaca"/>
+<text x="816" y="266" font-size="13" fill="#475569">S = 20</text>
+<text x="816" y="292" font-size="16" font-weight="bold">R08, R09</text>
+<text x="62" y="390" font-size="20">3</text>
+<rect x="100" y="338" width="168" height="87" rx="8" fill="#dcfce7"/>
+<text x="112" y="361" font-size="13" fill="#475569">S = 3</text>
+<rect x="276" y="338" width="168" height="87" rx="8" fill="#fef3c7"/>
+<text x="288" y="361" font-size="13" fill="#475569">S = 6</text>
+<rect x="452" y="338" width="168" height="87" rx="8" fill="#fef3c7"/>
+<text x="464" y="361" font-size="13" fill="#475569">S = 9</text>
+<text x="464" y="387" font-size="16" font-weight="bold">R03, R12</text>
+<rect x="628" y="338" width="168" height="87" rx="8" fill="#fed7aa"/>
+<text x="640" y="361" font-size="13" fill="#475569">S = 12</text>
+<text x="640" y="387" font-size="16" font-weight="bold">R01, R06, R07</text>
+<text x="640" y="407" font-size="16" font-weight="bold">R11, R16</text>
+<rect x="804" y="338" width="168" height="87" rx="8" fill="#fed7aa"/>
+<text x="816" y="361" font-size="13" fill="#475569">S = 15</text>
+<text x="816" y="387" font-size="16" font-weight="bold">R10, R14, R15</text>
+<text x="62" y="485" font-size="20">2</text>
+<rect x="100" y="433" width="168" height="87" rx="8" fill="#dcfce7"/>
+<text x="112" y="456" font-size="13" fill="#475569">S = 2</text>
+<rect x="276" y="433" width="168" height="87" rx="8" fill="#dcfce7"/>
+<text x="288" y="456" font-size="13" fill="#475569">S = 4</text>
+<rect x="452" y="433" width="168" height="87" rx="8" fill="#fef3c7"/>
+<text x="464" y="456" font-size="13" fill="#475569">S = 6</text>
+<text x="464" y="482" font-size="16" font-weight="bold">R13</text>
+<rect x="628" y="433" width="168" height="87" rx="8" fill="#fef3c7"/>
+<text x="640" y="456" font-size="13" fill="#475569">S = 8</text>
+<text x="640" y="482" font-size="16" font-weight="bold">R04</text>
+<rect x="804" y="433" width="168" height="87" rx="8" fill="#fed7aa"/>
+<text x="816" y="456" font-size="13" fill="#475569">S = 10</text>
+<text x="62" y="580" font-size="20">1</text>
+<rect x="100" y="528" width="168" height="87" rx="8" fill="#dcfce7"/>
+<text x="112" y="551" font-size="13" fill="#475569">S = 1</text>
+<rect x="276" y="528" width="168" height="87" rx="8" fill="#dcfce7"/>
+<text x="288" y="551" font-size="13" fill="#475569">S = 2</text>
+<rect x="452" y="528" width="168" height="87" rx="8" fill="#dcfce7"/>
+<text x="464" y="551" font-size="13" fill="#475569">S = 3</text>
+<rect x="628" y="528" width="168" height="87" rx="8" fill="#dcfce7"/>
+<text x="640" y="551" font-size="13" fill="#475569">S = 4</text>
+<rect x="804" y="528" width="168" height="87" rx="8" fill="#fef3c7"/>
+<text x="816" y="551" font-size="13" fill="#475569">S = 5</text>
+<text x="180" y="651" font-size="20">1</text>
+<text x="356" y="651" font-size="20">2</text>
+<text x="532" y="651" font-size="20">3</text>
+<text x="708" y="651" font-size="20">4</text>
+<text x="884" y="651" font-size="20">5</text>
+<text x="765" y="685" font-size="17">Влияние →</text>
+<rect x="52" y="713" width="18" height="18" rx="3" fill="#dcfce7"/><text x="79" y="728" font-size="16">низкий</text>
+<rect x="297" y="713" width="18" height="18" rx="3" fill="#fef3c7"/><text x="324" y="728" font-size="16">средний</text>
+<rect x="542" y="713" width="18" height="18" rx="3" fill="#fed7aa"/><text x="569" y="728" font-size="16">высокий</text>
+<rect x="787" y="713" width="18" height="18" rx="3" fill="#fecaca"/><text x="814" y="728" font-size="16">критический</text>
+</g></svg>
