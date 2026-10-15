@@ -25,11 +25,11 @@
   },
   "nats": {
     "repository": "nats",
-    "tag": "latest",
-    "digest": "sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490",
-    "image": "nats:latest@sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490",
-    "last_updated": "2026-10-14T01:57:29.361953Z",
-    "source": "https://hub.docker.com/v2/repositories/library/nats/tags/latest"
+    "tag": "alpine",
+    "digest": "sha256:2ae57dfba3063d5e25fecb75256118c0882a1a2d2cf7d0fba17a7c701df956f6",
+    "image": "nats:alpine@sha256:2ae57dfba3063d5e25fecb75256118c0882a1a2d2cf7d0fba17a7c701df956f6",
+    "last_updated": "2026-10-12T19:58:59.198944Z",
+    "source": "https://hub.docker.com/v2/repositories/library/nats/tags/alpine"
   },
   "mailpit": {
     "repository": "axllent/mailpit",

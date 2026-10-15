@@ -70,7 +70,7 @@
         },
       "nats":
         {
-          "image": "nats:latest@sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490",
+          "image": "nats:alpine@sha256:2ae57dfba3063d5e25fecb75256118c0882a1a2d2cf7d0fba17a7c701df956f6",
           "command": ["-js", "-sd", "/data", "-m", "8222"],
           "ports": ["127.0.0.1:4222:4222", "127.0.0.1:8222:8222"],
           "volumes": ["nats-data:/data"],
