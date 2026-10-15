@@ -1,0 +1,6 @@
+package: publicapi
+generate:
+  models: true
+output: packages/contracts/publicapi/types.gen.go
+output-options:
+  skip-prune: true

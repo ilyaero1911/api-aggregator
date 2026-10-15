@@ -1,0 +1,39 @@
+{
+  "root": "tenants",
+  "tenant_scoped": [
+    "users",
+    "identities",
+    "sessions",
+    "organizations",
+    "memberships",
+    "api_keys",
+    "key_limits",
+    "wallets",
+    "ledger_accounts",
+    "generations",
+    "ledger_transactions",
+    "ledger_entries",
+    "holds",
+    "payments",
+    "invoices",
+    "documents",
+    "providers",
+    "models",
+    "model_endpoints",
+    "prices",
+    "exchange_rates",
+    "promo_codes",
+    "redemptions",
+    "usage_events",
+    "audit_log",
+    "outbox"
+  ],
+  "append_only": [
+    "audit_log",
+    "ledger_entries",
+    "ledger_transactions",
+    "usage_events"
+  ],
+  "money_unit": "microkopeck",
+  "microkopecks_per_rub": 100000000
+}

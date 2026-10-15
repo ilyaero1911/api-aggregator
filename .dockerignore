@@ -1,0 +1,8 @@
+.git
+node_modules
+**/node_modules
+.cache
+apps/web/.next
+.env
+benchmark-local
+neurogateway-evidence

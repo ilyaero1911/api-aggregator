@@ -1,0 +1,161 @@
+erDiagram
+    tenants ||--o{ users : contains
+    users {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ identities : scopes
+    users ||--o{ identities : references
+    identities {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ sessions : scopes
+    users ||--o{ sessions : references
+    sessions {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ organizations : scopes
+    organizations {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ memberships : scopes
+    users ||--o{ memberships : references
+    organizations ||--o{ memberships : references
+    memberships {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ api_keys : scopes
+    users ||--o{ api_keys : references
+    organizations ||--o{ api_keys : references
+    api_keys {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ key_limits : scopes
+    api_keys ||--o{ key_limits : references
+    key_limits {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ wallets : scopes
+    users ||--o{ wallets : references
+    organizations ||--o{ wallets : references
+    wallets {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ ledger_accounts : scopes
+    wallets ||--o{ ledger_accounts : references
+    ledger_accounts {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ generations : scopes
+    api_keys ||--o{ generations : references
+    wallets ||--o{ generations : references
+    generations {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ ledger_transactions : scopes
+    generations ||--o{ ledger_transactions : references
+    ledger_transactions {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ ledger_entries : scopes
+    ledger_transactions ||--o{ ledger_entries : references
+    ledger_accounts ||--o{ ledger_entries : references
+    ledger_entries {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ holds : scopes
+    generations ||--o{ holds : references
+    wallets ||--o{ holds : references
+    holds {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ payments : scopes
+    wallets ||--o{ payments : references
+    payments {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ invoices : scopes
+    payments ||--o{ invoices : references
+    invoices {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ documents : scopes
+    invoices ||--o{ documents : references
+    documents {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ providers : scopes
+    providers {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ models : scopes
+    models {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ model_endpoints : scopes
+    models ||--o{ model_endpoints : references
+    providers ||--o{ model_endpoints : references
+    model_endpoints {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ prices : scopes
+    model_endpoints ||--o{ prices : references
+    prices {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ exchange_rates : scopes
+    exchange_rates {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ promo_codes : scopes
+    promo_codes {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ redemptions : scopes
+    promo_codes ||--o{ redemptions : references
+    users ||--o{ redemptions : references
+    ledger_transactions ||--o{ redemptions : references
+    redemptions {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ usage_events : scopes
+    generations ||--o{ usage_events : references
+    api_keys ||--o{ usage_events : references
+    usage_events {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ audit_log : scopes
+    users ||--o{ audit_log : references
+    audit_log {
+        uuid tenant_id PK
+        uuid id PK
+    }
+    tenants ||--o{ outbox : scopes
+    generations ||--o{ outbox : references
+    outbox {
+        uuid tenant_id PK
+        uuid id PK
+    }

@@ -1,0 +1,58 @@
+name: Foundation checks
+on:
+  push:
+    branches: [main, codex/foundation-tasks]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: foundation-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: '1.27.2'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: '24'
+      - run: npm install --global pnpm@11.25.0
+      - run: make install gen
+      - name: Generated contracts match source
+        run: git diff --exit-code -- schema packages/contracts packages/sdk/src/public-api.d.ts apps/web/src/internal-api.d.ts
+      - run: make lint test build
+  local-stack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COMPOSE_PARALLEL_LIMIT: '2'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Validate and start entire local stack
+        run: |
+          docker compose config --quiet
+          make up
+      - name: Seed is idempotent and services answer
+        run: |
+          make migrate seed
+          test "$(docker compose exec -T postgres psql -At -U ngdev -d neurogateway -c 'SELECT count(*) FROM neurogateway.ledger_transactions')" = 1
+          curl --fail http://127.0.0.1:8080/healthz
+          curl --fail http://127.0.0.1:8081/healthz
+          curl --fail http://127.0.0.1:8082/healthz
+          curl --fail http://127.0.0.1:3000/healthz
+          curl --fail http://127.0.0.1:9000/minio/health/live
+          curl --fail http://127.0.0.1:8089/v1/chat/completions -H 'Content-Type: application/json' -d '{"model":"mock/chat","messages":[{"role":"user","content":"synthetic CI"}]}'
+      - name: Print health and startup diagnostics
+        if: always()
+        run: |
+          docker compose ps -a
+          docker compose logs --tail=100
+          for id in $(docker compose ps -aq); do docker inspect --format '{{.Name}} {{json .State.Health}}' "$id"; done
+          docker compose exec -T clickhouse sh -c 'tail -100 /var/log/clickhouse-server/clickhouse-server.err.log' || true
+      - name: Stop disposable CI stack
+        if: always()
+        run: docker compose down
