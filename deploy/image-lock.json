@@ -1,0 +1,68 @@
+{
+  "postgres": {
+    "repository": "postgres",
+    "tag": "18",
+    "digest": "sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+    "image": "postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336",
+    "last_updated": "2026-10-07T13:08:31.264372Z",
+    "source": "https://hub.docker.com/v2/repositories/library/postgres/tags/18"
+  },
+  "redis": {
+    "repository": "redis",
+    "tag": "8",
+    "digest": "sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6",
+    "image": "redis:8@sha256:2c2dff791878316e3b083188be0d578423b24813cdda5de0e80ea4f7b3e6bfd6",
+    "last_updated": "2026-10-07T21:04:48.409916Z",
+    "source": "https://hub.docker.com/v2/repositories/library/redis/tags/8"
+  },
+  "clickhouse": {
+    "repository": "clickhouse/clickhouse-server",
+    "tag": "latest",
+    "digest": "sha256:bdb5c911a23d92fd364e246ab20b5a0a485f00112f3663fa626b083fb46c146b",
+    "image": "clickhouse/clickhouse-server:latest@sha256:bdb5c911a23d92fd364e246ab20b5a0a485f00112f3663fa626b083fb46c146b",
+    "last_updated": "2026-10-14T18:06:50.523511Z",
+    "source": "https://hub.docker.com/v2/repositories/clickhouse/clickhouse-server/tags/latest"
+  },
+  "nats": {
+    "repository": "nats",
+    "tag": "latest",
+    "digest": "sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490",
+    "image": "nats:latest@sha256:76e4b7a718f0b9e1a07442fe62b12973678a93c1ec2d494355f470dd59402490",
+    "last_updated": "2026-10-14T01:57:29.361953Z",
+    "source": "https://hub.docker.com/v2/repositories/library/nats/tags/latest"
+  },
+  "mailpit": {
+    "repository": "axllent/mailpit",
+    "tag": "latest",
+    "digest": "sha256:23fe39e81bde596a918000b3135c0f85dc8bb4c9ea6be274b051143f3e300387",
+    "image": "axllent/mailpit:latest@sha256:23fe39e81bde596a918000b3135c0f85dc8bb4c9ea6be274b051143f3e300387",
+    "last_updated": "2026-10-15T05:13:24.264047Z",
+    "source": "https://hub.docker.com/v2/repositories/axllent/mailpit/tags/latest"
+  },
+  "golang": {
+    "repository": "golang",
+    "tag": "1.27.2-alpine",
+    "digest": "sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d",
+    "image": "golang:1.27.2-alpine@sha256:f92b6ef800e499660581efdabdf25d9d817a9d124eaf900924f0504e7e27e12d",
+    "last_updated": "2026-10-10T10:23:34.98928Z",
+    "source": "https://hub.docker.com/v2/repositories/library/golang/tags/1.27.2-alpine"
+  },
+  "node": {
+    "repository": "node",
+    "tag": "24-alpine",
+    "digest": "sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f",
+    "image": "node:24-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f",
+    "last_updated": "2026-10-14T20:38:55.449061Z",
+    "source": "https://hub.docker.com/v2/repositories/library/node/tags/24-alpine"
+  },
+  "alpine": {
+    "image": "alpine:3@sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6",
+    "digest": "sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6",
+    "source": "https://hub.docker.com/v2/repositories/library/alpine/tags/3"
+  },
+  "minio": {
+    "source": "https://github.com/minio/minio/releases/tag/RELEASE.2025-10-15T17-29-55Z",
+    "version": "RELEASE.2025-10-15T17-29-55Z",
+    "method": "build from official Go module source; no third-party image"
+  }
+}

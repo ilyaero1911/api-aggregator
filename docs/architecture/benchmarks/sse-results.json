@@ -1,0 +1,99 @@
+{
+  "measured_at": "2026-10-15T09:30:41.249Z",
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "kernel": "24.1.0",
+    "cpus": 11,
+    "cpu": "Apple M3 Pro",
+    "memory_bytes": 19327352832,
+    "node": "v24.19.0"
+  },
+  "method": "Loopback HTTP/1.1; connections ramped in batches of 25; first-event includes connection setup; 100ms token interval; all simultaneous streams held after reaching concurrency; process RSS via ps; not provider latency or production gateway overhead.",
+  "results": [
+    {
+      "runtime": "go",
+      "repeat": 1,
+      "concurrency": 1000,
+      "confirmed_active": 1000,
+      "active_after_disconnect": 0,
+      "hold_ms": 2000,
+      "frames": 21109,
+      "first_event_p50_ms": 1.52829100000001,
+      "first_event_p95_ms": 2.405000000000001,
+      "idle_rss_kib": 7872,
+      "peak_rss_kib": 38320,
+      "additional_rss_kib_per_stream": 30.448
+    },
+    {
+      "runtime": "node",
+      "repeat": 1,
+      "concurrency": 1000,
+      "confirmed_active": 1000,
+      "active_after_disconnect": 0,
+      "hold_ms": 2000,
+      "frames": 21471,
+      "first_event_p50_ms": 2.295708000000104,
+      "first_event_p95_ms": 3.4100409999996373,
+      "idle_rss_kib": 59264,
+      "peak_rss_kib": 101392,
+      "additional_rss_kib_per_stream": 42.128
+    },
+    {
+      "runtime": "go",
+      "repeat": 2,
+      "concurrency": 1000,
+      "confirmed_active": 1000,
+      "active_after_disconnect": 0,
+      "hold_ms": 2000,
+      "frames": 21375,
+      "first_event_p50_ms": 1.4333750000005239,
+      "first_event_p95_ms": 2.2080000000005384,
+      "idle_rss_kib": 8112,
+      "peak_rss_kib": 38640,
+      "additional_rss_kib_per_stream": 30.528
+    },
+    {
+      "runtime": "node",
+      "repeat": 2,
+      "concurrency": 1000,
+      "confirmed_active": 1000,
+      "active_after_disconnect": 0,
+      "hold_ms": 2000,
+      "frames": 21332,
+      "first_event_p50_ms": 1.456333999999515,
+      "first_event_p95_ms": 2.3167499999999563,
+      "idle_rss_kib": 58720,
+      "peak_rss_kib": 105776,
+      "additional_rss_kib_per_stream": 47.056
+    },
+    {
+      "runtime": "go",
+      "repeat": 3,
+      "concurrency": 1000,
+      "confirmed_active": 1000,
+      "active_after_disconnect": 0,
+      "hold_ms": 2000,
+      "frames": 21157,
+      "first_event_p50_ms": 1.3843329999999696,
+      "first_event_p95_ms": 1.630457999999635,
+      "idle_rss_kib": 7776,
+      "peak_rss_kib": 37840,
+      "additional_rss_kib_per_stream": 30.064
+    },
+    {
+      "runtime": "node",
+      "repeat": 3,
+      "concurrency": 1000,
+      "confirmed_active": 1000,
+      "active_after_disconnect": 0,
+      "hold_ms": 2000,
+      "frames": 21250,
+      "first_event_p50_ms": 1.725916999999754,
+      "first_event_p95_ms": 2.3812920000000304,
+      "idle_rss_kib": 59904,
+      "peak_rss_kib": 104224,
+      "additional_rss_kib_per_stream": 44.32
+    }
+  ]
+}

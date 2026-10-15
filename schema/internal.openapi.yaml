@@ -1,0 +1,2818 @@
+{
+  "openapi": "3.1.0",
+  "info":
+    {
+      "title": "NeuroGateway control plane",
+      "version": "0.1.0",
+      "description": "Separate session-authenticated control plane contract; not a public model-provider proxy.",
+      "contact":
+        {
+          "name": "NeuroGateway project",
+          "url": "https://github.com/ilyaero1911/api-aggregator/issues",
+        },
+    },
+  "servers":
+    [
+      {
+        "url": "http://127.0.0.1:8081/api/internal",
+        "description": "Local development only",
+      },
+    ],
+  "tags":
+    [
+      {
+        "name": "Control plane",
+        "description": "Web account, keys and balance.",
+      },
+    ],
+  "security": [{ "SessionAuth": [] }],
+  "paths":
+    {
+      "/auth/register":
+        {
+          "post":
+            {
+              "operationId": "register",
+              "summary": "Control plane register",
+              "description": "Control plane register. Contract for phase Release 0.5; this specification does not mean the endpoint is implemented.",
+              "tags": ["Control plane"],
+              "x-release-phase": "Release 0.5",
+              "responses":
+                {
+                  "200":
+                    {
+                      "description": "Successful response",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Account" },
+                            },
+                        },
+                    },
+                  "400":
+                    {
+                      "description": "Malformed request",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "401":
+                    {
+                      "description": "Invalid credentials",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "402":
+                    {
+                      "description": "Insufficient balance",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "403":
+                    {
+                      "description": "Forbidden tenant or capability",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "404":
+                    {
+                      "description": "Unknown resource",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "409":
+                    {
+                      "description": "Idempotency key conflict",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "413":
+                    {
+                      "description": "Body limit exceeded",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "415":
+                    {
+                      "description": "Unsupported media type",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "422":
+                    {
+                      "description": "Unsupported parameter or invalid schema",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "429":
+                    {
+                      "description": "Rate limited",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                          "x-ratelimit-limit-requests":
+                            {
+                              "description": "Request limit per minute",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-remaining-requests":
+                            {
+                              "description": "Remaining requests",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-reset-requests":
+                            {
+                              "description": "Seconds until reset",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "Retry-After":
+                            {
+                              "description": "Seconds before retry",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "500":
+                    {
+                      "description": "Internal failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "502":
+                    {
+                      "description": "Provider failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "503":
+                    {
+                      "description": "Provider or dependency unavailable",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                },
+              "parameters":
+                [
+                  {
+                    "name": "Idempotency-Key",
+                    "in": "header",
+                    "description": "Tenant-scoped idempotency key. Same key with a different body returns 409; expires after 24 hours.",
+                    "schema":
+                      { "type": "string", "minLength": 1, "maxLength": 128 },
+                  },
+                ],
+              "requestBody":
+                {
+                  "required": true,
+                  "content":
+                    {
+                      "application/json":
+                        {
+                          "schema":
+                            { "$ref": "#/components/schemas/Credentials" },
+                        },
+                    },
+                },
+              "security": [],
+            },
+        },
+      "/auth/login":
+        {
+          "post":
+            {
+              "operationId": "login",
+              "summary": "Control plane login",
+              "description": "Control plane login. Contract for phase Release 0.5; this specification does not mean the endpoint is implemented.",
+              "tags": ["Control plane"],
+              "x-release-phase": "Release 0.5",
+              "responses":
+                {
+                  "200":
+                    {
+                      "description": "Successful response",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Account" },
+                            },
+                        },
+                    },
+                  "400":
+                    {
+                      "description": "Malformed request",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "401":
+                    {
+                      "description": "Invalid credentials",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "402":
+                    {
+                      "description": "Insufficient balance",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "403":
+                    {
+                      "description": "Forbidden tenant or capability",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "404":
+                    {
+                      "description": "Unknown resource",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "409":
+                    {
+                      "description": "Idempotency key conflict",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "413":
+                    {
+                      "description": "Body limit exceeded",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "415":
+                    {
+                      "description": "Unsupported media type",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "422":
+                    {
+                      "description": "Unsupported parameter or invalid schema",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "429":
+                    {
+                      "description": "Rate limited",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                          "x-ratelimit-limit-requests":
+                            {
+                              "description": "Request limit per minute",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-remaining-requests":
+                            {
+                              "description": "Remaining requests",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-reset-requests":
+                            {
+                              "description": "Seconds until reset",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "Retry-After":
+                            {
+                              "description": "Seconds before retry",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "500":
+                    {
+                      "description": "Internal failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "502":
+                    {
+                      "description": "Provider failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "503":
+                    {
+                      "description": "Provider or dependency unavailable",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                },
+              "parameters":
+                [
+                  {
+                    "name": "Idempotency-Key",
+                    "in": "header",
+                    "description": "Tenant-scoped idempotency key. Same key with a different body returns 409; expires after 24 hours.",
+                    "schema":
+                      { "type": "string", "minLength": 1, "maxLength": 128 },
+                  },
+                ],
+              "requestBody":
+                {
+                  "required": true,
+                  "content":
+                    {
+                      "application/json":
+                        {
+                          "schema":
+                            { "$ref": "#/components/schemas/Credentials" },
+                        },
+                    },
+                },
+              "security": [],
+            },
+        },
+      "/me":
+        {
+          "get":
+            {
+              "operationId": "getMe",
+              "summary": "Control plane getMe",
+              "description": "Control plane getMe. Contract for phase Release 0.5; this specification does not mean the endpoint is implemented.",
+              "tags": ["Control plane"],
+              "x-release-phase": "Release 0.5",
+              "responses":
+                {
+                  "200":
+                    {
+                      "description": "Successful response",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Account" },
+                            },
+                        },
+                    },
+                  "400":
+                    {
+                      "description": "Malformed request",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "401":
+                    {
+                      "description": "Invalid credentials",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "402":
+                    {
+                      "description": "Insufficient balance",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "403":
+                    {
+                      "description": "Forbidden tenant or capability",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "404":
+                    {
+                      "description": "Unknown resource",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "409":
+                    {
+                      "description": "Idempotency key conflict",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "413":
+                    {
+                      "description": "Body limit exceeded",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "415":
+                    {
+                      "description": "Unsupported media type",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "422":
+                    {
+                      "description": "Unsupported parameter or invalid schema",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "429":
+                    {
+                      "description": "Rate limited",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                          "x-ratelimit-limit-requests":
+                            {
+                              "description": "Request limit per minute",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-remaining-requests":
+                            {
+                              "description": "Remaining requests",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-reset-requests":
+                            {
+                              "description": "Seconds until reset",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "Retry-After":
+                            {
+                              "description": "Seconds before retry",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "500":
+                    {
+                      "description": "Internal failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "502":
+                    {
+                      "description": "Provider failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "503":
+                    {
+                      "description": "Provider or dependency unavailable",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+      "/keys":
+        {
+          "post":
+            {
+              "operationId": "issueKey",
+              "summary": "Control plane issueKey",
+              "description": "Control plane issueKey. Contract for phase Release 0.5; this specification does not mean the endpoint is implemented.",
+              "tags": ["Control plane"],
+              "x-release-phase": "Release 0.5",
+              "responses":
+                {
+                  "200":
+                    {
+                      "description": "Successful response",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/IssuedKey" },
+                            },
+                        },
+                    },
+                  "400":
+                    {
+                      "description": "Malformed request",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "401":
+                    {
+                      "description": "Invalid credentials",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "402":
+                    {
+                      "description": "Insufficient balance",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "403":
+                    {
+                      "description": "Forbidden tenant or capability",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "404":
+                    {
+                      "description": "Unknown resource",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "409":
+                    {
+                      "description": "Idempotency key conflict",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "413":
+                    {
+                      "description": "Body limit exceeded",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "415":
+                    {
+                      "description": "Unsupported media type",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "422":
+                    {
+                      "description": "Unsupported parameter or invalid schema",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "429":
+                    {
+                      "description": "Rate limited",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                          "x-ratelimit-limit-requests":
+                            {
+                              "description": "Request limit per minute",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-remaining-requests":
+                            {
+                              "description": "Remaining requests",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-reset-requests":
+                            {
+                              "description": "Seconds until reset",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "Retry-After":
+                            {
+                              "description": "Seconds before retry",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "500":
+                    {
+                      "description": "Internal failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "502":
+                    {
+                      "description": "Provider failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "503":
+                    {
+                      "description": "Provider or dependency unavailable",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                },
+              "parameters":
+                [
+                  {
+                    "name": "Idempotency-Key",
+                    "in": "header",
+                    "description": "Tenant-scoped idempotency key. Same key with a different body returns 409; expires after 24 hours.",
+                    "schema":
+                      { "type": "string", "minLength": 1, "maxLength": 128 },
+                  },
+                  {
+                    "name": "X-CSRF-Token",
+                    "in": "header",
+                    "required": true,
+                    "description": "Session-bound anti-CSRF token.",
+                    "schema": { "type": "string" },
+                  },
+                ],
+              "requestBody":
+                {
+                  "required": true,
+                  "content":
+                    {
+                      "application/json":
+                        {
+                          "schema":
+                            { "$ref": "#/components/schemas/CreateKey" },
+                        },
+                    },
+                },
+            },
+        },
+      "/keys/{id}":
+        {
+          "delete":
+            {
+              "operationId": "revokeKey",
+              "summary": "Control plane revokeKey",
+              "description": "Control plane revokeKey. Contract for phase Release 0.5; this specification does not mean the endpoint is implemented.",
+              "tags": ["Control plane"],
+              "x-release-phase": "Release 0.5",
+              "responses":
+                {
+                  "200":
+                    {
+                      "description": "Successful response",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/KeyInfo" },
+                            },
+                        },
+                    },
+                  "400":
+                    {
+                      "description": "Malformed request",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "401":
+                    {
+                      "description": "Invalid credentials",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "402":
+                    {
+                      "description": "Insufficient balance",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "403":
+                    {
+                      "description": "Forbidden tenant or capability",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "404":
+                    {
+                      "description": "Unknown resource",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "409":
+                    {
+                      "description": "Idempotency key conflict",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "413":
+                    {
+                      "description": "Body limit exceeded",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "415":
+                    {
+                      "description": "Unsupported media type",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "422":
+                    {
+                      "description": "Unsupported parameter or invalid schema",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "429":
+                    {
+                      "description": "Rate limited",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                          "x-ratelimit-limit-requests":
+                            {
+                              "description": "Request limit per minute",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-remaining-requests":
+                            {
+                              "description": "Remaining requests",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-reset-requests":
+                            {
+                              "description": "Seconds until reset",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "Retry-After":
+                            {
+                              "description": "Seconds before retry",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "500":
+                    {
+                      "description": "Internal failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "502":
+                    {
+                      "description": "Provider failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "503":
+                    {
+                      "description": "Provider or dependency unavailable",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                },
+              "parameters":
+                [
+                  {
+                    "name": "X-CSRF-Token",
+                    "in": "header",
+                    "required": true,
+                    "description": "Session-bound anti-CSRF token.",
+                    "schema": { "type": "string" },
+                  },
+                  {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "description": "Owned API key identifier.",
+                    "schema": { "type": "string" },
+                  },
+                ],
+            },
+        },
+      "/balance":
+        {
+          "get":
+            {
+              "operationId": "getBalance",
+              "summary": "Control plane getBalance",
+              "description": "Control plane getBalance. Contract for phase Release 0.5; this specification does not mean the endpoint is implemented.",
+              "tags": ["Control plane"],
+              "x-release-phase": "Release 0.5",
+              "responses":
+                {
+                  "200":
+                    {
+                      "description": "Successful response",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Credits" },
+                            },
+                        },
+                    },
+                  "400":
+                    {
+                      "description": "Malformed request",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "401":
+                    {
+                      "description": "Invalid credentials",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "402":
+                    {
+                      "description": "Insufficient balance",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "403":
+                    {
+                      "description": "Forbidden tenant or capability",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "404":
+                    {
+                      "description": "Unknown resource",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "409":
+                    {
+                      "description": "Idempotency key conflict",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "413":
+                    {
+                      "description": "Body limit exceeded",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "415":
+                    {
+                      "description": "Unsupported media type",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "422":
+                    {
+                      "description": "Unsupported parameter or invalid schema",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "429":
+                    {
+                      "description": "Rate limited",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                          "x-ratelimit-limit-requests":
+                            {
+                              "description": "Request limit per minute",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-remaining-requests":
+                            {
+                              "description": "Remaining requests",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-reset-requests":
+                            {
+                              "description": "Seconds until reset",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "Retry-After":
+                            {
+                              "description": "Seconds before retry",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "500":
+                    {
+                      "description": "Internal failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "502":
+                    {
+                      "description": "Provider failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "503":
+                    {
+                      "description": "Provider or dependency unavailable",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+      "/balance/topups":
+        {
+          "post":
+            {
+              "operationId": "topupStub",
+              "summary": "Control plane topupStub",
+              "description": "Control plane topupStub. Contract for phase Release 0.5; this specification does not mean the endpoint is implemented.",
+              "tags": ["Control plane"],
+              "x-release-phase": "Release 0.5",
+              "responses":
+                {
+                  "200":
+                    {
+                      "description": "Successful response",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Credits" },
+                            },
+                        },
+                    },
+                  "400":
+                    {
+                      "description": "Malformed request",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "401":
+                    {
+                      "description": "Invalid credentials",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "402":
+                    {
+                      "description": "Insufficient balance",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "403":
+                    {
+                      "description": "Forbidden tenant or capability",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "404":
+                    {
+                      "description": "Unknown resource",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "409":
+                    {
+                      "description": "Idempotency key conflict",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "413":
+                    {
+                      "description": "Body limit exceeded",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "415":
+                    {
+                      "description": "Unsupported media type",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "422":
+                    {
+                      "description": "Unsupported parameter or invalid schema",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "429":
+                    {
+                      "description": "Rate limited",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                          "x-ratelimit-limit-requests":
+                            {
+                              "description": "Request limit per minute",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-remaining-requests":
+                            {
+                              "description": "Remaining requests",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-reset-requests":
+                            {
+                              "description": "Seconds until reset",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "Retry-After":
+                            {
+                              "description": "Seconds before retry",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "500":
+                    {
+                      "description": "Internal failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "502":
+                    {
+                      "description": "Provider failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "503":
+                    {
+                      "description": "Provider or dependency unavailable",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                },
+              "parameters":
+                [
+                  {
+                    "name": "Idempotency-Key",
+                    "in": "header",
+                    "description": "Tenant-scoped idempotency key. Same key with a different body returns 409; expires after 24 hours.",
+                    "schema":
+                      { "type": "string", "minLength": 1, "maxLength": 128 },
+                  },
+                  {
+                    "name": "X-CSRF-Token",
+                    "in": "header",
+                    "required": true,
+                    "description": "Session-bound anti-CSRF token.",
+                    "schema": { "type": "string" },
+                  },
+                ],
+              "requestBody":
+                {
+                  "required": true,
+                  "content":
+                    {
+                      "application/json":
+                        { "schema": { "$ref": "#/components/schemas/Topup" } },
+                    },
+                },
+            },
+        },
+      "/usage":
+        {
+          "get":
+            {
+              "operationId": "listUsage",
+              "summary": "Control plane listUsage",
+              "description": "Control plane listUsage. Contract for phase Release 0.5; this specification does not mean the endpoint is implemented.",
+              "tags": ["Control plane"],
+              "x-release-phase": "Release 0.5",
+              "responses":
+                {
+                  "200":
+                    {
+                      "description": "Successful response",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Generation" },
+                            },
+                        },
+                    },
+                  "400":
+                    {
+                      "description": "Malformed request",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "401":
+                    {
+                      "description": "Invalid credentials",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "402":
+                    {
+                      "description": "Insufficient balance",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "403":
+                    {
+                      "description": "Forbidden tenant or capability",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "404":
+                    {
+                      "description": "Unknown resource",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "409":
+                    {
+                      "description": "Idempotency key conflict",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "413":
+                    {
+                      "description": "Body limit exceeded",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "415":
+                    {
+                      "description": "Unsupported media type",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "422":
+                    {
+                      "description": "Unsupported parameter or invalid schema",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "429":
+                    {
+                      "description": "Rate limited",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                          "x-ratelimit-limit-requests":
+                            {
+                              "description": "Request limit per minute",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-remaining-requests":
+                            {
+                              "description": "Remaining requests",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "x-ratelimit-reset-requests":
+                            {
+                              "description": "Seconds until reset",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                          "Retry-After":
+                            {
+                              "description": "Seconds before retry",
+                              "schema": { "type": "integer", "minimum": 0 },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "500":
+                    {
+                      "description": "Internal failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "502":
+                    {
+                      "description": "Provider failure",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                  "503":
+                    {
+                      "description": "Provider or dependency unavailable",
+                      "headers":
+                        {
+                          "X-Request-Id":
+                            {
+                              "description": "Correlation ID; never contains a secret.",
+                              "schema": { "type": "string" },
+                            },
+                        },
+                      "content":
+                        {
+                          "application/json":
+                            {
+                              "schema":
+                                { "$ref": "#/components/schemas/Error" },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
+  "components":
+    {
+      "securitySchemes":
+        {
+          "SessionAuth":
+            {
+              "type": "apiKey",
+              "in": "cookie",
+              "name": "ng_session",
+              "description": "HttpOnly Secure SameSite session; mutating calls also require X-CSRF-Token.",
+            },
+        },
+      "schemas":
+        {
+          "Usage":
+            {
+              "type": "object",
+              "properties":
+                {
+                  "prompt_tokens": { "type": "integer", "minimum": 0 },
+                  "completion_tokens": { "type": "integer", "minimum": 0 },
+                  "total_tokens": { "type": "integer", "minimum": 0 },
+                  "cached_tokens": { "type": "integer", "minimum": 0 },
+                  "cache_write_tokens": { "type": "integer", "minimum": 0 },
+                  "reasoning_tokens": { "type": "integer", "minimum": 0 },
+                  "audio_input_tokens": { "type": "integer", "minimum": 0 },
+                  "audio_output_tokens": { "type": "integer", "minimum": 0 },
+                  "image_input_tokens": { "type": "integer", "minimum": 0 },
+                  "image_output_tokens": { "type": "integer", "minimum": 0 },
+                },
+              "required":
+                ["prompt_tokens", "completion_tokens", "total_tokens"],
+              "additionalProperties": false,
+            },
+          "Error":
+            {
+              "type": "object",
+              "properties":
+                {
+                  "error":
+                    {
+                      "type": "object",
+                      "properties":
+                        {
+                          "message": { "type": "string" },
+                          "type": { "type": "string" },
+                          "param": { "type": ["string", "null"] },
+                          "code": { "type": ["string", "null"] },
+                        },
+                      "required": ["message", "type", "param", "code"],
+                      "additionalProperties": false,
+                    },
+                },
+              "required": ["error"],
+              "additionalProperties": false,
+            },
+          "Generation":
+            {
+              "type": "object",
+              "properties":
+                {
+                  "id": { "type": "string" },
+                  "model": { "type": "string" },
+                  "status":
+                    {
+                      "enum": ["held", "captured", "released", "failed"],
+                      "type": "string",
+                    },
+                  "amount_microkopecks":
+                    { "type": "string", "pattern": "^[0-9]+$" },
+                  "usage": { "$ref": "#/components/schemas/Usage" },
+                },
+              "required": ["id", "model", "status"],
+              "additionalProperties": false,
+            },
+          "KeyInfo":
+            {
+              "type": "object",
+              "properties":
+                {
+                  "id": { "type": "string" },
+                  "name": { "type": "string" },
+                  "enabled": { "type": "boolean" },
+                  "rpm_limit": { "type": "integer", "minimum": 0 },
+                  "budget_microkopecks":
+                    { "type": "string", "pattern": "^[0-9]+$" },
+                },
+              "required": ["id", "name", "enabled"],
+              "additionalProperties": false,
+            },
+          "Credits":
+            {
+              "type": "object",
+              "properties":
+                {
+                  "currency": { "const": "RUB", "type": "string" },
+                  "available_microkopecks":
+                    { "type": "string", "pattern": "^[0-9]+$" },
+                  "held_microkopecks":
+                    { "type": "string", "pattern": "^[0-9]+$" },
+                },
+              "required":
+                ["currency", "available_microkopecks", "held_microkopecks"],
+              "additionalProperties": false,
+            },
+          "Credentials":
+            {
+              "type": "object",
+              "properties":
+                {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 12 },
+                },
+              "required": ["email", "password"],
+              "additionalProperties": false,
+            },
+          "Account":
+            {
+              "type": "object",
+              "properties":
+                { "id": { "type": "string" }, "email": { "type": "string" } },
+              "required": ["id", "email"],
+              "additionalProperties": false,
+            },
+          "CreateKey":
+            {
+              "type": "object",
+              "properties":
+                {
+                  "name": { "type": "string" },
+                  "rpm_limit": { "type": "integer", "minimum": 0 },
+                },
+              "required": ["name"],
+              "additionalProperties": false,
+            },
+          "IssuedKey":
+            {
+              "type": "object",
+              "properties":
+                { "id": { "type": "string" }, "secret": { "type": "string" } },
+              "required": ["id", "secret"],
+              "additionalProperties": false,
+            },
+          "Topup":
+            {
+              "type": "object",
+              "properties":
+                {
+                  "amount_microkopecks":
+                    { "type": "string", "pattern": "^[1-9][0-9]*$" },
+                },
+              "required": ["amount_microkopecks"],
+              "additionalProperties": false,
+            },
+        },
+    },
+}

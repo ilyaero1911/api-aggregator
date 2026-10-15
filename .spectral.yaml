@@ -1,0 +1,6 @@
+extends: ["spectral:oas"]
+rules:
+  info-contact: error
+  operation-description: error
+  operation-operationId: error
+  operation-tags: error

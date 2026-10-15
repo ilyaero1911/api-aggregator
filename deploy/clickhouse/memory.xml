@@ -1,0 +1,1 @@
+<clickhouse><max_server_memory_usage>536870912</max_server_memory_usage><max_thread_pool_size>64</max_thread_pool_size><logger><level>warning</level></logger></clickhouse>

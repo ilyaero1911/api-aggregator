@@ -1,0 +1,18 @@
+{
+  "mvp": {
+    "rps": 100,
+    "streams": 500,
+    "duration_seconds": 900,
+    "warmup_seconds": 120,
+    "gateway_p95_ms": 30,
+    "ttft_overhead_p95_ms": 50
+  },
+  "ga": {
+    "rps": 2000,
+    "streams": 20000,
+    "duration_seconds": 900,
+    "warmup_seconds": 120,
+    "gateway_p95_ms": 30,
+    "ttft_overhead_p95_ms": 50
+  }
+}

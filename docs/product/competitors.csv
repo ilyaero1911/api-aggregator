@@ -1,0 +1,217 @@
+competitor,criterion,value,evidence,source,checked_at
+OpenRouter,OpenAI SDK,Документирован,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Chat API,Документирован,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,SSE,Документирован,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Anthropic Messages,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Embeddings,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Rerank,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Images,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Audio STT/TTS,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Video,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,PDF input,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Routing,Документирован в навигации,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Fallback,Автоматический описан,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,BYOK,Раздел документации,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Presets,Раздел документации,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Chat UI,Chat link,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Cursor guide,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Claude Code guide,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,n8n guide,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Public model catalog,Models API link,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Per-model pricing,Каталог; snapshot одинаковых моделей не сделан,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Minimum top-up,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Commission,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Bonuses,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,RUB payments,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Russian cards,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Company invoice,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,EDO,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Key budgets,Spend controls в документации,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Rate limits,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Usage analytics,Activity/analytics,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Closing documents,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Prompt retention,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Support channel,Support page,docs-claim,https://openrouter.ai/docs/quickstart,2026-10-15
+OpenRouter,Independent feedback,"Trustpilot: смешанные пользовательские сообщения, не верифицированы",unverified-anecdote,https://uk.trustpilot.com/review/openrouter.ai,2026-10-15
+AITUNNEL,OpenAI SDK,Документирован baseURL,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Chat API,Документирован,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,SSE,Раздел Streaming,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Anthropic Messages,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Embeddings,Раздел API,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Rerank,Раздел API,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Images,Раздел API,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Audio STT/TTS,Отдельные разделы,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Video,Раздел API,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,PDF input,Раздел PDF,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Routing,Выбор провайдера,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Fallback,Запасные модели,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,BYOK,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Presets,Раздел Presets,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Chat UI,Ссылка Чат,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Cursor guide,Ссылка руководства,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Claude Code guide,Ссылка руководства,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,n8n guide,Ссылка интеграции,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Public model catalog,Публичный /public/aitunnel/models,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Per-model pricing,Каталог в RUB,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Minimum top-up,"500 RUB по homepage, проверить перед оплатой",docs-claim,https://aitunnel.ru/,2026-10-15
+AITUNNEL,Commission,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Bonuses,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,RUB payments,Заявлены,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Russian cards,Заявлены на homepage,docs-claim,https://aitunnel.ru/,2026-10-15
+AITUNNEL,Company invoice,"Раздел Для юрлиц, условия проверить",docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,EDO,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Key budgets,Бюджет и whitelist моделей,docs-claim,https://aitunnel.ru/docs/keys,2026-10-15
+AITUNNEL,Rate limits,"Раздел Лимиты, численные зависят от тарифа",docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Usage analytics,stats/summary по ключу,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Closing documents,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Prompt retention,Нужна проверка privacy и условий; маркетинг не аудит,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Support channel,Email на официальной странице,docs-claim,https://aitunnel.ru/docs/api,2026-10-15
+AITUNNEL,Independent feedback,"Один отзыв Otzovik о простоте доступа, авторство/репрезентативность не проверены",unverified-anecdote,https://otzovik.com/review_18563292.html,2026-10-15
+GenAPI,OpenAI SDK,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Chat API,Есть текстовые модели; совместимость endpoint проверить,docs-claim,https://gen-api.ru/,2026-10-15
+GenAPI,SSE,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Anthropic Messages,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Embeddings,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Rerank,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Images,Категория моделей,docs-claim,https://gen-api.ru/,2026-10-15
+GenAPI,Audio STT/TTS,"Категория аудио, конкретные endpoints проверить",docs-claim,https://gen-api.ru/,2026-10-15
+GenAPI,Video,Категория моделей,docs-claim,https://gen-api.ru/,2026-10-15
+GenAPI,PDF input,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Routing,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Fallback,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,BYOK,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Presets,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Chat UI,Не подтверждено в исследовании,docs-claim,https://gen-api.ru/,2026-10-15
+GenAPI,Cursor guide,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Claude Code guide,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,n8n guide,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Public model catalog,Каталог на сайте,docs-claim,https://gen-api.ru/,2026-10-15
+GenAPI,Per-model pricing,"Ссылки цены/модели, нет сопоставимого snapshot",docs-claim,https://gen-api.ru/,2026-10-15
+GenAPI,Minimum top-up,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Commission,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Bonuses,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,RUB payments,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Russian cards,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Company invoice,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,EDO,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Key budgets,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Rate limits,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Usage analytics,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Closing documents,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Prompt retention,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+GenAPI,Support channel,Официальный сайт/документация,docs-claim,https://gen-api.ru/,2026-10-15
+GenAPI,Independent feedback,НД — не подтверждено в просмотренных источниках,unknown,https://gen-api.ru/,2026-10-15
+ProxyAPI,OpenAI SDK,Замена адреса и ключа по homepage,docs-claim,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Chat API,Поставщики OpenAI/Claude/Gemini/DeepSeek,docs-claim,https://proxyapi.ru/,2026-10-15
+ProxyAPI,SSE,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Anthropic Messages,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Embeddings,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Rerank,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Images,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Audio STT/TTS,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Video,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,PDF input,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Routing,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Fallback,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,BYOK,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Presets,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Chat UI,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Cursor guide,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Claude Code guide,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,n8n guide,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Public model catalog,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Per-model pricing,"Тарифы по ссылке, сопоставимый snapshot отсутствует",docs-claim,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Minimum top-up,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Commission,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Bonuses,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,RUB payments,Заявлены,docs-claim,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Russian cards,Заявлены,docs-claim,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Company invoice,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,EDO,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Key budgets,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Rate limits,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Usage analytics,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Closing documents,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Prompt retention,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Support channel,Официальный сайт/документация,docs-claim,https://proxyapi.ru/,2026-10-15
+ProxyAPI,Independent feedback,НД — не подтверждено в просмотренных источниках,unknown,https://proxyapi.ru/,2026-10-15
+VseGPT,OpenAI SDK,Документированы примеры,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Chat API,Документирован,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,SSE,Документирован,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Responses API,Противоречие версий: fetched docs говорят planned; требует ручного теста,conflicting,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Anthropic Messages,Beta по docs,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Embeddings,Документированы,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Rerank,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Images,Документированы,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Audio STT/TTS,Документированы,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Video,Специальные методы,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,PDF input,PDF/OCR в docs,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Routing,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Fallback,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,BYOK,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Presets,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Chat UI,Интерфейс VseGPT,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Cursor guide,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Claude Code guide,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,n8n guide,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Public model catalog,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Per-model pricing,Usage + тариф доступа; зависит от режима,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Minimum top-up,Не смешивать с платой тарифа; не подтверждено,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Commission,"Basic199RUB/30д + usage, не универсальная комиссия",docs-claim,https://vsegpt.ru/Docs/Tariffs,2026-10-15
+VseGPT,Bonuses,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,RUB payments,Цены тарифов RUB,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Russian cards,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Company invoice,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,EDO,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Key budgets,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Rate limits,"Basic docs:1RPS; есть FAST/Team, не общий лимит",docs-claim,https://vsegpt.ru/Docs/Tariffs/Limits,2026-10-15
+VseGPT,Usage analytics,Balance API; детализацию экспорта проверить,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Closing documents,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Prompt retention,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Support channel,Руководство подключения,docs-claim,https://vsegpt.ru/Docs/API,2026-10-15
+VseGPT,Independent feedback,НД — не подтверждено в просмотренных источниках,unknown,https://vsegpt.ru/Docs/API,2026-10-15
+BotHub,OpenAI SDK,OpenAI-compatible baseURL опубликован,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Chat API,Для разработчиков,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,SSE,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Responses API,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Anthropic Messages,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Embeddings,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Rerank,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Images,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Audio STT/TTS,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Video,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,PDF input,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Routing,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Fallback,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,BYOK,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Presets,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Chat UI,Основной чат продукта,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Cursor guide,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Claude Code guide,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,n8n guide,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Public model catalog,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Per-model pricing,Pro/Eco маршруты; единицы/модель перепроверить,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Minimum top-up,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Commission,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Bonuses,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,RUB payments,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Russian cards,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Company invoice,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,EDO,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Key budgets,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Rate limits,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Usage analytics,Выгрузка транзакций Excel,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Closing documents,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Prompt retention,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Regional controls,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Support channel,Официальная страница/канал,docs-claim,https://bothub.chat/profile/for-developers,2026-10-15
+BotHub,Independent feedback,НД — не подтверждено в просмотренных источниках,unknown,https://bothub.chat/profile/for-developers,2026-10-15
