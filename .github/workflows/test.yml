@@ -1,0 +1,19 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python3 -m unittest discover -v
+      - run: python3 tools/check_risks.py
+      - run: pip install coverage
+      - run: coverage run -m unittest discover -q
+      - run: coverage report --include='gateway/billing.py,gateway/pricing.py,gateway/fx.py' --fail-under=90
