@@ -11,6 +11,7 @@ API-агрегатор языковых моделей: один OpenAI-совм
 ```sh
 python3 -m unittest discover -v
 python3 tools/check_risks.py
+go test ./economics/
 ```
 
 Пространство задач: `ID24_API`. Команда: Улитин Максим (тимлид), Ерофеев Илья, Маркус Филипп, Деревцов Андрей.
