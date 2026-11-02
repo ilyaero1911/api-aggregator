@@ -1,0 +1,207 @@
+{
+  "checked_at": "2026-10-15",
+  "default_external_enabled": false,
+  "channels": [
+    {
+      "id": "openai-direct",
+      "name": "Основной внешний поставщик",
+      "source": "https://openai.com/policies/services-agreement/",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "anthropic-direct",
+      "name": "Anthropic direct",
+      "source": "https://www.anthropic.com/legal/commercial-terms",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "google-gemini",
+      "name": "Gemini API direct",
+      "source": "https://ai.google.dev/gemini-api/terms",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "azure-openai",
+      "name": "Azure / Foundry",
+      "source": "https://learn.microsoft.com/en-us/azure/ai-services/openai/overview",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "aws-bedrock",
+      "name": "AWS Bedrock",
+      "source": "https://aws.amazon.com/bedrock/faqs/",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "vertex-ai",
+      "name": "Google Vertex AI",
+      "source": "https://cloud.google.com/vertex-ai/docs/start/introduction-unified-platform",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "reseller",
+      "name": "Approved reseller (not yet selected)",
+      "source": "https://aitunnel.ru/docs/service_agreement.pdf",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "yandex",
+      "name": "Yandex AI Studio",
+      "source": "https://aistudio.yandex.ru/ru/docs/",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "gigachat",
+      "name": "GigaChat",
+      "source": "https://developers.sber.ru/docs/ru/gigachat/api/main",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "self-hosted",
+      "name": "Self-hosted licensed models",
+      "source": "https://huggingface.co/docs/hub/repositories-licenses",
+      "legal_status": "pending",
+      "enabled": false,
+      "permitted_models": [],
+      "permitted_regions": [],
+      "contract_reference": null,
+      "legal_opinion_reference": null,
+      "questions": [
+        "end-user inference vs resale/account sharing",
+        "contracting entity and jurisdictions",
+        "region and sanctions/export restrictions",
+        "model-specific license and sublicensing",
+        "DPA retention and cross-border prompt flow",
+        "billing refunds taxes and suspension"
+      ]
+    },
+    {
+      "id": "local-mock",
+      "name": "Synthetic local mock",
+      "source": "services/mock-provider",
+      "legal_status": "local-test-only",
+      "enabled": true,
+      "permitted_models": ["mock/chat"],
+      "permitted_regions": ["local"],
+      "contract_reference": null,
+      "legal_opinion_reference": null
+    }
+  ]
+}

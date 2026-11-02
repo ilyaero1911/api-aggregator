@@ -1,0 +1,6 @@
+package: internalapi
+generate:
+  models: true
+output: packages/contracts/internalapi/types.gen.go
+output-options:
+  skip-prune: true

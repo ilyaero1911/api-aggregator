@@ -1,0 +1,4 @@
+phase,compute,postgres,redis,clickhouse,storage_backup,network_security,observability
+MVP,12000,8000,2000,4000,2000,3000,1000
+Beta,24000,24000,6000,12000,5000,8000,4000
+GA,70000,70000,16000,45000,15000,25000,12000

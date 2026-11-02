@@ -1,0 +1,28 @@
+{
+  "name": "neurogateway-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "lint:api": "spectral lint schema/openapi.yaml schema/internal.openapi.yaml --fail-severity warn",
+    "gen:ts": "openapi-typescript schema/openapi.yaml -o packages/sdk/src/public-api.d.ts && openapi-typescript schema/internal.openapi.yaml -o apps/web/src/internal-api.d.ts",
+    "test:db": "node tools/test-migrations.mjs",
+    "test:contracts": "node --test tests/contracts.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.9",
+    "@eslint/js": "^10.0.1",
+    "@stoplight/spectral-cli": "^6.17.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "eslint": "^10.12.0",
+    "openai": "7.33.0",
+    "openapi-fetch": "0.17.0",
+    "openapi-typescript": "^7.13.0",
+    "prettier": "^3.9.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.71.2",
+    "yaml": "^2.9.1"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

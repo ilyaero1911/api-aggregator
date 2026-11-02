@@ -1,0 +1,50 @@
+# Draft rules. Metric instrumentation and promtool validation required before production.
+groups:
+  - name: neurogateway
+    rules:
+      - alert: GatewayAvailabilityBudgetBurn
+        expr: sum(rate(ng_requests_total{outcome="gateway_error"}[5m])) / clamp_min(sum(rate(ng_requests_total{eligible="true"}[5m])), 0.001) > 0.005
+        for: 5m
+        labels: { severity: critical }
+        annotations:
+          {
+            summary: "Gateway Beta error budget burn; check total user availability too",
+          }
+      - alert: GatewayOverheadHigh
+        expr: histogram_quantile(0.95, sum by (le) (rate(ng_gateway_pre_provider_seconds_bucket[5m]))) > 0.030
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "p95 gateway overhead above 30 ms" }
+      - alert: GatewayTTFTOverheadHigh
+        expr: histogram_quantile(0.95, sum by (le) (rate(ng_ttft_overhead_seconds_bucket[5m]))) > 0.050
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "p95 TTFT overhead above 50 ms" }
+      - alert: UsageLost
+        expr: ng_reconcile_missing_usage > 0
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          { summary: "Generation has no final usage or reconciliation" }
+      - alert: LedgerMismatch
+        expr: ng_ledger_unbalanced_transactions > 0
+        for: 1m
+        labels: { severity: critical }
+        annotations: { summary: "Ledger invariant broken; freeze paid capture" }
+      - alert: OutboxStalled
+        expr: ng_outbox_oldest_pending_age_seconds > 60
+        for: 5m
+        labels: { severity: warning }
+        annotations: { summary: "Outbox relay delayed" }
+      - alert: PostgreSQLBackupStale
+        expr: time() - ng_pg_last_recoverable_timestamp_seconds > 300
+        for: 1m
+        labels: { severity: critical }
+        annotations:
+          { summary: "PostgreSQL recovery point older than five minutes" }
+      - alert: MetricsMissing
+        expr: absent(ng_requests_total)
+        for: 5m
+        labels: { severity: warning }
+        annotations:
+          { summary: "NFR instrumentation missing; no healthy SLO claim" }
