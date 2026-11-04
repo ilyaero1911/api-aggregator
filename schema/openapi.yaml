@@ -43,6 +43,84 @@ paths:
           description: Баланса не хватает, провайдер не вызывается
         '415':
           description: Тело не JSON
+  /v1/credits:
+    get:
+      operationId: getCredits
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Баланс, бонусы и расход за период
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [balance, bonus, used]
+                properties:
+                  balance:
+                    type: integer
+                    description: Доступно на кошельке, minor
+                  bonus:
+                    type: integer
+                  used:
+                    type: integer
+  /v1/key:
+    get:
+      operationId: getKey
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Лимит ключа, остаток, сброс периода и лимит частоты
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [limit, used, remain, hard]
+                properties:
+                  limit:
+                    type: integer
+                  used:
+                    type: integer
+                  remain:
+                    type: integer
+                  reset:
+                    type: string
+                    format: date-time
+                  hard:
+                    type: boolean
+                  tier:
+                    type: string
+                  rate_limit:
+                    type: integer
+  /v1/activity:
+    get:
+      operationId: listActivity
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: model
+          schema:
+            type: string
+        - in: query
+          name: key
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Страница журнала своей организации, без текста запроса
 components:
   schemas:
     ChatCompletionRequest:
