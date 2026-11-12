@@ -1,0 +1,94 @@
+// Package config читает настройки из переменных окружения.
+package config
+
+import (
+	"os"
+	"strconv"
+	"strings"
+	"time"
+)
+
+type Config struct {
+	Addr        string
+	DatabaseURL string
+	RedisURL    string
+	// PublicURL — адрес фронтенда, на него возвращаем после входа через Google и оплаты.
+	PublicURL string
+	// APIBaseURL — адрес, который показываем пользователю в примерах кода.
+	APIBaseURL string
+
+	SecretKey     string // шифрование ключей провайдеров и подпись состояния OAuth
+	SecureCookies bool
+	SessionTTL    time.Duration
+
+	GoogleClientID     string
+	GoogleClientSecret string
+
+	AdminEmails []string // эти адреса получают роль admin при регистрации
+
+	FxRefresh  time.Duration
+	FxCBRURL   string
+	FxBackupURL string
+
+	PaymentProvider string // сейчас только "fake"
+}
+
+func Load() Config {
+	return Config{
+		Addr:               env("ADDR", ":8090"),
+		DatabaseURL:        env("DATABASE_URL", "postgres://aggregator:aggregator@localhost:55442/aggregator?sslmode=disable"),
+		RedisURL:           env("REDIS_URL", "redis://localhost:56389/0"),
+		PublicURL:          strings.TrimRight(env("PUBLIC_URL", "http://localhost:3100"), "/"),
+		APIBaseURL:         strings.TrimRight(env("API_BASE_URL", "http://localhost:3100/v1"), "/"),
+		SecretKey:          env("SECRET_KEY", "dev-secret-change-me-32-bytes-long!"),
+		SecureCookies:      env("SECURE_COOKIES", "false") == "true",
+		SessionTTL:         dur("SESSION_TTL", 30*24*time.Hour),
+		GoogleClientID:     env("GOOGLE_CLIENT_ID", ""),
+		GoogleClientSecret: env("GOOGLE_CLIENT_SECRET", ""),
+		AdminEmails:        list(env("ADMIN_EMAILS", "admin@local.test")),
+		FxRefresh:          dur("FX_REFRESH", time.Hour),
+		FxCBRURL:           env("FX_CBR_URL", "https://www.cbr.ru/scripts/XML_daily.asp"),
+		FxBackupURL:        env("FX_BACKUP_URL", "https://www.cbr-xml-daily.ru/daily_json.js"),
+		PaymentProvider:    env("PAYMENT_PROVIDER", "fake"),
+	}
+}
+
+func (c Config) GoogleEnabled() bool { return c.GoogleClientID != "" && c.GoogleClientSecret != "" }
+
+func (c Config) IsAdminEmail(email string) bool {
+	for _, e := range c.AdminEmails {
+		if strings.EqualFold(e, email) {
+			return true
+		}
+	}
+	return false
+}
+
+func env(k, def string) string {
+	if v, ok := os.LookupEnv(k); ok && v != "" {
+		return v
+	}
+	return def
+}
+
+func dur(k string, def time.Duration) time.Duration {
+	if v := os.Getenv(k); v != "" {
+		if d, err := time.ParseDuration(v); err == nil {
+			return d
+		}
+		if n, err := strconv.Atoi(v); err == nil {
+			return time.Duration(n) * time.Second
+		}
+	}
+	return def
+}
+
+func list(v string) []string {
+	var out []string
+	for _, p := range strings.Split(v, ",") {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
