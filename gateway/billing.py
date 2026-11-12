@@ -22,6 +22,10 @@ class AccountIsolationError(Exception):
     pass
 
 
+class ProviderOutcomeUnknown(Exception):
+    """Провайдер мог выполнить запрос, но подтверждения нет (обрыв после отправки)."""
+
+
 def require_minor(value: object, name: str, *, allow_zero: bool = False) -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{name} должно быть целым")
@@ -39,6 +43,7 @@ class Ledger:
         self.capture_owner: dict[str, str] = {}
         self.hold_at: dict[str, float] = {}
         self.overdraft: dict[str, int] = {}
+        self.to_reconcile: dict[str, str] = {}
         self.postings: list[dict] = []
         self._seq = 0
         self._lock = threading.RLock()
@@ -69,12 +74,13 @@ class Ledger:
         generation_id: str,
         estimate_minor: int,
         now: float | None = None,
-    ) -> None:
+    ) -> bool:
+        """Ставит hold. False — генерация уже известна, новый резерв не создан."""
         estimate = require_minor(estimate_minor, "оценка")
         with self._lock:
             self._reject_foreign(account, generation_id)
             if generation_id in self.captures or generation_id in self.holds:
-                return
+                return False
             available = self.available.get(account, 0)
             if available + self.overdraft.get(account, 0) < estimate:
                 raise InsufficientBalance(account)
@@ -88,6 +94,7 @@ class Ledger:
             self.holds[generation_id] = estimate
             self.hold_owner[generation_id] = account
             self.hold_at[generation_id] = time.monotonic() if now is None else now
+            return True
 
     def capture(
         self,
@@ -128,6 +135,7 @@ class Ledger:
             del self.holds[generation_id]
             del self.hold_owner[generation_id]
             del self.hold_at[generation_id]
+            self.to_reconcile.pop(generation_id, None)
             self.captures[generation_id] = actual
             self.capture_owner[generation_id] = account
 
@@ -148,6 +156,34 @@ class Ledger:
             del self.holds[generation_id]
             del self.hold_owner[generation_id]
             del self.hold_at[generation_id]
+            self.to_reconcile.pop(generation_id, None)
+
+    def mark_reconcile(self, account: str, generation_id: str, reason: str) -> None:
+        """Оставляет hold до сверки: ни списания, ни возврата до ответа провайдера."""
+        with self._lock:
+            if generation_id not in self.holds:
+                raise KeyError(generation_id)
+            if self.hold_owner[generation_id] != account:
+                raise AccountIsolationError(generation_id)
+            self.to_reconcile[generation_id] = reason
+
+    def settle(self, account: str, generation_id: str, actual_minor: int | None) -> None:
+        """Итог сверки: None — провайдер не выполнил запрос, иначе фактическая сумма.
+
+        Факт больше резерва списывается в пределах резерва, остаток уходит в
+        отчёт сверки; резерв при этом не теряется.
+        """
+        with self._lock:
+            if generation_id in self.captures:
+                self._reject_foreign(account, generation_id)
+                return
+            if generation_id not in self.to_reconcile:
+                raise KeyError(generation_id)
+            if actual_minor is None:
+                self.release(account, generation_id)
+                return
+            actual = require_minor(actual_minor, "факт", allow_zero=True)
+            self.capture(account, generation_id, min(actual, self.holds[generation_id]))
 
     def release_expired(self, now: float, ttl_seconds: float) -> list[str]:
         if ttl_seconds < 0:
@@ -156,7 +192,7 @@ class Ledger:
             expired = [
                 generation_id
                 for generation_id, held_at in self.hold_at.items()
-                if now - held_at >= ttl_seconds
+                if now - held_at >= ttl_seconds and generation_id not in self.to_reconcile
             ]
             owners = {generation_id: self.hold_owner[generation_id] for generation_id in expired}
         for generation_id, account in owners.items():
@@ -219,28 +255,38 @@ def handle_completion(
     rate_alert: bool = False,
     now: float | None = None,
 ) -> dict:
-    """US-04 и US-05. provider вызывается только после успешного hold."""
-    if generation_id in ledger.captures:
-        if ledger.capture_owner.get(generation_id) != account:
-            return {"status": 403, "provider_called": False, "generation_id": generation_id}
-        return {
-            "status": 200,
-            "provider_called": False,
-            "generation_id": generation_id,
-            "amount_minor": ledger.captures[generation_id],
-        }
-    if generation_id in ledger.holds:
-        if ledger.hold_owner.get(generation_id) != account:
-            return {"status": 403, "provider_called": False, "generation_id": generation_id}
-        return {"status": 409, "provider_called": False, "generation_id": generation_id}
+    """US-04 и US-05. provider вызывается только после успешного hold.
+
+    Исход вызова провайдера:
+    - успех — capture факта; факт больше резерва уходит на сверку, hold остаётся;
+    - подтверждённый отказ (любое исключение) — release, баланс как до запроса;
+    - ProviderOutcomeUnknown — hold остаётся до сверки, повтор провайдера не вызывает.
+    """
     try:
-        ledger.authorize(account, generation_id, estimate_minor, now=now)
+        require_minor(estimate_minor, "оценка")
+        require_minor(actual_minor, "факт", allow_zero=True)
+        if rate_minor is not None:
+            require_minor(rate_minor, "курс", allow_zero=True)
+    except ValueError:
+        return {"status": 400, "provider_called": False, "generation_id": generation_id}
+    try:
+        created = ledger.authorize(account, generation_id, estimate_minor, now=now)
     except InsufficientBalance:
         return {"status": 402, "provider_called": False, "generation_id": generation_id}
     except AccountIsolationError:
         return {"status": 403, "provider_called": False, "generation_id": generation_id}
+    if not created:
+        return _replay(ledger, account, generation_id)
     try:
         provider()
+    except ProviderOutcomeUnknown:
+        ledger.mark_reconcile(account, generation_id, "исход вызова провайдера неизвестен")
+        return {
+            "status": 504,
+            "provider_called": True,
+            "generation_id": generation_id,
+            "reconcile": True,
+        }
     except Exception:
         ledger.release(account, generation_id)
         return {
@@ -258,12 +304,28 @@ def handle_completion(
             rate_alert=rate_alert,
         )
     except ValueError:
-        raise
-    except KeyError:
-        return {"status": 409, "provider_called": True, "generation_id": generation_id}
+        ledger.mark_reconcile(account, generation_id, f"факт {actual_minor} больше резерва")
+        return {
+            "status": 200,
+            "provider_called": True,
+            "generation_id": generation_id,
+            "reconcile": True,
+        }
     return {
         "status": 200,
         "provider_called": True,
         "generation_id": generation_id,
         "amount_minor": actual_minor,
     }
+
+
+def _replay(ledger: Ledger, account: str, generation_id: str) -> dict:
+    with ledger._lock:
+        if generation_id in ledger.captures:
+            return {
+                "status": 200,
+                "provider_called": False,
+                "generation_id": generation_id,
+                "amount_minor": ledger.captures[generation_id],
+            }
+        return {"status": 409, "provider_called": False, "generation_id": generation_id}
