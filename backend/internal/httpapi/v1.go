@@ -20,7 +20,7 @@ import (
 type keyCtx struct{}
 
 func (s *Server) v1Routes(r chi.Router) {
-	r.Get("/models", s.v1Models)
+	r.With(s.publicLimit(60)).Get("/models", s.v1Models)
 	r.Group(func(r chi.Router) {
 		r.Use(s.requireKey)
 		r.Post("/chat/completions", s.v1Chat)

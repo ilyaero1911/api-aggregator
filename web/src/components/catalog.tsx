@@ -7,6 +7,7 @@ import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Model } from "@/lib/types";
 import { Icon } from "./icons";
+import { CopyId } from "./copy-id";
 import { ProviderLogo } from "./provider-logo";
 import { Select } from "./select";
 import { Seg } from "./ui";
@@ -147,6 +148,7 @@ export function Catalog({ models, base = "/models", inShell }: { models: Model[]
               <Link key={m.id} href={`${base}/${m.id}`} className="mtile">
                 <div className="row" style={{ gap: 10 }}><ProviderLogo author={m.author} size={36} /><span className="label">{m.author}</span></div>
                 <div className="h3">{m.name}</div>
+                <CopyId id={m.id} />
                 <p className="muted small mclamp">{m.description}</p>
                 <div className="row-wrap" style={{ ["--gap" as string]: "6px" }}>
                   {m.capabilities.map((c) => <span key={c} className="tag">{M.cap[c] ?? c}</span>)}
@@ -174,7 +176,7 @@ function ModelRow({ m, base }: { m: Model; base: string }) {
       <div className="grow" style={{ display: "grid", gap: 6, minWidth: 0 }}>
         <div className="row-wrap" style={{ ["--gap" as string]: "10px" }}>
           <span className="h3">{m.name}</span>
-          <span className="mono faint small mrow-id">{m.id}</span>
+          <CopyId id={m.id} />
           {m.is_free && <span className="tag tag-ok">{t.common.free}</span>}
           {m.in_plans && !m.is_free && <span className="tag tag-signal">{M.inPlan}</span>}
           {m.open_weights && <span className="tag">{M.openWeights}</span>}

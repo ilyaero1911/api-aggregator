@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/ui";
 import { TokenExplainer } from "@/components/token-explainer";
 import { ProviderLogo } from "@/components/provider-logo";
+import { CopyId } from "@/components/copy-id";
 import { loadModels } from "@/lib/server-data";
 import { api } from "@/lib/api";
 import { ctx, date, perM } from "@/lib/format";
@@ -35,7 +36,7 @@ export async function ModelDetail({ author, slug, base, inShell }: { author: str
         <div className="stack" style={{ ["--gap" as string]: "10px" }}>
           <div className="row" style={{ gap: 16 }}><ProviderLogo author={m.author} size={64} /><div className="stack" style={{ ["--gap" as string]: "6px" }}><div className="label">{m.author}</div><h1 className="h1" style={{ fontSize: 40 }}>{m.name}</h1></div></div>
           <div className="row-wrap">
-            <code className="mono">{m.id}</code>
+            <CopyId id={m.id} label />
             {m.is_free && <span className="tag tag-ok">{t.common.free}</span>}
             {m.in_plans && <span className="tag tag-signal">{M.inPlan}</span>}
             {m.open_weights && <span className="tag">{M.openWeights}</span>}

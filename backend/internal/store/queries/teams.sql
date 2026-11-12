@@ -54,3 +54,15 @@ SELECT nextval('invoice_number_seq')::bigint;
 
 -- name: SetPaymentMeta :exec
 UPDATE payments SET meta = $2 WHERE id = $1;
+
+-- name: ListIncomingInvites :many
+SELECT i.id, i.role, i.budget_micro, i.created_at, u.email AS owner_email, u.name AS owner_name
+FROM team_invites i JOIN users u ON u.id = i.owner_id
+WHERE lower(i.email) = lower(@email::text) AND i.accepted_at IS NULL AND i.created_at > now() - interval '14 days'
+ORDER BY i.created_at DESC;
+
+-- name: GetInvite :one
+SELECT * FROM team_invites WHERE id = $1 AND accepted_at IS NULL;
+
+-- name: DeleteInviteByID :exec
+DELETE FROM team_invites WHERE id = $1;

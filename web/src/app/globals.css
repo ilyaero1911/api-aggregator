@@ -1076,3 +1076,62 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border: 0; bord
 .inv-note { color: #333; font-size: 12px; margin-top: 12px; }
 .inv-sign { display: flex; justify-content: space-between; margin-top: 40px; padding-top: 10px; border-top: 2px solid #000; }
 @media print { .inv-actions { display: none; } .inv-page { background: #fff; padding: 0; } .inv { box-shadow: none; padding: 0; } }
+.help { position: relative; display: inline-flex; vertical-align: middle; margin-left: 6px; }
+.help-btn { width: 18px; height: 18px; border-radius: 50%; border: 0; background: var(--paper-3); color: var(--ink-2); font: 600 11px/18px var(--font-sans); cursor: help; padding: 0; transition: background .2s, color .2s; }
+.help-btn:hover { background: var(--ink); color: var(--paper); }
+.help-pop { position: absolute; z-index: 95; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%); width: 260px; background: var(--ink); color: var(--paper); font: 400 13px/1.5 var(--font-sans); padding: 10px 12px; border-radius: 12px; box-shadow: 0 16px 40px -14px rgb(0 0 0 / .5); animation: pop .15s var(--ease); text-transform: none; letter-spacing: 0; white-space: normal; }
+.help-pop::after { content: ""; position: absolute; left: 50%; top: 100%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--ink); }
+/* чат v3: модель сверху, настройки по кнопке */
+.chat { display: flex; flex-direction: column; gap: 12px; height: calc(100vh - 120px); min-height: 520px; }
+.chat-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.chat-model { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
+.chat-price { display: inline-flex; align-items: center; }
+.chat-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.chat-body.with-set { grid-template-columns: minmax(0, 1fr) 320px; }
+.chat-body .pg2-chat { min-height: 0; }
+.chat-set { animation: slide .25s var(--ease); }
+@media (max-width: 1000px) {
+  .chat { height: auto; }
+  .chat-body.with-set { grid-template-columns: 1fr; }
+  .chat-set { order: -1; }
+  .chat-body .pg2-chat { height: 72vh; }
+}
+@media (max-width: 700px) { .hide-sm { display: none; } }
+.invites-in { display: grid; gap: 10px; margin-bottom: 18px; }
+.invite-card { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 16px 18px; border-radius: 18px; background: var(--surface); box-shadow: 0 0 0 1px var(--signal), 0 18px 40px -22px var(--glow); animation: rise .4s var(--ease); }
+.team-row { padding: 12px 14px; border-radius: 14px; background: var(--paper); box-shadow: 0 0 0 1px var(--rule); flex-wrap: wrap; }
+.copy-id { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 8px; border: 0; border-radius: 8px; background: var(--paper-2); color: var(--ink-2); cursor: pointer; font-size: 12.5px; max-width: 100%; transition: background .2s, color .2s; }
+.copy-id .mono { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.copy-id:hover { background: var(--ink); color: var(--paper); }
+.copy-id.done { background: var(--ok-soft); color: var(--ok); }
+.copy-id.with-label { height: 32px; padding: 0 10px; font-size: 13px; }
+/* главная: без цветных пятен и градиентного текста, сцена без рамки */
+.hero-glow { display: none; }
+.rot-w { background: none; -webkit-background-clip: initial; background-clip: initial; color: var(--ink); filter: none; transform: translateY(100%); }
+.rot-w.on { transform: none; }
+.rot-w.off { transform: translateY(-100%); opacity: 0; }
+.rot-line { position: absolute; left: 0; bottom: .06em; height: .07em; width: 100%; background: var(--signal); border-radius: 2px; transform-origin: left; animation: underline 2.2s var(--ease) both; }
+@keyframes underline { 0% { transform: scaleX(0); } 25%, 80% { transform: scaleX(1); } 100% { transform: scaleX(1); opacity: .9; } }
+.hero-art .gw-stage { background: transparent; box-shadow: none; border-radius: 0; overflow: visible; }
+.hero-art .gw-stage::before { opacity: .45; mask-image: radial-gradient(ellipse 60% 70% at 55% 50%, #000 20%, transparent 75%); -webkit-mask-image: radial-gradient(ellipse 60% 70% at 55% 50%, #000 20%, transparent 75%); }
+.hero-art .gw-ask .input { background: transparent; }
+.hero-art .gw-reply { background: transparent; box-shadow: none; border-left: 2px solid var(--signal); border-radius: 0; padding: 4px 0 4px 14px; }
+@media (min-width: 1100px) { .hero-art .gw-stage { margin-right: calc(-1 * var(--gutter)); } }
+/* анимация итога оплаты */
+.payres { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 8px 0 4px; animation: rise .4s var(--ease); }
+.payres-mark { position: relative; width: 88px; height: 88px; }
+.payres-ring { fill: none; stroke-width: 4; stroke-dasharray: 214; stroke-dashoffset: 214; animation: draw .7s var(--ease) forwards; transform: rotate(-90deg); transform-origin: center; }
+.payres-path { fill: none; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 60; stroke-dashoffset: 60; animation: draw .45s .6s var(--ease) forwards; }
+.is-ok .payres-ring, .is-ok .payres-path { stroke: var(--ok); }
+.is-bad .payres-ring, .is-bad .payres-path { stroke: var(--bad); }
+.is-cancel .payres-ring, .is-cancel .payres-path { stroke: var(--ink-3); }
+.is-ok .payres-mark svg { animation: popin .5s .9s var(--ease) both; }
+.is-bad .payres-mark { animation: shake .5s 1s var(--ease); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes popin { 0% { transform: scale(1); } 50% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+.payres-burst { position: absolute; inset: 0; pointer-events: none; }
+.payres-burst i { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px; border-radius: 50%; background: var(--ok); opacity: 0; transform: rotate(var(--a)) translateY(0); animation: burst .8s .85s var(--ease) forwards; }
+.payres-burst i:nth-child(3n) { background: var(--signal); }
+.payres-burst i:nth-child(3n+1) { background: #e9b949; }
+@keyframes burst { 0% { opacity: 1; transform: rotate(var(--a)) translateY(0) scale(1); } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-62px) scale(.4); } }

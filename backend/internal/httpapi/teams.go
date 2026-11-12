@@ -25,6 +25,8 @@ func (s *Server) teamRoutes(r chi.Router) {
 	r.Patch("/team/members/{id}", s.teamMemberUpdate)
 	r.Delete("/team/members/{id}", s.teamMemberRemove)
 	r.Post("/team/leave/{owner}", s.teamLeave)
+	r.Post("/team/invites/{id}/accept", s.teamIncomingAccept)
+	r.Post("/team/invites/{id}/decline", s.teamIncomingDecline)
 	r.Get("/team/join/{token}", s.teamInviteInfo)
 	r.Post("/team/join/{token}", s.teamInviteAccept)
 	r.Post("/billing/invoice", s.createInvoice)
@@ -39,6 +41,7 @@ func (s *Server) teamOverview(w http.ResponseWriter, r *http.Request) {
 	}
 	invites, _ := s.q.ListInvites(r.Context(), u.ID)
 	mine, _ := s.q.ListMyTeams(r.Context(), u.ID)
+	incoming, _ := s.q.ListIncomingInvites(r.Context(), u.Email)
 	type inv struct {
 		ID          uuid.UUID `json:"id"`
 		Email       string    `json:"email"`
@@ -50,7 +53,7 @@ func (s *Server) teamOverview(w http.ResponseWriter, r *http.Request) {
 	for i, x := range invites {
 		out[i] = inv{ID: x.ID, Email: x.Email, Role: x.Role, BudgetMicro: x.BudgetMicro, CreatedAt: x.CreatedAt.Format("2006-01-02T15:04:05Z07:00")}
 	}
-	writeJSON(w, 200, map[string]any{"members": members, "invites": out, "teams": mine})
+	writeJSON(w, 200, map[string]any{"members": members, "invites": out, "teams": mine, "incoming": incoming})
 }
 
 func budgetMicro(rub *float64) *int64 {
@@ -221,4 +224,42 @@ func (s *Server) createInvoice(w http.ResponseWriter, r *http.Request) {
 	s.tg.Send(r.Context(), fmt.Sprintf("🧾 <b>Выставлен счёт</b> СЧ-%d на %.2f ₽\n%s, ИНН %s", num, float64(kop)/100, in.Company, in.INN))
 	pay, _ := s.q.GetPayment(r.Context(), p.ID)
 	writeJSON(w, 201, pay)
+}
+
+// incomingInvite проверяет, что приглашение выписано на почту текущего пользователя.
+func (s *Server) incomingInvite(w http.ResponseWriter, r *http.Request) (db.TeamInvite, bool) {
+	id, ok := pathUUID(w, r, "id")
+	if !ok {
+		return db.TeamInvite{}, false
+	}
+	inv, err := s.q.GetInvite(r.Context(), id)
+	if err != nil || !strings.EqualFold(inv.Email, currentUser(r).Email) {
+		writeErr(w, 404, "invite_not_found", "Invite not found")
+		return db.TeamInvite{}, false
+	}
+	return inv, true
+}
+
+func (s *Server) teamIncomingAccept(w http.ResponseWriter, r *http.Request) {
+	inv, ok := s.incomingInvite(w, r)
+	if !ok {
+		return
+	}
+	u := currentUser(r)
+	if err := s.q.AddMember(r.Context(), db.AddMemberParams{OwnerID: inv.OwnerID, MemberID: u.ID, Role: inv.Role, BudgetMicro: inv.BudgetMicro}); err != nil {
+		s.internal(w, err)
+		return
+	}
+	_ = s.q.AcceptInvite(r.Context(), inv.ID)
+	s.event(r, u.ID, "team.join", inv.OwnerID.String())
+	writeJSON(w, 200, map[string]any{"owner_id": inv.OwnerID})
+}
+
+func (s *Server) teamIncomingDecline(w http.ResponseWriter, r *http.Request) {
+	inv, ok := s.incomingInvite(w, r)
+	if !ok {
+		return
+	}
+	_ = s.q.DeleteInviteByID(r.Context(), inv.ID)
+	writeJSON(w, 200, map[string]bool{"ok": true})
 }

@@ -3,8 +3,10 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
+import { Help } from "@/components/help";
+import { ProviderLogo } from "@/components/provider-logo";
 import { Select } from "@/components/select";
-import { PageHead, Seg, Switch, useLoad, useToast } from "@/components/ui";
+import { Seg, Switch, useLoad, useToast } from "@/components/ui";
 import { get } from "@/lib/api";
 import { perM, rub } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
@@ -26,6 +28,11 @@ const COPY = {
     examples: ["Объясни простыми словами, что такое API", "Напиши вежливое письмо о переносе встречи", "Придумай 5 названий для кофейни", "Сравни Python и Go для бэкенда"],
     ph: "Напишите сообщение…", hint: "Enter — отправить, Shift + Enter — новая строка", you: "Вы", send: "Отправить", stop: "Остановить",
     cost: "{t} токенов · {c}", freeModel: "бесплатная модель",
+    sysHelp: "Это постоянное указание для модели: какую роль играть, каким тоном и в каком виде отвечать. Например «отвечай кратко» или «ты юрист». Модель помнит его весь разговор. Можно оставить пустым.",
+    creativeHelp: "Насколько смело модель подбирает слова. Ближе к нулю — точные и предсказуемые ответы, подходит для кода, фактов и расчётов. Ближе к двум — разнообразнее и неожиданнее, подходит для идей и текстов.",
+    lengthHelp: "Сколько модель может написать в ответ. Короткий — пара абзацев, длинный — подробная статья. Платите только за реально написанный текст, а лимит лишь не даёт ответу разрастись.",
+    streamHelp: "Если включено, ответ появляется по словам, как будто модель печатает. Если выключено, ответ придёт целиком, когда будет готов.",
+    priceHelp: "Цена за миллион токенов: сначала за ваш вопрос, потом за ответ модели. Один обычный вопрос с ответом стоит копейки.",
   },
   en: {
     title: "Chat with models",
@@ -40,6 +47,11 @@ const COPY = {
     examples: ["Explain what an API is in simple words", "Write a polite email to reschedule a meeting", "Come up with 5 names for a coffee shop", "Compare Python and Go for backends"],
     ph: "Write a message…", hint: "Enter to send, Shift + Enter for a new line", you: "You", send: "Send", stop: "Stop",
     cost: "{t} tokens · {c}", freeModel: "free model",
+    sysHelp: "A standing instruction for the model: what role to play, which tone and format to use. For example “answer briefly” or “you are a lawyer”. The model keeps it for the whole chat. You can leave it empty.",
+    creativeHelp: "How boldly the model picks words. Near zero means precise and predictable answers, good for code, facts and maths. Near two means more varied and surprising, good for ideas and writing.",
+    lengthHelp: "How much the model may write. Short is a couple of paragraphs, long is a detailed article. You only pay for what is actually written.",
+    streamHelp: "When on, the answer appears word by word as the model types. When off, it arrives in one piece when ready.",
+    priceHelp: "Price per million tokens: first for your question, then for the answer. A typical question and answer costs a fraction of a cent.",
   },
 };
 
@@ -58,6 +70,9 @@ function Playground() {
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState(sp.get("prompt") ?? "");
   const [busy, setBusy] = useState(false);
+  const [showSet, setShowSet] = useState(false);
+  useEffect(() => { try { setShowSet(localStorage.getItem("chat-settings") === "1"); } catch {} }, []);
+  const toggleSet = () => setShowSet((v) => { try { localStorage.setItem("chat-settings", v ? "0" : "1"); } catch {} return !v; });
   const abort = useRef<AbortController | null>(null);
   const log = useRef<HTMLDivElement>(null);
   const ta = useRef<HTMLTextAreaElement>(null);
@@ -125,9 +140,21 @@ function Playground() {
   }
 
   return (
-    <>
-      <PageHead title={C.title} lead={C.lead} actions={msgs.length > 0 && <button className="btn btn-ghost btn-sm" onClick={() => setMsgs([])} disabled={busy}><Icon name="trash" size={15} />{C.clear}</button>} />
-      <div className="pg2">
+    <div className="chat">
+      <div className="chat-top">
+        <div className="chat-model">
+          {cur && <ProviderLogo author={cur.author} size={34} />}
+          <Select value={model} onChange={(e) => setModel(e.target.value)} style={{ minWidth: 240 }}>
+            {models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.is_free ? (lang === "en" ? " · free" : " · бесплатно") : ""}</option>)}
+          </Select>
+          {cur && <span className="hint chat-price">{cur.is_free ? C.freeModel : `${perM(cur.prices.input_per_m, lang)} / ${perM(cur.prices.output_per_m, lang)} ${t.models.perM}`}<Help text={C.priceHelp} /></span>}
+        </div>
+        <div className="row" style={{ gap: 6 }}>
+          {msgs.length > 0 && <button className="btn btn-ghost btn-sm" onClick={() => setMsgs([])} disabled={busy}><Icon name="trash" size={15} /><span className="hide-sm">{C.clear}</span></button>}
+          <button className={`btn btn-sm ${showSet ? "" : "btn-ghost"}`} onClick={toggleSet}><Icon name="preset" size={15} /><span className="hide-sm">{C.settings}</span>{system && <i className="stop-dot" style={{ position: "static" }} />}</button>
+        </div>
+      </div>
+      <div className={`chat-body${showSet ? " with-set" : ""}`}>
         <section className="pg2-chat">
           <div className="pg2-log" ref={log}>
             {msgs.length === 0 ? (
@@ -154,40 +181,35 @@ function Playground() {
             <textarea ref={ta} rows={1} placeholder={C.ph} value={input} onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} />
             {busy ? <button type="button" className="btn btn-ghost" onClick={() => abort.current?.abort()}><Icon name="stop" size={16} />{C.stop}</button>
-              : <button className="btn btn-signal" disabled={!input.trim() || !model}><Icon name="send" size={16} />{C.send}</button>}
+              : <button className="btn btn-signal" disabled={!input.trim() || !model}><Icon name="send" size={16} /><span className="hide-sm">{C.send}</span></button>}
           </form>
           <div className="hint" style={{ padding: "0 18px 12px" }}>{C.hint}</div>
         </section>
 
-        <aside className="pg2-side">
-          <h2 className="h3">{C.settings}</h2>
-          <label className="field"><span>{C.model}</span>
-            <Select value={model} onChange={(e) => setModel(e.target.value)}>
-              {models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.is_free ? (lang === "en" ? " · free" : " · бесплатно") : ""}</option>)}
-            </Select>
-            {cur && <span className="hint">{cur.is_free ? C.freeModel : `${t.models.input} ${perM(cur.prices.input_per_m, lang)} · ${t.models.output} ${perM(cur.prices.output_per_m, lang)} ${t.models.perM}`}</span>}
-          </label>
-          <div className="field">
-            <span>{C.sys}</span>
-            <textarea className="textarea" rows={4} placeholder={C.sysPh} value={system} onChange={(e) => setSystem(e.target.value)} />
-            <div className="row-wrap" style={{ ["--gap" as string]: "6px" }}>
-              {C.sysPresets.map(([l, v]) => <button key={l} type="button" className={`chip${system === v ? " on" : ""}`} onClick={() => setSystem(system === v ? "" : v)}>{l}</button>)}
+        {showSet && (
+          <aside className="pg2-side chat-set">
+            <div className="spread"><h2 className="h3">{C.settings}</h2><button className="x-btn" onClick={toggleSet} aria-label="close"><Icon name="close" size={16} /></button></div>
+            <div className="field">
+              <span>{C.sys}<Help text={C.sysHelp} /></span>
+              <textarea className="textarea" rows={4} placeholder={C.sysPh} value={system} onChange={(e) => setSystem(e.target.value)} />
+              <div className="row-wrap" style={{ ["--gap" as string]: "6px" }}>
+                {C.sysPresets.map(([l, v]) => <button key={l} type="button" className={`chip${system === v ? " on" : ""}`} onClick={() => setSystem(system === v ? "" : v)}>{l}</button>)}
+              </div>
             </div>
-            <span className="hint">{C.sysHint}</span>
-          </div>
-          <div className="field">
-            <span className="spread">{C.creative}<b className="mono small">{temp.toFixed(1)}</b></span>
-            <input type="range" min="0" max="2" step="0.1" value={temp} onChange={(e) => setTemp(Number(e.target.value))} />
-            <div className="spread hint"><span>{C.exact}</span><span>{C.free}</span></div>
-          </div>
-          <div className="field">
-            <span>{C.length}</span>
-            <Seg value={len} onChange={setLen} options={[{ value: "256", label: C.short }, { value: "1024", label: C.mid }, { value: "4096", label: C.long }]} />
-          </div>
-          <label className="spread small" style={{ gap: 12 }}><span>{C.stream}</span><Switch checked={stream} onChange={setStream} /></label>
-        </aside>
+            <div className="field">
+              <span className="spread"><span>{C.creative}<Help text={C.creativeHelp} /></span><b className="mono small">{temp.toFixed(1)}</b></span>
+              <input type="range" min="0" max="2" step="0.1" value={temp} onChange={(e) => setTemp(Number(e.target.value))} />
+              <div className="spread hint"><span>{C.exact}</span><span>{C.free}</span></div>
+            </div>
+            <div className="field">
+              <span>{C.length}<Help text={C.lengthHelp} /></span>
+              <Seg value={len} onChange={setLen} options={[{ value: "256", label: C.short }, { value: "1024", label: C.mid }, { value: "4096", label: C.long }]} />
+            </div>
+            <label className="spread small" style={{ gap: 12 }}><span>{C.stream}<Help text={C.streamHelp} /></span><Switch checked={stream} onChange={setStream} /></label>
+          </aside>
+        )}
       </div>
-    </>
+    </div>
   );
 }
 

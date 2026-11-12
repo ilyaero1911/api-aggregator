@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import { Logo } from "@/components/brand";
+import { PayResult } from "@/components/pay-result";
 import { get, post } from "@/lib/api";
 import { date, kopecks } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
@@ -50,9 +51,8 @@ export default function FakePay({ params }: { params: Promise<{ id: string }> })
               </div>
             ) : (
               <div className="stack">
-                <p className={`h3 ${p.status === "succeeded" ? "ok" : "bad"}`}>
-                  {p.status === "succeeded" ? P.done : p.status === "failed" ? P.failed : P.canceled}
-                </p>
+                <PayResult status={p.status as "succeeded" | "failed" | "canceled"} title={p.status === "succeeded" ? P.done : p.status === "failed" ? P.failed : P.canceled}
+                  sub={p.status === "succeeded" ? (lang === "en" ? "The money is already on your balance." : "Деньги уже на балансе.") : p.status === "failed" ? (lang === "en" ? "No money was charged. Try again or use another card." : "Деньги не списаны. Попробуйте ещё раз или другой картой.") : undefined} />
                 <Link className="btn" href="/dashboard/billing" style={{ width: "100%" }}>{P.toBilling}</Link>
               </div>
             )}

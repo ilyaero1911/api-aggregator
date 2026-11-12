@@ -12,6 +12,7 @@ import { useI18n } from "@/lib/i18n/client";
 type Member = { owner_id: string; member_id: string; role: "admin" | "member"; budget_micro: number | null; created_at: string; email: string; name: string; spent_month: number };
 type Team = { owner_id: string; member_id: string; role: string; budget_micro: number | null; owner_email: string; owner_name: string; spent_month: number };
 type Invite = { id: string; email: string; role: string; budget_micro: number | null; created_at: string };
+type Incoming = { id: string; role: string; budget_micro: number | null; created_at: string; owner_email: string; owner_name: string };
 
 export default function TeamPage() {
   const { lang } = useI18n();
@@ -20,7 +21,7 @@ export default function TeamPage() {
   const toast = useToast();
   const { ask, node } = useConfirm();
   const { user } = useSession();
-  const { data, reload } = useLoad(() => get<{ members: Member[]; invites: Invite[]; teams: Team[] }>("/api/team"));
+  const { data, reload } = useLoad(() => get<{ members: Member[]; invites: Invite[]; teams: Team[]; incoming: Incoming[] }>("/api/team"));
   const [inv, setInv] = useState<{ email: string; role: string; budget: string } | null>(null);
   const [link, setLink] = useState<string | null>(null);
   const [edit, setEdit] = useState<{ id: string; role: string; budget: string } | null>(null);
@@ -31,6 +32,23 @@ export default function TeamPage() {
     <>
       <PageHead title={L("Команда", "Team")} lead={L("Пригласите коллег: они создают свои ключи, а расходы списываются с вашего баланса. Каждому можно задать месячный бюджет.", "Invite colleagues: they create their own keys and usage is charged to your balance. Give each a monthly budget.")}
         actions={<button className="btn" onClick={() => setInv({ email: "", role: "member", budget: "" })}><Icon name="plus" size={16} />{L("Пригласить", "Invite")}</button>} />
+
+      {data && data.incoming.length > 0 && (
+        <div className="invites-in">
+          {data.incoming.map((i) => (
+            <div key={i.id} className="invite-card">
+              <span className="news-ico"><Icon name="users" size={18} /></span>
+              <div className="grow">
+                <b>{L(`${i.owner_name || i.owner_email} приглашает вас в команду`, `${i.owner_name || i.owner_email} invites you to their team`)}</b>
+                <div className="hint">{i.owner_email} · {i.role === "admin" ? L("роль: админ", "role: admin") : L("роль: участник", "role: member")}{i.budget_micro !== null && ` · ${L("бюджет", "budget")} ${rub(i.budget_micro, lang)} ${L("в месяц", "per month")}`}</div>
+                <div className="hint">{L("Запросы по командным ключам будут оплачиваться с баланса владельца.", "Requests with team keys are paid from the owner\u2019s balance.")}</div>
+              </div>
+              <button className="btn btn-signal btn-sm" onClick={async () => { try { await post(`/api/team/invites/${i.id}/accept`); toast(L("Вы в команде", "You joined the team")); reload(); } catch (e) { fail(e); } }}>{L("Принять", "Accept")}</button>
+              <button className="btn btn-ghost btn-sm" onClick={async () => { await post(`/api/team/invites/${i.id}/decline`); reload(); }}>{L("Отклонить", "Decline")}</button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <section className="panel" style={{ marginBottom: 18 }}>
         <div className="spread" style={{ marginBottom: 10 }}><h2 className="h3">{L("Участники вашей команды", "Your team members")}</h2><span className="hint">{L("Владелец", "Owner")}: {user.email}</span></div>
@@ -101,7 +119,7 @@ export default function TeamPage() {
         )}
       </Modal>
       <Modal open={!!link} onClose={() => setLink(null)} title={L("Приглашение создано", "Invite created")} footer={<button className="btn" onClick={() => setLink(null)}>{L("Готово", "Done")}</button>}>
-        <p className="muted">{L("Отправьте ссылку коллеге. Она действует 14 дней, открыть её нужно под аккаунтом с этой почтой или любым другим.", "Send this link to your colleague. It is valid for 14 days.")}</p>
+        <p className="muted">{L("Приглашение уже появилось у коллеги в кабинете, в разделе «Команда», если он зарегистрирован с этой почтой. Если нет, отправьте ему ссылку: она действует 14 дней.", "The invite already shows up in your colleague\u2019s dashboard under Team if they signed up with this email. Otherwise send them the link, valid for 14 days.")}</p>
         <code className="secret">{link}</code>
         {link && <div><CopyButton text={link} className="btn" /></div>}
       </Modal>

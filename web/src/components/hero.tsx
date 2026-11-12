@@ -22,7 +22,7 @@ export function HeroText({ models, rate }: { models: number; rate: string }) {
         <span className="hero-line">
           <span className="rot" aria-live="polite">
             {WORDS.map((w, k) => <span key={w} className={`rot-w${k === i ? " on" : k === (i + WORDS.length - 1) % WORDS.length ? " off" : ""}`}>{w}</span>)}
-            <span className="rot-sizer">{WORDS.reduce((a, b) => (a.length > b.length ? a : b))}</span>
+            <span className="rot-line" key={i} /><span className="rot-sizer">{WORDS.reduce((a, b) => (a.length > b.length ? a : b))}</span>
           </span>
         </span>
       </h1>

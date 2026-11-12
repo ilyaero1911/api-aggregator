@@ -14,6 +14,8 @@ function Nav({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const [unread, setUnread] = useState(0);
   const [supUnread, setSupUnread] = useState(0);
+  const [invites, setInvites] = useState(0);
+  useEffect(() => { get<{ incoming: unknown[] }>("/api/team").then((r) => setInvites(r.incoming?.length ?? 0)).catch(() => {}); }, [path]);
   useEffect(() => { get<{ unread: number }>("/api/news").then((r) => setUnread(r.unread)).catch(() => {}); }, [path]);
   useEffect(() => { get<{ unread: number }>("/api/support").then((r) => setSupUnread(r.unread)).catch(() => {}); }, [path]);
   const nav: NavGroup[] = [
@@ -28,7 +30,7 @@ function Nav({ children }: { children: React.ReactNode }) {
     { label: N.groupAccount, items: [
       { href: "/dashboard/keys", label: N.keys, icon: "key" },
       { href: "/dashboard/billing", label: N.billing, icon: "wallet" },
-      { href: "/dashboard/team", label: en ? "Team" : "Команда", icon: "users" },
+      { href: "/dashboard/team", label: en ? "Team" : "Команда", icon: "users", badge: invites },
       { href: "/dashboard/logs", label: N.logs, icon: "logs" },
       { href: "/dashboard/activity", label: en ? "Account activity" : "Действия в аккаунте", icon: "history" },
       { href: "/dashboard/management-keys", label: N.managementKeys, icon: "shieldKey" },

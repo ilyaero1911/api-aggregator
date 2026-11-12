@@ -25,7 +25,6 @@ export default async function Landing() {
   return (
     <>
       <section className="hero-wrap">
-        <div className="hero-glow" aria-hidden><span /><span /><span /></div>
         <div className="wrap hero">
           <HeroText models={models.length} rate={usd ? (usd.rub_micro / 1e6).toFixed(2) : "—"} />
           <div className="hero-art" data-reveal><GatewayScene /></div>

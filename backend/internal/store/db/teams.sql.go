@@ -92,6 +92,35 @@ func (q *Queries) DeleteInvite(ctx context.Context, arg DeleteInviteParams) erro
 	return err
 }
 
+const deleteInviteByID = `-- name: DeleteInviteByID :exec
+DELETE FROM team_invites WHERE id = $1
+`
+
+func (q *Queries) DeleteInviteByID(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteInviteByID, id)
+	return err
+}
+
+const getInvite = `-- name: GetInvite :one
+SELECT id, owner_id, email, role, budget_micro, token_hash, created_at, accepted_at FROM team_invites WHERE id = $1 AND accepted_at IS NULL
+`
+
+func (q *Queries) GetInvite(ctx context.Context, id uuid.UUID) (TeamInvite, error) {
+	row := q.db.QueryRow(ctx, getInvite, id)
+	var i TeamInvite
+	err := row.Scan(
+		&i.ID,
+		&i.OwnerID,
+		&i.Email,
+		&i.Role,
+		&i.BudgetMicro,
+		&i.TokenHash,
+		&i.CreatedAt,
+		&i.AcceptedAt,
+	)
+	return i, err
+}
+
 const getInviteByToken = `-- name: GetInviteByToken :one
 SELECT i.id, i.owner_id, i.email, i.role, i.budget_micro, i.token_hash, i.created_at, i.accepted_at, u.email AS owner_email, u.name AS owner_name FROM team_invites i JOIN users u ON u.id = i.owner_id
 WHERE i.token_hash = $1 AND i.accepted_at IS NULL AND i.created_at > now() - interval '14 days'
@@ -148,6 +177,49 @@ func (q *Queries) GetMembership(ctx context.Context, arg GetMembershipParams) (T
 		&i.CreatedAt,
 	)
 	return i, err
+}
+
+const listIncomingInvites = `-- name: ListIncomingInvites :many
+SELECT i.id, i.role, i.budget_micro, i.created_at, u.email AS owner_email, u.name AS owner_name
+FROM team_invites i JOIN users u ON u.id = i.owner_id
+WHERE lower(i.email) = lower($1::text) AND i.accepted_at IS NULL AND i.created_at > now() - interval '14 days'
+ORDER BY i.created_at DESC
+`
+
+type ListIncomingInvitesRow struct {
+	ID          uuid.UUID `json:"id"`
+	Role        string    `json:"role"`
+	BudgetMicro *int64    `json:"budget_micro"`
+	CreatedAt   time.Time `json:"created_at"`
+	OwnerEmail  string    `json:"owner_email"`
+	OwnerName   string    `json:"owner_name"`
+}
+
+func (q *Queries) ListIncomingInvites(ctx context.Context, email string) ([]ListIncomingInvitesRow, error) {
+	rows, err := q.db.Query(ctx, listIncomingInvites, email)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListIncomingInvitesRow{}
+	for rows.Next() {
+		var i ListIncomingInvitesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Role,
+			&i.BudgetMicro,
+			&i.CreatedAt,
+			&i.OwnerEmail,
+			&i.OwnerName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listInvites = `-- name: ListInvites :many

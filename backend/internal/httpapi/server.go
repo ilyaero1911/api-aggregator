@@ -94,8 +94,11 @@ func (s *Server) Router() http.Handler {
 	r.Route("/api", func(r chi.Router) {
 		r.Use(middleware.Timeout(60 * time.Second))
 		r.Use(s.sessionUser)
-		s.publicRoutes(r)
-		s.contentPublicRoutes(r)
+		r.Group(func(r chi.Router) {
+			r.Use(s.publicLimit(120))
+			s.publicRoutes(r)
+			s.contentPublicRoutes(r)
+		})
 		s.authRoutes(r)
 		r.Group(func(r chi.Router) {
 			r.Use(s.requireUser)
@@ -219,3 +222,28 @@ func clientIP(r *http.Request) string {
 }
 
 func chiParam(r *http.Request, name string) string { return chi.URLParam(r, name) }
+
+// publicLimit ограничивает частоту запросов к открытым данным (каталог, цены, документы) с одного IP,
+// чтобы их нельзя было массово выкачивать. Запросы самого сайта с localhost не считаются.
+func (s *Server) publicLimit(perMin int64) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ip := clientIP(r)
+			if ip == "127.0.0.1" || ip == "::1" || ip == "[::1]" || currentUser(r) != nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+			key := "rl:pub:" + ip + ":" + strconv.FormatInt(time.Now().Unix()/60, 10)
+			n, err := s.rdb.Incr(r.Context(), key).Result()
+			if err == nil {
+				s.rdb.Expire(r.Context(), key, 70*time.Second)
+				if n > perMin {
+					w.Header().Set("Retry-After", "60")
+					writeErr(w, 429, "rate_limited", "Too many requests, slow down")
+					return
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
