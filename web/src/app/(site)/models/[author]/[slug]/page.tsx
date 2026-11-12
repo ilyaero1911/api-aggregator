@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/ui";
 import { TokenExplainer } from "@/components/token-explainer";
+import { ProviderLogo } from "@/components/provider-logo";
 import { loadModels } from "@/lib/server-data";
 import { api } from "@/lib/api";
 import { ctx, date, perM } from "@/lib/format";
@@ -37,8 +38,7 @@ export default async function ModelPage({ params }: { params: Promise<{ author: 
       <Link href="/models" className="small muted">← {M.title}</Link>
       <header className="page-head" style={{ marginTop: 16 }}>
         <div className="stack" style={{ ["--gap" as string]: "10px" }}>
-          <div className="label">{m.author}</div>
-          <h1 className="h1" style={{ fontSize: 40 }}>{m.name}</h1>
+          <div className="row" style={{ gap: 16 }}><ProviderLogo author={m.author} size={64} /><div className="stack" style={{ ["--gap" as string]: "6px" }}><div className="label">{m.author}</div><h1 className="h1" style={{ fontSize: 40 }}>{m.name}</h1></div></div>
           <div className="row-wrap">
             <code className="mono">{m.id}</code>
             {m.is_free && <span className="tag tag-ok">{t.common.free}</span>}

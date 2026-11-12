@@ -23,6 +23,7 @@ import (
 	"github.com/ilyaero1911/api-aggregator/backend/internal/config"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/fx"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/gateway"
+	"github.com/ilyaero1911/api-aggregator/backend/internal/notify"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/payments"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/settings"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/store/db"
@@ -39,6 +40,7 @@ type Server struct {
 	engine   *gateway.Engine
 	payments *payments.Registry
 	oauth    map[string]*auth.OAuth
+	tg       *notify.Telegram
 	sealer   *auth.Sealer
 	log      *slog.Logger
 }
@@ -53,13 +55,14 @@ type Deps struct {
 	Engine   *gateway.Engine
 	Payments *payments.Registry
 	Sealer   *auth.Sealer
+	Telegram *notify.Telegram
 	Log      *slog.Logger
 }
 
 func New(d Deps) *Server {
 	s := &Server{
 		cfg: d.Cfg, pool: d.Pool, q: db.New(d.Pool), rdb: d.Redis, billing: d.Billing, fx: d.FX,
-		settings: d.Settings, engine: d.Engine, payments: d.Payments, sealer: d.Sealer, log: d.Log,
+		settings: d.Settings, engine: d.Engine, payments: d.Payments, sealer: d.Sealer, log: d.Log, tg: d.Telegram,
 	}
 	s.oauth = map[string]*auth.OAuth{}
 	for name, mk := range map[string]func(id, secret, redirect string) *auth.OAuth{"github": auth.NewGitHub, "yandex": auth.NewYandex, "vk": auth.NewVK} {
@@ -98,11 +101,13 @@ func (s *Server) Router() http.Handler {
 			r.Use(s.requireUser)
 			s.accountRoutes(r)
 			s.contentAccountRoutes(r)
+			s.supportUserRoutes(r)
 		})
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(s.requireAdmin)
 			s.adminRoutes(r)
 			s.contentAdminRoutes(r)
+			s.supportAdminRoutes(r)
 		})
 	})
 

@@ -13,7 +13,9 @@ function Nav({ children }: { children: React.ReactNode }) {
   const en = lang === "en";
   const path = usePathname();
   const [unread, setUnread] = useState(0);
+  const [supUnread, setSupUnread] = useState(0);
   useEffect(() => { get<{ unread: number }>("/api/news").then((r) => setUnread(r.unread)).catch(() => {}); }, [path]);
+  useEffect(() => { get<{ unread: number }>("/api/support").then((r) => setSupUnread(r.unread)).catch(() => {}); }, [path]);
   const nav: NavGroup[] = [
     { label: N.groupWork, items: [
       { href: "/dashboard", label: N.overview, exact: true, icon: "overview" },
@@ -30,6 +32,7 @@ function Nav({ children }: { children: React.ReactNode }) {
       { href: "/dashboard/settings", label: N.settings, icon: "settings" },
     ] },
     { label: N.groupResources, items: [
+      { href: "/dashboard/support", label: en ? "Support" : "Поддержка", icon: "chat", badge: supUnread },
       { href: "/dashboard/news", label: en ? "News" : "Новости", icon: "sparkle", badge: unread },
       { href: "/models", label: N.models, icon: "cube" }, { href: "/docs", label: N.docs, icon: "book" },
     ] },

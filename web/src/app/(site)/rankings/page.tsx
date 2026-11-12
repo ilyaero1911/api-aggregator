@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ProviderLogo } from "@/components/provider-logo";
 import { api } from "@/lib/api";
 import { compact, num } from "@/lib/format";
 import { getDict } from "@/lib/i18n/server";
@@ -24,7 +25,7 @@ export default async function Rankings() {
             {rank.data.map((r, i) => (
               <tr key={r.model_id}>
                 <td className="mono faint">{i + 1}</td>
-                <td><Link href={`/models/${r.model_id}`}>{byId.get(r.model_id)?.name ?? r.model_id}</Link> <span className="faint small mono">{byId.get(r.model_id)?.author}</span></td>
+                <td><div className="row" style={{ gap: 10 }}><ProviderLogo author={byId.get(r.model_id)?.author ?? "?"} size={28} /><Link href={`/models/${r.model_id}`}>{byId.get(r.model_id)?.name ?? r.model_id}</Link> <span className="faint small mono">{byId.get(r.model_id)?.author}</span></div></td>
                 <td><div className="share-track"><div className="share-bar" style={{ width: `${(r.tokens / max) * 100}%`, background: i === 0 ? "var(--signal)" : undefined }} /></div></td>
                 <td className="r num">{compact(r.tokens, lang)}</td>
                 <td className="r num">{num(r.requests, lang)}</td>

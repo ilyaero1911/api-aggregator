@@ -3,12 +3,12 @@ import { GatewayScene } from "@/components/gateway-scene";
 import { HeroText } from "@/components/hero";
 import { Icon } from "@/components/icons";
 import { PlanGrid } from "@/components/plans";
+import { ProviderLogo } from "@/components/provider-logo";
 import { CodeBlock } from "@/components/ui";
 import { ctx, perM } from "@/lib/format";
 import { getDict } from "@/lib/i18n/server";
 import { loadConfig, loadFx, loadModels, loadPlans } from "@/lib/server-data";
 
-const COLORS: Record<string, string> = { Anthropic: "#d97757", OpenAI: "#10a37f", Google: "#4285f4", DeepSeek: "#4d6bfe", Qwen: "#7c5cff", Meta: "#0866ff", Mistral: "#fa520f", "Moonshot AI": "#16191e", xAI: "#111", "Black Forest Labs": "#222" };
 
 export default async function Landing() {
   const { t, lang } = await getDict();
@@ -52,7 +52,7 @@ export default async function Landing() {
           {popular.map((m, i) => (
             <Link key={m.id} href={`/models/${m.id}`} className="mcard" data-reveal style={{ ["--d" as string]: `${i * 60}ms` }}>
               <div className="row" style={{ gap: 10 }}>
-                <span className="gw-ava" style={{ background: COLORS[m.author] ?? "var(--ink)", width: 32, height: 32, fontSize: 14 }}>{m.author[0]}</span>
+                <ProviderLogo author={m.author} size={44} />
                 <div><div className="h3">{m.name}</div><div className="hint">{m.author} · {ctx(m.context_length)} {ru ? "контекст" : "context"}</div></div>
               </div>
               <p className="muted small mclamp">{m.description}</p>

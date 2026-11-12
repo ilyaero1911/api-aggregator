@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n/client";
 import { DEMO_EN, DEMO_RU, type Demo } from "@/lib/demo-prompts";
 import { Icon } from "./icons";
+import { ProviderLogo } from "./provider-logo";
 
 /**
  * Интерактивная сцена шлюза для главной.
@@ -197,7 +198,7 @@ export function GatewayScene() {
             style={{ left: `${(PX / W) * 100}%`, top: `${(py(i) / H) * 100}%` }}
             onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onClick={() => toggle(i)}
             title={down[i] ? (ru ? "Вернуть провайдера" : "Restore provider") : (ru ? "Уронить провайдера" : "Take provider down")}>
-            <span className="gw-ava" style={{ background: p.color }}>{p.name[0]}</span>
+            <span className="gw-ava"><ProviderLogo author={p.name} size={26} /></span>
             <span className="gw-name">{p.name}</span>
             <span className="gw-ms">{down[i] ? (ru ? "лежит" : "down") : `${lat[i]} ms`}</span>
           </button>

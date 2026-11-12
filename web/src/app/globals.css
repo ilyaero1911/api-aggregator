@@ -901,3 +901,32 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border: 0; bord
 .tl-item { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; border-radius: 12px; transition: background .2s; }
 .tl-item:hover { background: var(--paper); }
 .tl-ico { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--paper-2); color: var(--ink-2); flex: none; }
+.plogo { display: inline-grid; place-items: center; flex: none; color: var(--ink); background: var(--paper); border-radius: 28%; box-shadow: 0 0 0 1px var(--rule); }
+.plogo svg { width: 100%; height: 100%; display: block; }
+.plogo-fallback { font-weight: 600; color: var(--ink-2); }
+.gw-ava .plogo { box-shadow: none; background: var(--surface); }
+.gw-ava { background: transparent !important; }
+.mrow > .plogo { align-self: flex-start; }
+/* поддержка */
+.sup { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 16px; height: calc(100vh - 220px); min-height: 520px; }
+.sup-list { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); padding: 8px; overflow-y: auto; display: grid; gap: 4px; align-content: start; }
+.sup-item { text-align: left; border: 0; background: transparent; border-radius: 14px; padding: 12px; display: grid; gap: 4px; cursor: pointer; color: var(--ink); transition: background .2s; }
+.sup-item:hover { background: var(--paper); }
+.sup-item.on { background: var(--paper); box-shadow: 0 0 0 1px var(--rule); }
+.sup-subj { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sup-prev { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sup-st { font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--paper-2); color: var(--ink-2); }
+.st-open { background: var(--warn-soft); color: var(--warn); } .st-answered { background: var(--ok-soft); color: var(--ok); }
+.sup-main { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+.sup-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; box-shadow: inset 0 -1px 0 var(--rule); }
+.sup-chat { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.sup-log { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.sup-msg { display: flex; gap: 10px; max-width: 78%; animation: rise .3s var(--ease); }
+.sup-msg.mine { align-self: flex-end; flex-direction: row-reverse; text-align: right; }
+.sup-bubble { background: var(--paper); box-shadow: 0 0 0 1px var(--rule); padding: 10px 14px; border-radius: 4px 16px 16px 16px; white-space: pre-wrap; line-height: 1.55; text-align: left; }
+.sup-msg.mine .sup-bubble { background: var(--ink); color: var(--paper); box-shadow: none; border-radius: 16px 4px 16px 16px; }
+.sup-ava { width: 30px; height: 30px; border-radius: 10px; background: var(--signal-soft); color: var(--signal); display: grid; place-items: center; font-weight: 600; font-size: 13px; flex: none; }
+.sup-closed { padding: 0 20px 8px; }
+.sup-chat .pg2-input { margin-bottom: 14px; }
+.sup-new { padding: clamp(20px, 3vw, 36px); display: grid; gap: 14px; max-width: 640px; }
+@media (max-width: 900px) { .sup { grid-template-columns: 1fr; height: auto; } .sup-main { min-height: 70vh; } }

@@ -1,0 +1,2 @@
+Brand logos in this folder come from @lobehub/icons-static-svg (MIT License, https://github.com/lobehub/lobe-icons).
+Logos are trademarks of their respective owners and are used only to identify the model providers.

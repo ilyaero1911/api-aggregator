@@ -33,9 +33,13 @@ type Config struct {
 	FxBackupURL string
 
 	PaymentProvider string // сейчас только "fake"
+
+	TelegramToken  string // токен бота для уведомлений админам
+	TelegramChatID string // chat_id через запятую; можно задать и в админке
 }
 
 func Load() Config {
+	loadDotEnv(".env", "../.env")
 	return Config{
 		Addr:          env("ADDR", ":8090"),
 		DatabaseURL:   env("DATABASE_URL", "postgres://aggregator:aggregator@localhost:55442/aggregator?sslmode=disable"),
@@ -53,6 +57,8 @@ func Load() Config {
 		FxCBRURL:        env("FX_CBR_URL", "https://www.cbr.ru/scripts/XML_daily.asp"),
 		FxBackupURL:     env("FX_BACKUP_URL", "https://www.cbr-xml-daily.ru/daily_json.js"),
 		PaymentProvider: env("PAYMENT_PROVIDER", "fake"),
+		TelegramToken:   env("TELEGRAM_BOT_TOKEN", ""),
+		TelegramChatID:  env("TELEGRAM_CHAT_ID", ""),
 	}
 }
 
@@ -105,4 +111,29 @@ func list(v string) []string {
 		}
 	}
 	return out
+}
+
+// loadDotEnv подхватывает переменные из .env рядом с сервером или в корне репозитория.
+// Уже заданные переменные окружения не перезаписываются.
+func loadDotEnv(paths ...string) {
+	for _, p := range paths {
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			continue
+		}
+		for _, line := range strings.Split(string(raw), "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" || strings.HasPrefix(line, "#") {
+				continue
+			}
+			k, v, ok := strings.Cut(line, "=")
+			if !ok {
+				continue
+			}
+			k, v = strings.TrimSpace(k), strings.Trim(strings.TrimSpace(v), `"'`)
+			if _, set := os.LookupEnv(k); !set && v != "" {
+				os.Setenv(k, v)
+			}
+		}
+	}
 }

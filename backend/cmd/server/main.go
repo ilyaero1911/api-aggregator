@@ -23,6 +23,7 @@ import (
 	"github.com/ilyaero1911/api-aggregator/backend/internal/fx"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/gateway"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/httpapi"
+	"github.com/ilyaero1911/api-aggregator/backend/internal/notify"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/payments"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/settings"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/store/db"
@@ -68,6 +69,7 @@ func run(log *slog.Logger) error {
 	bill := billing.New(pool)
 	rates := fx.New(q, rdb, st, cfg.FxCBRURL, cfg.FxBackupURL, log)
 	engine := gateway.NewEngine(q, bill, rates, st, rdb, sealer, log)
+	tg := notify.NewTelegram(cfg.TelegramToken, cfg.TelegramChatID, st, log)
 	pay := payments.NewRegistry(cfg.PaymentProvider, payments.Fake{PublicURL: cfg.PublicURL})
 
 	go rates.Run(ctx, cfg.FxRefresh)
@@ -76,7 +78,7 @@ func run(log *slog.Logger) error {
 	srv := &http.Server{
 		Addr: cfg.Addr,
 		Handler: httpapi.New(httpapi.Deps{Cfg: cfg, Pool: pool, Redis: rdb, Billing: bill, FX: rates, Settings: st,
-			Engine: engine, Payments: pay, Sealer: sealer, Log: log}).Router(),
+			Engine: engine, Payments: pay, Sealer: sealer, Log: log, Telegram: tg}).Router(),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 	go func() {

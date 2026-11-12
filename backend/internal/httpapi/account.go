@@ -17,6 +17,7 @@ import (
 	"github.com/ilyaero1911/api-aggregator/backend/internal/billing"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/gateway"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/money"
+	"github.com/ilyaero1911/api-aggregator/backend/internal/notify"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/payments"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/settings"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/store/db"
@@ -514,6 +515,9 @@ func (s *Server) fakePay(w http.ResponseWriter, r *http.Request) {
 		p, err = s.billing.CompletePayment(r.Context(), id)
 		if err == nil {
 			s.event(r, p.UserID, "payment", p.ExternalID)
+			if s.settings.Bool(r.Context(), "tg_notify_payments", false) {
+				s.tg.Send(r.Context(), fmt.Sprintf("💳 <b>Оплата</b> %.2f ₽ от %s (%s)", float64(p.AmountKopecks)/100, notify.Esc(currentUser(r).Email), p.Purpose))
+			}
 		}
 	case "cancel":
 		err = s.billing.FailPayment(r.Context(), id, "canceled")

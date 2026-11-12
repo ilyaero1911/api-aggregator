@@ -6,6 +6,7 @@ import { ctx, perM } from "@/lib/format";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Model } from "@/lib/types";
+import { ProviderLogo } from "./provider-logo";
 import { Seg } from "./ui";
 import { Select } from "@/components/select";
 
@@ -112,7 +113,7 @@ export function Catalog({ models }: { models: Model[] }) {
           <div className="mgrid">
             {list.map((m) => (
               <Link key={m.id} href={`/models/${m.id}`} className="mtile">
-                <div className="label">{m.author}</div>
+                <div className="row" style={{ gap: 10 }}><ProviderLogo author={m.author} size={36} /><span className="label">{m.author}</span></div>
                 <div className="h3">{m.name}</div>
                 <p className="muted small mclamp">{m.description}</p>
                 <div className="row-wrap" style={{ ["--gap" as string]: "6px" }}>
@@ -137,6 +138,7 @@ function ModelRow({ m }: { m: Model }) {
   const M = t.models;
   return (
     <Link href={`/models/${m.id}`} className="mrow">
+      <ProviderLogo author={m.author} size={48} />
       <div className="grow" style={{ display: "grid", gap: 6 }}>
         <div className="row-wrap" style={{ ["--gap" as string]: "10px" }}>
           <span className="h3">{m.name}</span>

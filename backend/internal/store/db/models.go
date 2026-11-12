@@ -231,6 +231,26 @@ type Subscription struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
+type SupportMessage struct {
+	ID        int64      `json:"id"`
+	TicketID  uuid.UUID  `json:"ticket_id"`
+	Author    string     `json:"author"`
+	AuthorID  *uuid.UUID `json:"author_id"`
+	Body      string     `json:"body"`
+	CreatedAt time.Time  `json:"created_at"`
+}
+
+type SupportTicket struct {
+	ID            uuid.UUID `json:"id"`
+	UserID        uuid.UUID `json:"user_id"`
+	Subject       string    `json:"subject"`
+	Status        string    `json:"status"`
+	UnreadAdmin   int32     `json:"unread_admin"`
+	UnreadUser    int32     `json:"unread_user"`
+	LastMessageAt time.Time `json:"last_message_at"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
 type Transaction struct {
 	ID                uuid.UUID `json:"id"`
 	UserID            uuid.UUID `json:"user_id"`
