@@ -10,6 +10,7 @@ import { ApiError, del, get, patch, post } from "@/lib/api";
 import { ago, compact, date, dateTime, kopecks, ms, num, rub } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import type { Key, Payment, Plan, Preset, RequestLog, Transaction, User, Wallet } from "@/lib/types";
+import { Select } from "@/components/select";
 
 type Sub = { id: string; plan_id: string; status: string; tokens_used: number; started_at: string; ends_at: string; name_ru: string; name_en: string };
 type Usage = { prompt_tokens: number; completion_tokens: number; requests: number; cost_micro: number; errors: number };
@@ -101,7 +102,7 @@ export default function AdminUser({ params }: { params: Promise<{ id: string }> 
               <label className="field"><span>Email</span><input className="input" value={prof.email} onChange={(e) => setProf({ ...prof, email: e.target.value })} /></label>
               <label className="field"><span>{L("Имя", "Name")}</span><input className="input" value={prof.name} onChange={(e) => setProf({ ...prof, name: e.target.value })} /></label>
             </div>
-            <label className="field"><span>{L("Язык", "Language")}</span><select className="select" value={prof.locale} onChange={(e) => setProf({ ...prof, locale: e.target.value })}><option value="ru">ru</option><option value="en">en</option></select></label>
+            <label className="field"><span>{L("Язык", "Language")}</span><Select value={prof.locale} onChange={(e) => setProf({ ...prof, locale: e.target.value })}><option value="ru">ru</option><option value="en">en</option></Select></label>
             <label className="field"><span>{L("Заметка администратора (видна только админам)", "Admin note (admins only)")}</span><textarea className="textarea" rows={4} value={prof.note} onChange={(e) => setProf({ ...prof, note: e.target.value })} /></label>
             <div><button className="btn" onClick={() => act(() => patch(`/api/admin/users/${id}`, { name: prof.name, email: prof.email, locale: prof.locale, admin_note: prof.note }))}>{L("Сохранить профиль", "Save profile")}</button></div>
             <div className="spread small"><span>{L("Сохраняет текст запросов", "Logs prompts")}</span><span>{u.log_prompts ? L("да", "yes") : L("нет", "no")}</span></div>
@@ -133,7 +134,7 @@ export default function AdminUser({ params }: { params: Promise<{ id: string }> 
         <div className="stack" style={{ ["--gap" as string]: "24px" }}>
           <div className="box box-tint row-wrap" style={{ alignItems: "flex-end" }}>
             <label className="field"><span>{L("Выдать тариф бесплатно (заменит текущий)", "Grant a plan for free (replaces current)")}</span>
-              <select className="select" style={{ minWidth: 260 }} value={grant} onChange={(e) => setGrant(e.target.value)}><option value="">—</option>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days} {L("дн.", "d")} · {kopecks(p.price_kopecks, "ru")}</option>)}</select>
+              <Select style={{ minWidth: 260 }} value={grant} onChange={(e) => setGrant(e.target.value)}><option value="">—</option>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days} {L("дн.", "d")} · {kopecks(p.price_kopecks, "ru")}</option>)}</Select>
             </label>
             <button className="btn" disabled={!grant} onClick={() => act(() => post(`/api/admin/users/${id}/plan`, { plan_id: grant }))}>{L("Выдать", "Grant")}</button>
             {active && <button className="btn btn-danger" onClick={() => act(() => post(`/api/admin/users/${id}/plan`, { plan_id: "" }))}>{L("Отключить текущий", "Cancel current")}</button>}
@@ -233,7 +234,7 @@ export default function AdminUser({ params }: { params: Promise<{ id: string }> 
             <label className="field"><span>{L("Название", "Name")}</span><input className="input" value={editKey.name} onChange={(e) => setEditKey({ ...editKey, name: e.target.value })} /></label>
             <div className="grid-2" style={{ gap: 12 }}>
               <label className="field"><span>{L("Лимит, ₽", "Limit, ₽")}</span><input className="input" type="number" value={editKey.limitRub} onChange={(e) => setEditKey({ ...editKey, limitRub: e.target.value })} /></label>
-              <label className="field"><span>{L("Сброс", "Reset")}</span><select className="select" value={editKey.limit_reset} onChange={(e) => setEditKey({ ...editKey, limit_reset: e.target.value as Key["limit_reset"] })}>{["never", "daily", "weekly", "monthly"].map((x) => <option key={x}>{x}</option>)}</select></label>
+              <label className="field"><span>{L("Сброс", "Reset")}</span><Select value={editKey.limit_reset} onChange={(e) => setEditKey({ ...editKey, limit_reset: e.target.value as Key["limit_reset"] })}>{["never", "daily", "weekly", "monthly"].map((x) => <option key={x}>{x}</option>)}</Select></label>
               <label className="field"><span>RPM</span><input className="input" type="number" value={editKey.rpm} onChange={(e) => setEditKey({ ...editKey, rpm: e.target.value })} /></label>
               <label className="field"><span>{L("Действует до", "Expires")}</span><input className="input" type="date" value={editKey.exp} onChange={(e) => setEditKey({ ...editKey, exp: e.target.value })} /></label>
             </div>
@@ -250,7 +251,7 @@ export default function AdminUser({ params }: { params: Promise<{ id: string }> 
         </>}>
         {editSub && (
           <div className="grid-2" style={{ gap: 12 }}>
-            <label className="field"><span>{L("Тариф", "Plan")}</span><select className="select" value={editSub.plan_id} onChange={(e) => setEditSub({ ...editSub, plan_id: e.target.value })}>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</select></label>
+            <label className="field"><span>{L("Тариф", "Plan")}</span><Select value={editSub.plan_id} onChange={(e) => setEditSub({ ...editSub, plan_id: e.target.value })}>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</Select></label>
             <label className="field"><span>{L("Действует до", "Ends at")}</span><input className="input" type="date" value={editSub.ends} onChange={(e) => setEditSub({ ...editSub, ends: e.target.value })} /></label>
             <label className="field"><span>{L("Израсходовано токенов", "Tokens used")}</span><input className="input" type="number" value={editSub.tokens} onChange={(e) => setEditSub({ ...editSub, tokens: e.target.value })} /></label>
             <div className="field"><span>&nbsp;</span><button className="btn btn-ghost" onClick={() => setEditSub({ ...editSub, tokens: "0" })}>{L("Обнулить расход", "Reset usage")}</button></div>

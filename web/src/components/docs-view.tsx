@@ -11,6 +11,15 @@ function sections(base: string, en: boolean): Sec[] {
   const L = (ru: string, e: string) => (en ? e : ru);
   return [
     {
+      id: "how", group: L("Начало", "Getting started"), title: L("Как устроен шлюз", "How the gateway works"),
+      text: [
+        L("Один формат. Меняете base_url в любом OpenAI SDK, и всё работает: тот же /chat/completions и те же потоковые ответы.", "One format. Change base_url in any OpenAI SDK and it works: the same /chat/completions and the same streaming."),
+        L("Запасные маршруты. Если провайдер упал или перегружен, запрос уходит к следующему. Порядок провайдеров и запасные модели можно задать самому.", "Backup routes. If a provider fails or is overloaded, the request goes to the next one. You can set the provider order and fallback models."),
+        L("Цены в рублях. Цены провайдеров пересчитываются по курсу ЦБ каждый час. Списываем за фактические токены после каждого запроса.", "Ruble pricing. Provider prices are converted at the Bank of Russia rate every hour. You pay for actual tokens after each request."),
+        L("Контроль расходов. У ключа есть лимит по дням, неделям или месяцам и ограничение запросов в минуту, а в истории видно каждый запрос.", "Spend control. Keys have daily, weekly or monthly limits and a requests-per-minute cap, and every request is in the history."),
+      ],
+    },
+    {
       id: "quickstart", group: L("Начало", "Getting started"), title: L("Быстрый старт", "Quickstart"),
       text: [
         L("1. Зарегистрируйтесь и создайте API-ключ в разделе «API-ключи».", "1. Sign up and create an API key on the “API keys” page."),

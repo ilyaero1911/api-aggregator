@@ -7,6 +7,7 @@ import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Model } from "@/lib/types";
 import { Seg } from "./ui";
+import { Select } from "@/components/select";
 
 type Sort = "new" | "cheap" | "context" | "name";
 const CTX = [
@@ -88,10 +89,10 @@ export function Catalog({ models }: { models: Model[] }) {
         </div>
         <div className="row-wrap" style={{ marginBottom: 14 }}>
           <input className="input grow" style={{ maxWidth: 360 }} placeholder={M.search} value={q} onChange={(e) => setQ(e.target.value)} />
-          <select className="select" style={{ width: 190 }} value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
+          <Select style={{ width: 190 }} value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
             <option value="new">{M.sortNew}</option><option value="cheap">{M.sortCheap}</option>
             <option value="context">{M.sortContext}</option><option value="name">{M.sortName}</option>
-          </select>
+          </Select>
           <div style={{ marginLeft: "auto" }}>
             <Seg value={view} onChange={setView} options={[{ value: "list", label: M.list }, { value: "grid", label: M.grid }]} />
           </div>

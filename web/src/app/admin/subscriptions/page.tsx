@@ -7,6 +7,7 @@ import { ApiError, get, patch } from "@/lib/api";
 import { date, num } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import type { Plan } from "@/lib/types";
+import { Select } from "@/components/select";
 
 type Row = { id: string; user_id: string; plan_id: string; status: string; tokens_used: number; started_at: string; ends_at: string; email: string; name_ru: string; token_quota: number };
 
@@ -27,8 +28,8 @@ export default function Subscriptions() {
       <PageHead title={L("Подписки", "Subscriptions")} lead={L("Кто на каком тарифе, сколько токенов потратил и когда заканчивается. Можно продлить, сменить тариф, обнулить расход или отменить.", "Who is on which plan, usage and end dates. Extend, change plan, reset usage or cancel.")} />
       <div className="filters">
         <input className="input" placeholder="Email" value={q} onChange={(e) => setQ(e.target.value)} />
-        <select className="select" value={status} onChange={(e) => setStatus(e.target.value)}><option value="">{L("Любой статус", "Any status")}</option><option value="active">active</option><option value="expired">expired</option><option value="canceled">canceled</option></select>
-        <select className="select" value={plan} onChange={(e) => setPlan(e.target.value)}><option value="">{L("Любой тариф", "Any plan")}</option>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</select>
+        <Select value={status} onChange={(e) => setStatus(e.target.value)}><option value="">{L("Любой статус", "Any status")}</option><option value="active">active</option><option value="expired">expired</option><option value="canceled">canceled</option></Select>
+        <Select value={plan} onChange={(e) => setPlan(e.target.value)}><option value="">{L("Любой тариф", "Any plan")}</option>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</Select>
       </div>
       <table className="table">
         <thead><tr><th>{L("Пользователь", "User")}</th><th>{L("Тариф", "Plan")}</th><th>{L("Статус", "Status")}</th><th>{L("Период", "Period")}</th><th style={{ width: 220 }}>{L("Расход токенов", "Token usage")}</th><th /></tr></thead>
@@ -56,8 +57,8 @@ export default function Subscriptions() {
         footer={<><button className="btn btn-ghost" onClick={() => setEd(null)}>{L("Отмена", "Cancel")}</button><button className="btn" onClick={() => ed && act(async () => { await patch(`/api/admin/subscriptions/${ed.id}`, { plan_id: ed.plan_id, ends_at: new Date(ed.ends + "T23:59:59").toISOString(), tokens_used: Number(ed.tokens), status: ed.status }); setEd(null); })}>{L("Сохранить", "Save")}</button></>}>
         {ed && (
           <div className="grid-2" style={{ gap: 12 }}>
-            <label className="field"><span>{L("Тариф", "Plan")}</span><select className="select" value={ed.plan_id} onChange={(e) => setEd({ ...ed, plan_id: e.target.value })}>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</select></label>
-            <label className="field"><span>{L("Статус", "Status")}</span><select className="select" value={ed.status} onChange={(e) => setEd({ ...ed, status: e.target.value })}><option value="active">active</option><option value="expired">expired</option><option value="canceled">canceled</option></select></label>
+            <label className="field"><span>{L("Тариф", "Plan")}</span><Select value={ed.plan_id} onChange={(e) => setEd({ ...ed, plan_id: e.target.value })}>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</Select></label>
+            <label className="field"><span>{L("Статус", "Status")}</span><Select value={ed.status} onChange={(e) => setEd({ ...ed, status: e.target.value })}><option value="active">active</option><option value="expired">expired</option><option value="canceled">canceled</option></Select></label>
             <label className="field"><span>{L("Действует до", "Ends at")}</span><input className="input" type="date" value={ed.ends} onChange={(e) => setEd({ ...ed, ends: e.target.value })} /></label>
             <label className="field"><span>{L("Израсходовано токенов", "Tokens used")}</span><input className="input" type="number" value={ed.tokens} onChange={(e) => setEd({ ...ed, tokens: e.target.value })} /></label>
           </div>

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { cur, getUsdRate, num, rub } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import type { Model } from "@/lib/types";
+import { Select } from "@/components/select";
 
 /** Грубая нарезка на токены для наглядности: так же оценивает шлюз (≈4 латинских символа или ≈2,5 кириллических на токен). */
 function chunks(text: string): string[] {
@@ -21,16 +22,16 @@ function chunks(text: string): string[] {
 const T = {
   ru: {
     title: "Как считается цена — простыми словами",
-    s1t: "1. Модель считает не слова, а токены",
+    s1t: "Модель считает не слова, а токены",
     s1: "Токен — это кусочек текста. Короткое слово — один токен, длинное режется на несколько кусочков. По-английски один токен — это примерно 4 буквы, по-русски одно слово — это 2–3 токена. Напишите что-нибудь и посмотрите, как текст режется на токены:",
     sample: "Привет! Помоги написать письмо клиенту о переносе встречи на пятницу.",
     count: "{n} токенов",
-    s2t: "2. Ввод — то, что вы отправляете. Вывод — то, что модель отвечает",
+    s2t: "Ввод — то, что вы отправляете. Вывод — то, что модель отвечает",
     s2a: "Ввод", s2ad: "Ваш вопрос, инструкции, история переписки, приложенный текст. Всё, что модель читает.",
     s2b: "Вывод", s2bd: "Ответ модели. Всё, что она пишет. Писать труднее, чем читать, поэтому вывод обычно в 3–8 раз дороже ввода.",
-    s3t: "3. «Цена за 1 млн токенов» — как цена за килограмм",
+    s3t: "«Цена за 1 млн токенов» — как цена за килограмм",
     s3: "На рынке пишут цену за килограмм, но вы покупаете 200 грамм и платите только за них. Здесь так же: цена указана за миллион токенов (это около 1500 страниц книжного текста), а списывается только за те токены, что вы реально потратили. Обычный вопрос с ответом — это сотые или тысячные доли от миллиона.",
-    calc: "4. Посчитайте свой случай",
+    calc: "Посчитайте свой случай",
     model: "Модель", q: "Длина вопроса", a: "Длина ответа", perDay: "Запросов в день",
     words: "{n} слов", short: "Коротко", mid: "Средне", long: "Подробно",
     inLine: "Ввод: {t} токенов × {p} за 1 млн", outLine: "Вывод: {t} токенов × {p} за 1 млн",
@@ -40,16 +41,16 @@ const T = {
   },
   en: {
     title: "How pricing works, in plain words",
-    s1t: "1. Models count tokens, not words",
+    s1t: "Models count tokens, not words",
     s1: "A token is a small piece of text. A short word is one token, a long word is cut into several pieces. In English one token is about 4 letters, so 100 words are roughly 130 tokens. Type something and see how it is cut into tokens:",
     sample: "Hi! Help me write a short email to a client moving our meeting to Friday.",
     count: "{n} tokens",
-    s2t: "2. Input is what you send. Output is what the model writes back",
+    s2t: "Input is what you send. Output is what the model writes back",
     s2a: "Input", s2ad: "Your question, instructions, chat history, attached text. Everything the model reads.",
     s2b: "Output", s2bd: "The model's answer. Everything it writes. Writing is harder than reading, so output usually costs 3–8× more than input.",
-    s3t: "3. “Price per 1M tokens” works like a price per kilogram",
+    s3t: "“Price per 1M tokens” works like a price per kilogram",
     s3: "A market lists the price per kilogram, but you buy 200 grams and pay only for those. Same here: the price is per million tokens (about 1,500 book pages), and you are charged only for the tokens you actually used. A typical question and answer is a tiny fraction of a million.",
-    calc: "4. Calculate your case",
+    calc: "Calculate your case",
     model: "Model", q: "Question length", a: "Answer length", perDay: "Requests per day",
     words: "{n} words", short: "Short", mid: "Medium", long: "Detailed",
     inLine: "Input: {t} tokens × {p} per 1M", outLine: "Output: {t} tokens × {p} per 1M",
@@ -108,9 +109,9 @@ export function TokenExplainer({ models, initialModel }: { models: Model[]; init
         <div className="calc-grid">
           <div className="stack">
             <label className="field"><span>{L.model}</span>
-              <select className="select" value={modelId} onChange={(e) => setModelId(e.target.value)}>
+              <Select value={modelId} onChange={(e) => setModelId(e.target.value)}>
                 {text.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}
-              </select>
+              </Select>
             </label>
             <label className="field"><span className="spread">{L.q}<b className="mono">{f(L.words, { n: qWords })}</b></span>
               <input type="range" min="10" max="3000" step="10" value={qWords} onChange={(e) => setQWords(Number(e.target.value))} />

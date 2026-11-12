@@ -23,7 +23,7 @@ export default async function Rankings() {
           <tbody>
             {rank.data.map((r, i) => (
               <tr key={r.model_id}>
-                <td className="mono faint">{String(i + 1).padStart(2, "0")}</td>
+                <td className="mono faint">{i + 1}</td>
                 <td><Link href={`/models/${r.model_id}`}>{byId.get(r.model_id)?.name ?? r.model_id}</Link> <span className="faint small mono">{byId.get(r.model_id)?.author}</span></td>
                 <td><div className="share-track"><div className="share-bar" style={{ width: `${(r.tokens / max) * 100}%`, background: i === 0 ? "var(--signal)" : undefined }} /></div></td>
                 <td className="r num">{compact(r.tokens, lang)}</td>

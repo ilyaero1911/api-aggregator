@@ -7,6 +7,7 @@ import { ago, date, inputToRub, microToInput, rub } from "@/lib/format";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Key } from "@/lib/types";
+import { Select } from "@/components/select";
 
 type Form = { id?: string; name: string; limit: string; reset: Key["limit_reset"]; rpm: string; expires: string; disabled: boolean };
 const empty: Form = { name: "", limit: "", reset: "never", rpm: "", expires: "", disabled: false };
@@ -118,9 +119,9 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
                 <div className="grid-2" style={{ gap: 12 }}>
                   <label className="field"><span>{K.limit}</span><input className="input" type="number" min="0" step="1" value={form.limit} placeholder={K.limitPh} onChange={(e) => setForm({ ...form, limit: e.target.value })} /></label>
                   <label className="field"><span>{K.reset}</span>
-                    <select className="select" value={form.reset} onChange={(e) => setForm({ ...form, reset: e.target.value as Form["reset"] })}>
+                    <Select value={form.reset} onChange={(e) => setForm({ ...form, reset: e.target.value as Form["reset"] })}>
                       <option value="never">{K.resetNever}</option><option value="daily">{K.resetDaily}</option><option value="weekly">{K.resetWeekly}</option><option value="monthly">{K.resetMonthly}</option>
-                    </select>
+                    </Select>
                   </label>
                 </div>
                 <div className="grid-2" style={{ gap: 12 }}>
@@ -136,10 +137,8 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
       <Modal open={!!secret} onClose={() => setSecret(null)} title={K.secretTitle}
         footer={<button className="btn" onClick={() => setSecret(null)}>{t.common.close}</button>}>
         <p className="note">{K.secretText}</p>
-        <div className="row" style={{ gap: 8 }}>
-          <code className="input mono" style={{ display: "flex", alignItems: "center", overflowX: "auto", whiteSpace: "nowrap", fontSize: 13 }}>{secret}</code>
-          {secret && <CopyButton text={secret} className="btn" />}
-        </div>
+        <code className="secret">{secret}</code>
+        {secret && <div><CopyButton text={secret} className="btn" /></div>}
       </Modal>
       {node}
     </>

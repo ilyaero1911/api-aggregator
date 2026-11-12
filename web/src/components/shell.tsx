@@ -7,9 +7,10 @@ import { get, post } from "@/lib/api";
 import { rub } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import { LangSwitch, Logo, ThemeToggle } from "./brand";
+import { Icon, type IconName } from "./icons";
 import { useSession } from "./session";
 
-export type NavGroup = { label: string; items: { href: string; label: string; exact?: boolean }[] };
+export type NavGroup = { label: string; items: { href: string; label: string; exact?: boolean; icon: IconName }[] };
 
 export function Shell({ nav, children, home, badge }: { nav: NavGroup[]; children: ReactNode; home: string; badge?: ReactNode }) {
   const { t, lang } = useI18n();
@@ -37,7 +38,7 @@ export function Shell({ nav, children, home, badge }: { nav: NavGroup[]; childre
               <div className="label">{g.label}</div>
               <ol>
                 {g.items.map((it) => (
-                  <li key={it.href}><Link className="stop" href={it.href} aria-current={isActive(it.href, it.exact) ? "page" : undefined}>{it.label}</Link></li>
+                  <li key={it.href}><Link className="stop" href={it.href} aria-current={isActive(it.href, it.exact) ? "page" : undefined}><Icon name={it.icon} /><span>{it.label}</span></Link></li>
                 ))}
               </ol>
             </div>

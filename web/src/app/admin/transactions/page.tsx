@@ -7,6 +7,7 @@ import { get } from "@/lib/api";
 import { dateTime, rub } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import type { Transaction } from "@/lib/types";
+import { Select } from "@/components/select";
 
 export default function Ledger() {
   const { lang, t } = useI18n();
@@ -21,10 +22,10 @@ export default function Ledger() {
       <PageHead title={L("Операции по балансу", "Balance ledger")} lead={L("Каждое движение денег: пополнения, списания за запросы, тарифы, бонусы, промокоды, возвраты и ручные корректировки.", "Every money movement: top-ups, request charges, plans, bonuses, promo codes, refunds and manual adjustments.")} />
       <div className="filters">
         <input className="input" style={{ minWidth: 260 }} placeholder={L("Email или описание", "Email or description")} value={q} onChange={(e) => setQ(e.target.value)} />
-        <select className="select" value={kind} onChange={(e) => { setKind(e.target.value); setOff(0); }}>
+        <Select value={kind} onChange={(e) => { setKind(e.target.value); setOff(0); }}>
           <option value="">{L("Все типы", "All types")}</option>
           {Object.entries(t.billing.kinds).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-        </select>
+        </Select>
       </div>
       <table className="table">
         <thead><tr><th>{L("Дата", "Date")}</th><th>{L("Пользователь", "User")}</th><th>{L("Тип", "Type")}</th><th>{L("Описание", "Description")}</th><th className="r">{L("Сумма", "Amount")}</th><th className="r">{L("Баланс после", "Balance after")}</th></tr></thead>

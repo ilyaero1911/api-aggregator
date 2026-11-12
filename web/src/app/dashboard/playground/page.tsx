@@ -2,18 +2,50 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { PageHead, useLoad, useToast } from "@/components/ui";
+import { Icon } from "@/components/icons";
+import { Select } from "@/components/select";
+import { PageHead, Seg, Switch, useLoad, useToast } from "@/components/ui";
 import { get } from "@/lib/api";
 import { perM, rub } from "@/lib/format";
-import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Model } from "@/lib/types";
 
-type Msg = { role: "user" | "assistant"; content: string; meta?: string; error?: boolean };
+type Msg = { role: "user" | "assistant"; content: string; meta?: string; error?: boolean; model?: string };
+
+const COPY = {
+  ru: {
+    title: "Чат с моделями",
+    lead: "Задайте вопрос любой модели прямо здесь, без кода. Удобно, чтобы сравнить модели перед подключением по API. Стоимость такая же, как через API.",
+    settings: "Настройки ответа", model: "Модель",
+    sys: "Инструкция для модели", sysHint: "Модель будет следовать ей во всём разговоре.", sysPh: "Например: отвечай кратко и по-русски",
+    sysPresets: [["Кратко", "Отвечай кратко, по делу, без вступлений."], ["Как эксперт", "Ты опытный специалист. Объясняй понятно и приводи примеры."], ["Переводчик", "Переводи всё, что я пишу, на английский язык."]],
+    creative: "Креативность", exact: "Точно", free: "Творчески",
+    length: "Длина ответа", short: "Короткий", mid: "Средний", long: "Длинный",
+    stream: "Показывать ответ по мере печати",
+    clear: "Очистить чат", start: "С чего начать", startHint: "Нажмите на пример или напишите свой вопрос внизу.",
+    examples: ["Объясни простыми словами, что такое API", "Напиши вежливое письмо о переносе встречи", "Придумай 5 названий для кофейни", "Сравни Python и Go для бэкенда"],
+    ph: "Напишите сообщение…", hint: "Enter — отправить, Shift + Enter — новая строка", you: "Вы", send: "Отправить", stop: "Остановить",
+    cost: "{t} токенов · {c}", freeModel: "бесплатная модель",
+  },
+  en: {
+    title: "Chat with models",
+    lead: "Ask any model right here, no code needed. Handy for comparing models before using the API. Same price as the API.",
+    settings: "Response settings", model: "Model",
+    sys: "Instructions for the model", sysHint: "The model follows them for the whole conversation.", sysPh: "For example: answer briefly",
+    sysPresets: [["Brief", "Answer briefly and to the point."], ["Expert", "You are an experienced specialist. Explain clearly with examples."], ["Translator", "Translate everything I write into Spanish."]],
+    creative: "Creativity", exact: "Precise", free: "Creative",
+    length: "Answer length", short: "Short", mid: "Medium", long: "Long",
+    stream: "Show the answer as it is typed",
+    clear: "Clear chat", start: "Where to start", startHint: "Click an example or type your own question below.",
+    examples: ["Explain what an API is in simple words", "Write a polite email to reschedule a meeting", "Come up with 5 names for a coffee shop", "Compare Python and Go for backends"],
+    ph: "Write a message…", hint: "Enter to send, Shift + Enter for a new line", you: "You", send: "Send", stop: "Stop",
+    cost: "{t} tokens · {c}", freeModel: "free model",
+  },
+};
 
 function Playground() {
-  const { t, lang } = useI18n();
-  const P = t.playground;
+  const { lang, t } = useI18n();
+  const C = COPY[lang === "en" ? "en" : "ru"];
   const toast = useToast();
   const sp = useSearchParams();
   const { data } = useLoad(() => get<{ data: Model[] }>("/api/models"));
@@ -21,32 +53,36 @@ function Playground() {
   const [model, setModel] = useState(sp.get("model") ?? "");
   const [system, setSystem] = useState("");
   const [temp, setTemp] = useState(0.7);
-  const [maxTokens, setMaxTokens] = useState(1024);
+  const [len, setLen] = useState<"256" | "1024" | "4096">("1024");
   const [stream, setStream] = useState(true);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
-  const end = useRef<HTMLDivElement>(null);
+  const log = useRef<HTMLDivElement>(null);
+  const ta = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => { if (!model && models.length) setModel(models.find((m) => m.is_free)?.id ?? models[0].id); }, [models, model]);
-  useEffect(() => { end.current?.scrollIntoView({ block: "end" }); }, [msgs]);
+  useEffect(() => { log.current?.scrollTo({ top: log.current.scrollHeight, behavior: "smooth" }); }, [msgs]);
+  useEffect(() => { const el = ta.current; if (el) { el.style.height = "0px"; el.style.height = Math.min(200, el.scrollHeight) + "px"; } }, [input]);
   const cur = models.find((m) => m.id === model);
 
-  async function send() {
-    const text = input.trim();
-    if (!text || busy) return;
+  async function send(textArg?: string) {
+    const text = (textArg ?? input).trim();
+    if (!text || busy || !model) return;
     const history: Msg[] = [...msgs, { role: "user", content: text }];
-    setMsgs([...history, { role: "assistant", content: "" }]);
+    setMsgs([...history, { role: "assistant", content: "", model }]);
     setInput("");
     setBusy(true);
     const ctrl = new AbortController();
     abort.current = ctrl;
     const body = {
-      model, stream, temperature: temp, max_tokens: maxTokens,
+      model, stream, temperature: temp, max_tokens: Number(len),
       messages: [...(system ? [{ role: "system", content: system }] : []), ...history.map(({ role, content }) => ({ role, content }))],
     };
     const update = (fn: (m: Msg) => Msg) => setMsgs((xs) => [...xs.slice(0, -1), fn(xs[xs.length - 1])]);
+    const meta = (u: { total_tokens: number; cost: number; paid_by: string }) =>
+      C.cost.replace("{t}", String(u.total_tokens)).replace("{c}", u.paid_by === "balance" ? rub(u.cost * 1e6, lang, { precise: true }) : u.paid_by === "free" ? C.freeModel : t.logs.paid[u.paid_by]);
     try {
       const res = await fetch("/api/playground/chat", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body), signal: ctrl.signal });
       if (!res.ok) {
@@ -54,8 +90,6 @@ function Playground() {
         update((m) => ({ ...m, content: e?.error?.message ?? res.statusText, error: true }));
         return;
       }
-      const meta = (u: { total_tokens: number; cost: number; paid_by: string }) =>
-        fmt(P.cost, { tokens: u.total_tokens, cost: u.paid_by === "balance" ? rub(u.cost * 1e6, lang, { precise: true }) : t.logs.paid[u.paid_by] });
       if (!stream) {
         const j = await res.json();
         update((m) => ({ ...m, content: j.choices[0].message.content, meta: meta(j.usage) }));
@@ -92,40 +126,66 @@ function Playground() {
 
   return (
     <>
-      <PageHead title={P.title} lead={P.lead} />
-      <div className="pg">
-        <aside className="pg-side stack">
-          <label className="field"><span>{P.model}</span>
-            <select className="select" value={model} onChange={(e) => setModel(e.target.value)}>
-              {models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.is_free ? " · free" : ""}</option>)}
-            </select>
-          </label>
-          {cur && <p className="hint mono">{cur.is_free ? t.common.free : `${perM(cur.prices.input_per_m, lang)} / ${perM(cur.prices.output_per_m, lang)} · ${t.models.perM}`}</p>}
-          <label className="field"><span>{P.system}</span><textarea className="textarea" rows={5} placeholder={P.systemPh} value={system} onChange={(e) => setSystem(e.target.value)} /></label>
-          <label className="field"><span className="spread">{P.temperature}<span className="mono">{temp.toFixed(1)}</span></span><input type="range" min="0" max="2" step="0.1" value={temp} onChange={(e) => setTemp(Number(e.target.value))} style={{ accentColor: "var(--signal)" }} /></label>
-          <label className="field"><span>{P.maxTokens}</span><input className="input" type="number" min="1" value={maxTokens} onChange={(e) => setMaxTokens(Number(e.target.value))} /></label>
-          <label className="check"><input type="checkbox" checked={stream} onChange={(e) => setStream(e.target.checked)} />{P.stream}</label>
-          <div><button className="btn btn-ghost btn-sm" onClick={() => setMsgs([])} disabled={busy}>{P.clear}</button></div>
-        </aside>
-        <section className="pg-chat">
-          <div className="pg-log">
-            {msgs.length === 0 && <div className="empty" style={{ border: 0 }}>{P.empty}</div>}
-            {msgs.map((m, i) => (
-              <div key={i} className={`msg msg-${m.role}`}>
-                <div className="label">{m.role === "user" ? P.you : model}</div>
-                <div className={`msg-body${m.error ? " bad" : ""}`}>{m.content || (busy && i === msgs.length - 1 ? <span className="caret" /> : "")}</div>
-                {m.meta && <div className="hint mono">{m.meta}</div>}
+      <PageHead title={C.title} lead={C.lead} actions={msgs.length > 0 && <button className="btn btn-ghost btn-sm" onClick={() => setMsgs([])} disabled={busy}><Icon name="trash" size={15} />{C.clear}</button>} />
+      <div className="pg2">
+        <section className="pg2-chat">
+          <div className="pg2-log" ref={log}>
+            {msgs.length === 0 ? (
+              <div className="pg2-empty">
+                <span className="pg2-empty-ico"><Icon name="sparkle" size={26} /></span>
+                <h2 className="h2">{C.start}</h2>
+                <p className="muted">{C.startHint}</p>
+                <div className="pg2-ex">
+                  {C.examples.map((x) => <button key={x} onClick={() => send(x)}><Icon name="chat" size={16} />{x}</button>)}
+                </div>
+              </div>
+            ) : msgs.map((m, i) => (
+              <div key={i} className={`bub bub-${m.role}`}>
+                {m.role === "assistant" && <span className="bub-ava"><Icon name="sparkle" size={15} /></span>}
+                <div className="bub-body">
+                  {m.role === "assistant" && <div className="hint">{m.model}</div>}
+                  <div className={`bub-text${m.error ? " bad" : ""}`}>{m.content || (busy && i === msgs.length - 1 ? <span className="dots"><i /><i /><i /></span> : "")}</div>
+                  {m.meta && <div className="hint">{m.meta}</div>}
+                </div>
               </div>
             ))}
-            <div ref={end} />
           </div>
-          <form className="pg-input" onSubmit={(e) => { e.preventDefault(); send(); }}>
-            <textarea className="textarea" rows={3} placeholder={P.placeholder} value={input} onChange={(e) => setInput(e.target.value)}
+          <form className="pg2-input" onSubmit={(e) => { e.preventDefault(); send(); }}>
+            <textarea ref={ta} rows={1} placeholder={C.ph} value={input} onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }} />
-            {busy ? <button type="button" className="btn btn-ghost" onClick={() => abort.current?.abort()}>{P.stop}</button>
-              : <button className="btn btn-signal" disabled={!input.trim() || !model}>{P.send} ↵</button>}
+            {busy ? <button type="button" className="btn btn-ghost" onClick={() => abort.current?.abort()}><Icon name="stop" size={16} />{C.stop}</button>
+              : <button className="btn btn-signal" disabled={!input.trim() || !model}><Icon name="send" size={16} />{C.send}</button>}
           </form>
+          <div className="hint" style={{ padding: "0 18px 12px" }}>{C.hint}</div>
         </section>
+
+        <aside className="pg2-side">
+          <h2 className="h3">{C.settings}</h2>
+          <label className="field"><span>{C.model}</span>
+            <Select value={model} onChange={(e) => setModel(e.target.value)}>
+              {models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.is_free ? (lang === "en" ? " · free" : " · бесплатно") : ""}</option>)}
+            </Select>
+            {cur && <span className="hint">{cur.is_free ? C.freeModel : `${t.models.input} ${perM(cur.prices.input_per_m, lang)} · ${t.models.output} ${perM(cur.prices.output_per_m, lang)} ${t.models.perM}`}</span>}
+          </label>
+          <div className="field">
+            <span>{C.sys}</span>
+            <textarea className="textarea" rows={4} placeholder={C.sysPh} value={system} onChange={(e) => setSystem(e.target.value)} />
+            <div className="row-wrap" style={{ ["--gap" as string]: "6px" }}>
+              {C.sysPresets.map(([l, v]) => <button key={l} type="button" className={`chip${system === v ? " on" : ""}`} onClick={() => setSystem(system === v ? "" : v)}>{l}</button>)}
+            </div>
+            <span className="hint">{C.sysHint}</span>
+          </div>
+          <div className="field">
+            <span className="spread">{C.creative}<b className="mono small">{temp.toFixed(1)}</b></span>
+            <input type="range" min="0" max="2" step="0.1" value={temp} onChange={(e) => setTemp(Number(e.target.value))} />
+            <div className="spread hint"><span>{C.exact}</span><span>{C.free}</span></div>
+          </div>
+          <div className="field">
+            <span>{C.length}</span>
+            <Seg value={len} onChange={setLen} options={[{ value: "256", label: C.short }, { value: "1024", label: C.mid }, { value: "4096", label: C.long }]} />
+          </div>
+          <label className="spread small" style={{ gap: 12 }}><span>{C.stream}</span><Switch checked={stream} onChange={setStream} /></label>
+        </aside>
       </div>
     </>
   );

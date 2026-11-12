@@ -77,7 +77,6 @@ export default async function ModelPage({ params }: { params: Promise<{ author: 
             <tbody>
               {endpoints.map((e, i) => (
                 <tr key={e.provider}>
-                  <td className="mono faint" style={{ width: 40 }}>{String(i + 1).padStart(2, "0")}</td>
                   <td className="mono">{e.provider}</td>
                   <td className="r">{e.enabled ? <span className="tag tag-ok"><span className="dot" />online</span> : <span className="tag">off</span>}</td>
                 </tr>

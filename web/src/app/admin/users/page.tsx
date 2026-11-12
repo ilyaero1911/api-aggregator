@@ -8,6 +8,7 @@ import { ApiError, get, post } from "@/lib/api";
 import { ago, date, kopecks, num, rub } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import type { Plan, User } from "@/lib/types";
+import { Select } from "@/components/select";
 
 type Row = {
   id: string; email: string; name: string; role: string; status: string; created_at: string; last_login_at: string | null; admin_note: string;
@@ -49,17 +50,17 @@ function Users() {
         actions={<button className="btn" onClick={() => setNu({ email: "", name: "", password: "", role: "user", balance: "", plan: "" })}>+ {L("Добавить пользователя", "Add user")}</button>} />
       <div className="filters">
         <input className="input" style={{ minWidth: 260 }} placeholder={L("Email, имя или ID", "Email, name or ID")} value={q} onChange={(e) => setQ(e.target.value)} />
-        <select className="select" value={role} onChange={(e) => setF(() => setRole(e.target.value))}><option value="">{L("Любая роль", "Any role")}</option><option value="user">user</option><option value="admin">admin</option></select>
-        <select className="select" value={status} onChange={(e) => setF(() => setStatus(e.target.value))}><option value="">{L("Любой статус", "Any status")}</option><option value="active">{L("Активные", "Active")}</option><option value="blocked">{L("Заблокированные", "Blocked")}</option></select>
-        <select className="select" value={plan} onChange={(e) => setF(() => setPlan(e.target.value))}>
+        <Select value={role} onChange={(e) => setF(() => setRole(e.target.value))}><option value="">{L("Любая роль", "Any role")}</option><option value="user">user</option><option value="admin">admin</option></Select>
+        <Select value={status} onChange={(e) => setF(() => setStatus(e.target.value))}><option value="">{L("Любой статус", "Any status")}</option><option value="active">{L("Активные", "Active")}</option><option value="blocked">{L("Заблокированные", "Blocked")}</option></Select>
+        <Select value={plan} onChange={(e) => setF(() => setPlan(e.target.value))}>
           <option value="">{L("Любой тариф", "Any plan")}</option><option value="none">{L("Без тарифа", "No plan")}</option>
           {plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}
-        </select>
-        <select className="select" value={sort} onChange={(e) => setF(() => setSort(e.target.value))}>
+        </Select>
+        <Select value={sort} onChange={(e) => setF(() => setSort(e.target.value))}>
           <option value="">{L("Сначала новые", "Newest first")}</option><option value="active">{L("По активности", "Recently active")}</option>
           <option value="spend">{L("Больше потратили (30 дн.)", "Top spend (30d)")}</option><option value="paid">{L("Больше заплатили", "Top paid")}</option>
           <option value="balance">{L("Больший баланс", "Highest balance")}</option><option value="requests">{L("Больше запросов", "Most requests")}</option>
-        </select>
+        </Select>
         <button className="btn btn-ghost btn-sm" onClick={reload}>↻</button>
       </div>
       {loading && !data ? <Skeleton h={300} /> : (
@@ -107,10 +108,10 @@ function Users() {
               <label className="field"><span>Email</span><input className="input" type="email" value={nu.email} onChange={(e) => setNu({ ...nu, email: e.target.value })} autoFocus /></label>
               <label className="field"><span>{L("Имя", "Name")}</span><input className="input" value={nu.name} onChange={(e) => setNu({ ...nu, name: e.target.value })} /></label>
               <label className="field"><span>{L("Пароль (от 8 символов)", "Password (8+ chars)")}</span><input className="input" value={nu.password} onChange={(e) => setNu({ ...nu, password: e.target.value })} /></label>
-              <label className="field"><span>{L("Роль", "Role")}</span><select className="select" value={nu.role} onChange={(e) => setNu({ ...nu, role: e.target.value })}><option value="user">user</option><option value="admin">admin</option></select></label>
+              <label className="field"><span>{L("Роль", "Role")}</span><Select value={nu.role} onChange={(e) => setNu({ ...nu, role: e.target.value })}><option value="user">user</option><option value="admin">admin</option></Select></label>
               <label className="field"><span>{L("Начислить на баланс, ₽", "Add to balance, ₽")}</span><input className="input" type="number" value={nu.balance} onChange={(e) => setNu({ ...nu, balance: e.target.value })} /></label>
               <label className="field"><span>{L("Выдать тариф", "Grant plan")}</span>
-                <select className="select" value={nu.plan} onChange={(e) => setNu({ ...nu, plan: e.target.value })}><option value="">—</option>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</select>
+                <Select value={nu.plan} onChange={(e) => setNu({ ...nu, plan: e.target.value })}><option value="">—</option>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</Select>
               </label>
             </div>
             <p className="hint">{L("Приветственный бонус из настроек тоже начислится.", "The sign-up bonus from settings is added too.")}</p>

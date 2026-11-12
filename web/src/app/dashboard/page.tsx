@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Bars, Shares } from "@/components/charts";
+import { Icon, type IconName } from "@/components/icons";
 import { useSession } from "@/components/session";
 import { PageHead, Seg, Skeleton, useLoad } from "@/components/ui";
 import { get } from "@/lib/api";
@@ -10,6 +11,7 @@ import { compact, date, num, rub } from "@/lib/format";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Stats, Subscription } from "@/lib/types";
+import { Select } from "@/components/select";
 
 type Range = "24h" | "7d" | "30d" | "all";
 
@@ -30,23 +32,23 @@ export default function Overview() {
     <>
       <PageHead title={fmt(D.hello, { name: user.name || user.email.split("@")[0] })} lead={D.overviewLead}
         actions={<>
-          <select className="select" style={{ width: 220 }} value={model} onChange={(e) => setModel(e.target.value)}>
+          <Select style={{ width: 220 }} value={model} onChange={(e) => setModel(e.target.value)}>
             <option value="">{D.allModels}</option>
             {data?.models.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
+          </Select>
           <Seg value={range} onChange={setRange} options={[{ value: "24h", label: "24h" }, { value: "7d", label: "7d" }, { value: "30d", label: "30d" }, { value: "all", label: t.common.all }]} />
         </>} />
 
       <div className="board">
         {[
-          [D.inputTokens, tot && compact(tot.prompt_tokens, lang)],
-          [D.outputTokens, tot && compact(tot.completion_tokens, lang)],
-          [D.cachedTokens, tot && compact(tot.cached_tokens, lang)],
-          [D.apiRequests, tot && num(tot.requests, lang)],
-          [D.errors, tot && num(tot.errors, lang)],
-          [D.cost, tot && rub(tot.cost_micro, lang)],
-        ].map(([l, v]) => (
-          <div key={l as string}><span className="label">{l}</span>{loading || v === undefined ? <Skeleton h={28} w="60%" /> : <span className="v">{v}</span>}</div>
+          [D.cost, tot && rub(tot.cost_micro, lang), "wallet"],
+          [D.apiRequests, tot && num(tot.requests, lang), "pulse"],
+          [D.inputTokens, tot && compact(tot.prompt_tokens, lang), "send"],
+          [D.outputTokens, tot && compact(tot.completion_tokens, lang), "chat"],
+          [D.cachedTokens, tot && compact(tot.cached_tokens, lang), "refresh"],
+          [D.errors, tot && num(tot.errors, lang), "close"],
+        ].map(([l, v, ic]) => (
+          <div key={l as string}><span className="label row" style={{ gap: 6 }}><Icon name={ic as IconName} size={15} />{l}</span>{loading || v === undefined ? <Skeleton h={28} w="60%" /> : <span className="v">{v}</span>}</div>
         ))}
       </div>
 
@@ -55,11 +57,11 @@ export default function Overview() {
           <div className="panel stack">
             <h2 className="h2">{D.quickStart}</h2>
             <p className="muted">{D.noData}</p>
-            <ol className="steps">
-              <li><Link href="/dashboard/keys">{D.quick1} →</Link></li>
-              <li><Link href="/dashboard/billing">{D.quick2} →</Link></li>
-              <li><Link href="/docs">{D.quick3} →</Link></li>
-            </ol>
+            <div className="qs">
+              <Link href="/dashboard/keys"><Icon name="key" size={20} /><span>{D.quick1}</span><Icon name="arrow" size={16} /></Link>
+              <Link href="/dashboard/billing"><Icon name="wallet" size={20} /><span>{D.quick2}</span><Icon name="arrow" size={16} /></Link>
+              <Link href="/dashboard/playground"><Icon name="chat" size={20} /><span>{D.quick3}</span><Icon name="arrow" size={16} /></Link>
+            </div>
           </div>
         </section>
       ) : (

@@ -1,123 +1,93 @@
 import Link from "next/link";
-import { CodeBlock } from "@/components/ui";
+import { GatewayScene } from "@/components/gateway-scene";
+import { HeroText } from "@/components/hero";
+import { Icon } from "@/components/icons";
 import { PlanGrid } from "@/components/plans";
-import { RouteLive } from "@/components/route-live";
+import { CodeBlock } from "@/components/ui";
 import { ctx, perM } from "@/lib/format";
-import { fmt } from "@/lib/i18n";
 import { getDict } from "@/lib/i18n/server";
 import { loadConfig, loadFx, loadModels, loadPlans } from "@/lib/server-data";
 
+const COLORS: Record<string, string> = { Anthropic: "#d97757", OpenAI: "#10a37f", Google: "#4285f4", DeepSeek: "#4d6bfe", Qwen: "#7c5cff", Meta: "#0866ff", Mistral: "#fa520f", "Moonshot AI": "#16191e", xAI: "#111", "Black Forest Labs": "#222" };
+
 export default async function Landing() {
   const { t, lang } = await getDict();
+  const ru = lang !== "en";
   const [{ data: models }, plans, fx, cfg] = await Promise.all([loadModels(), loadPlans(), loadFx(), loadConfig()]);
-  const authors = Array.from(new Set(models.map((m) => m.author)));
   const usd = fx.data.find((r) => r.currency === "USD");
-  const popular = models.filter((m) => m.modality === "text" && !m.is_free).slice(0, 8);
-  const sample = popular[1]?.id ?? "openai/gpt-5";
+  const popular = models.filter((m) => m.modality === "text" && !m.is_free).slice(0, 6);
+  const sample = "deepseek/deepseek-v3.2";
   const L = t.landing;
-
-  const py = `from openai import OpenAI
-
-client = OpenAI(
-    base_url="${cfg.api_base_url}",
-    api_key="ng-v1-…",
-)
-
-resp = client.chat.completions.create(
-    model="${sample}",
-    messages=[{"role": "user", "content": "Привет!"}],
-)
-print(resp.choices[0].message.content)`;
-  const curl = `curl ${cfg.api_base_url}/chat/completions \\
-  -H "Authorization: Bearer $NG_API_KEY" \\
-  -H "Content-Type: application/json" \\
-  -d '{"model": "${sample}", "messages": [{"role": "user", "content": "Привет!"}]}'`;
-  const ts = `import OpenAI from "openai";
-
-const client = new OpenAI({ baseURL: "${cfg.api_base_url}", apiKey: process.env.NG_API_KEY });
-
-const resp = await client.chat.completions.create({
-  model: "${sample}",
-  messages: [{ role: "user", content: "Привет!" }],
-});`;
+  const py = `from openai import OpenAI\n\nclient = OpenAI(base_url="${cfg.api_base_url}", api_key="…")\n\nresp = client.chat.completions.create(\n    model="${sample}",\n    messages=[{"role": "user", "content": "${ru ? "Привет!" : "Hello!"}"}],\n)\nprint(resp.choices[0].message.content)`;
+  const ts = `import OpenAI from "openai";\n\nconst client = new OpenAI({ baseURL: "${cfg.api_base_url}", apiKey: process.env.API_KEY });\n\nconst resp = await client.chat.completions.create({\n  model: "${sample}",\n  messages: [{ role: "user", content: "${ru ? "Привет!" : "Hello!"}" }],\n});`;
+  const curl = `curl ${cfg.api_base_url}/chat/completions \\\n  -H "Authorization: Bearer $API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "${sample}", "messages": [{"role": "user", "content": "${ru ? "Привет!" : "Hello!"}"}]}'`;
 
   return (
     <>
-      <section className="wrap hero">
-        <div className="hero-text">
-          <div className="label">{fmt(L.kicker, { n: models.length })}</div>
-          <h1 className="h-display" style={{ whiteSpace: "pre-line" }}>{L.title}</h1>
-          <p className="hero-lead">{L.lead}</p>
-          <div className="row" style={{ marginTop: 8 }}>
-            <Link href="/register" className="btn btn-lg btn-signal">{L.start} →</Link>
-            <Link href="/docs" className="btn btn-lg btn-ghost">{L.docs}</Link>
+      <section className="hero-wrap">
+        <div className="hero-glow" aria-hidden><span /><span /><span /></div>
+        <div className="wrap hero">
+          <HeroText models={models.length} rate={usd ? (usd.rub_micro / 1e6).toFixed(2) : "—"} />
+          <div className="hero-art" data-reveal><GatewayScene /></div>
+        </div>
+      </section>
+
+      <section className="wrap section">
+        <div className="split" data-reveal>
+          <div className="split-text">
+            <h2 className="h1">{ru ? "Подключение — две строки" : "Two lines to connect"}</h2>
+            <p className="muted">{ru ? "Берёте любой код под OpenAI, меняете адрес и ключ. Все модели каталога сразу доступны под своими именами." : "Take any OpenAI code, swap the base URL and key. Every model in the catalog is available by its name."}</p>
+            <Link href="/docs" className="btn btn-ghost"><Icon name="book" size={17} />{t.nav.docs}</Link>
+          </div>
+          <CodeBlock tabs={[{ label: "python", code: py }, { label: "typescript", code: ts }, { label: "curl", code: curl }]} />
+        </div>
+      </section>
+
+      <section className="wrap section">
+        <div className="section-head spread" data-reveal>
+          <div><h2 className="h1">{L.modelsTitle}</h2><p className="muted">{ru ? "Цены за миллион токенов по сегодняшнему курсу." : "Prices per million tokens at today's rate."} <Link href="/pricing#how" className="link-u">{ru ? "Что это значит?" : "What does that mean?"}</Link></p></div>
+          <Link href="/models" className="btn btn-ghost">{L.allModels} <Icon name="arrow" size={16} /></Link>
+        </div>
+        <div className="mcards">
+          {popular.map((m, i) => (
+            <Link key={m.id} href={`/models/${m.id}`} className="mcard" data-reveal style={{ ["--d" as string]: `${i * 60}ms` }}>
+              <div className="row" style={{ gap: 10 }}>
+                <span className="gw-ava" style={{ background: COLORS[m.author] ?? "var(--ink)", width: 32, height: 32, fontSize: 14 }}>{m.author[0]}</span>
+                <div><div className="h3">{m.name}</div><div className="hint">{m.author} · {ctx(m.context_length)} {ru ? "контекст" : "context"}</div></div>
+              </div>
+              <p className="muted small mclamp">{m.description}</p>
+              <div className="mcard-prices">
+                <div><span className="hint">{t.models.input}</span><b className="num">{perM(m.prices.input_per_m, lang)}</b></div>
+                <div><span className="hint">{t.models.output}</span><b className="num">{perM(m.prices.output_per_m, lang)}</b></div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="wrap section">
+        <div className="section-head" data-reveal><h2 className="h1">{L.plansTitle}</h2><p className="muted">{L.plansLead}</p></div>
+        <div data-reveal><PlanGrid plans={plans} /></div>
+      </section>
+
+      <section className="wrap section">
+        <div className="faq-wrap" data-reveal>
+          <h2 className="h1">{L.faqTitle}</h2>
+          <div className="faq">
+            {L.faq.map(([q, a]) => (
+              <details key={q}><summary>{q}</summary><p className="muted">{a}</p></details>
+            ))}
           </div>
         </div>
-        <div className="hero-art"><RouteLive providers={authors} /></div>
-      </section>
-
-      <section className="wrap">
-        <div className="board">
-          <div><span className="label">{L.statModels}</span><span className="v">{models.length}</span></div>
-          <div><span className="label">{L.statProviders}</span><span className="v">{authors.length}</span></div>
-          <div><span className="label">{L.statRate}</span><span className="v">{usd ? (usd.rub_micro / 1e6).toFixed(2) : "—"}<small>₽/$</small></span></div>
-          <div><span className="label">OpenAI SDK</span><span className="v">/v1<small>compatible</small></span></div>
-        </div>
       </section>
 
       <section className="wrap section">
-        <div className="section-head"><span className="label">01</span><h2 className="h1">{L.howTitle}</h2></div>
-        <div className="how">
-          {[[L.how1t, L.how1], [L.how2t, L.how2], [L.how3t, L.how3], [L.how4t, L.how4]].map(([h, p], i) => (
-            <div key={h}>
-              <div className="label">{String(i + 1).padStart(2, "0")}</div>
-              <h3 className="h3">{h}</h3>
-              <p className="muted">{p}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="wrap section">
-        <div className="section-head"><span className="label">02</span><h2 className="h1">{L.tryTitle}</h2></div>
-        <CodeBlock tabs={[{ label: "python", code: py }, { label: "typescript", code: ts }, { label: "curl", code: curl }]} />
-      </section>
-
-      <section className="wrap section">
-        <div className="section-head spread">
-          <div><span className="label">03</span><h2 className="h1">{L.modelsTitle}</h2></div>
-          <Link href="/models" className="btn btn-ghost">{L.allModels} →</Link>
-        </div>
-        <div className="table-wrap">
-          <table className="table">
-            <thead><tr><th>{t.models.title}</th><th>{t.models.author}</th><th className="r">{t.models.context}</th><th className="r">{t.models.input}</th><th className="r">{t.models.output}</th></tr></thead>
-            <tbody>
-              {popular.map((m) => (
-                <tr key={m.id}>
-                  <td><Link href={`/models/${m.id}`}><b style={{ fontWeight: 500 }}>{m.name}</b> <span className="faint mono small">{m.id}</span></Link></td>
-                  <td className="muted">{m.author}</td>
-                  <td className="r num">{ctx(m.context_length)}</td>
-                  <td className="r num">{perM(m.prices.input_per_m, lang)}</td>
-                  <td className="r num">{perM(m.prices.output_per_m, lang)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="hint" style={{ marginTop: 10 }}>{t.models.perM} · {usd ? fmt(t.pricing.rateNote, { rate: (usd.rub_micro / 1e6).toFixed(2), source: usd.source, markup: fx.markup_bps / 100 }) : ""}</p>
-      </section>
-
-      <section className="wrap section">
-        <div className="section-head"><span className="label">04</span><h2 className="h1">{L.plansTitle}</h2><p className="muted">{L.plansLead}</p></div>
-        <PlanGrid plans={plans} />
-      </section>
-
-      <section className="wrap section">
-        <div className="section-head"><span className="label">05</span><h2 className="h1">{L.faqTitle}</h2></div>
-        <div className="faq">
-          {L.faq.map(([q, a]) => (
-            <details key={q}><summary>{q}</summary><p className="muted">{a}</p></details>
-          ))}
+        <div className="cta" data-reveal>
+          <div>
+            <h2 className="h1">{ru ? "Попробуйте бесплатно" : "Try it for free"}</h2>
+            <p>{ru ? "Регистрация за минуту, стартовый бонус на баланс и бесплатные модели без ограничений по времени." : "Sign up in a minute, get a starter bonus and free models with no time limit."}</p>
+          </div>
+          <Link href="/register" className="btn btn-lg btn-signal">{ru ? "Создать аккаунт" : "Create account"} <Icon name="arrow" size={18} /></Link>
         </div>
       </section>
     </>

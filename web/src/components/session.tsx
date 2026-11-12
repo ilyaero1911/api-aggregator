@@ -25,7 +25,7 @@ export function SessionGate({ children, admin }: { children: ReactNode; admin?: 
     setUser(r.user);
   }, [router, admin]);
   useEffect(() => { refresh().catch(() => router.replace("/login")); }, [refresh, router]);
-  if (!user) return <div className="gate"><span className="label">NeuroGateway</span></div>;
+  if (!user) return <div className="gate"><span className="label">Strelka</span></div>;
   return <Session.Provider value={{ user, refresh, setUser }}>{children}</Session.Provider>;
 }
 

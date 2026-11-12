@@ -1,5 +1,5 @@
 const ru = {
-  brand: "NeuroGateway",
+  brand: "Strelka",
   common: {
     save: "Сохранить", cancel: "Отмена", delete: "Удалить", create: "Создать", edit: "Изменить", close: "Закрыть",
     copy: "Копировать", copied: "Скопировано", loading: "Загрузка…", search: "Поиск", all: "Все", yes: "Да", no: "Нет",
@@ -11,9 +11,9 @@ const ru = {
   },
   nav: {
     models: "Модели", pricing: "Тарифы", docs: "Документация", rankings: "Рейтинг", overview: "Обзор",
-    playground: "Плейграунд", images: "Изображения", keys: "API-ключи", managementKeys: "Ключи управления",
-    billing: "Баланс и тарифы", logs: "Логи", presets: "Пресеты", settings: "Настройки",
-    groupWork: "Работа", groupAccount: "Аккаунт", groupResources: "Справка",
+    playground: "Чат с моделями", images: "Картинки", keys: "API-ключи", managementKeys: "Ключи управления",
+    billing: "Баланс и тарифы", logs: "История запросов", presets: "Пресеты", settings: "Настройки",
+    groupWork: "Работа", groupAccount: "Аккаунт и деньги", groupResources: "Справка",
   },
   landing: {
     kicker: "Один API · {n} моделей · оплата в рублях",
@@ -69,11 +69,11 @@ const ru = {
     } as Record<string, string>,
   },
   dash: {
-    hello: "Здравствуйте, {name}", overviewLead: "Сводка использования за выбранный период.",
-    inputTokens: "Входные токены", outputTokens: "Выходные токены", cachedTokens: "Чтение кэша", apiRequests: "Запросы",
-    cost: "Расходы", errors: "Ошибки", balance: "Баланс", allModels: "Все модели", tokenUsage: "Токены по дням",
-    spend: "Расходы по дням", topModels: "Модели", noData: "Пока нет данных. Сделайте первый запрос — он появится здесь.",
-    quickStart: "Быстрый старт", quick1: "Создайте API-ключ", quick2: "Пополните баланс или выберите тариф", quick3: "Отправьте запрос",
+    hello: "Здравствуйте, {name}", overviewLead: "Сколько запросов вы отправили и сколько они стоили. Период переключается справа.",
+    inputTokens: "Отправлено токенов", outputTokens: "Получено токенов", cachedTokens: "Взято из кэша", apiRequests: "Запросов",
+    cost: "Потрачено", errors: "С ошибкой", balance: "Баланс", allModels: "Все модели", tokenUsage: "Токены по дням",
+    spend: "Траты по дням", topModels: "На что уходят деньги", noData: "Пока нет данных. Сделайте первый запрос — он появится здесь.",
+    quickStart: "Быстрый старт", quick1: "Создайте API-ключ", quick2: "Пополните баланс или выберите тариф", quick3: "Задайте вопрос модели в чате",
     goDeeper: "Подробнее в логах", plan: "Тариф", planTokens: "Токены тарифа", until: "до {date}", noPlan: "Без тарифа",
   },
   keys: {

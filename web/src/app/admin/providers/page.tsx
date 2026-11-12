@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal, PageHead, Switch, useConfirm, useLoad, useToast } from "@/components/ui";
 import { ApiError, del, get, put } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/client";
+import { Select } from "@/components/select";
 
 type P = { id: string; name: string; kind: "mock" | "openai_compatible"; base_url: string; enabled: boolean; priority: number; mock_latency_ms: number; mock_error_rate: number; has_key: boolean };
 
@@ -52,7 +53,7 @@ export default function Providers() {
             <div className="grid-2" style={{ gap: 12 }}>
               <label className="field"><span>ID</span><input className="input mono" disabled={!f.isNew} value={f.id} onChange={(e) => setF({ ...f, id: e.target.value })} /></label>
               <label className="field"><span>{t.common.name}</span><input className="input" value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></label>
-              <label className="field"><span>{A.kind}</span><select className="select" value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value as P["kind"] })}><option value="mock">mock</option><option value="openai_compatible">openai_compatible</option></select></label>
+              <label className="field"><span>{A.kind}</span><Select value={f.kind} onChange={(e) => setF({ ...f, kind: e.target.value as P["kind"] })}><option value="mock">mock</option><option value="openai_compatible">openai_compatible</option></Select></label>
               <label className="field"><span>{A.priority}</span><input className="input" type="number" value={f.priority} onChange={(e) => setF({ ...f, priority: Number(e.target.value) })} /></label>
             </div>
             {f.kind === "mock" ? (

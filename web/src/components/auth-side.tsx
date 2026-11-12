@@ -46,7 +46,7 @@ export function AuthSide() {
           <p className="mono small">{a.slice(0, n)}<span className="caret" /></p>
         </div>
       </div>
-      <div className="hint">© NeuroGateway</div>
+      <div className="hint">© Strelka</div>
     </div>
   );
 }

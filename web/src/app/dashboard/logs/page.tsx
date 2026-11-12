@@ -6,6 +6,7 @@ import { get } from "@/lib/api";
 import { ago, dateTime, ms, num, rub } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import type { RequestLog } from "@/lib/types";
+import { Select } from "@/components/select";
 
 export default function Logs() {
   const { t, lang } = useI18n();
@@ -30,10 +31,10 @@ export default function Logs() {
       </>} />
       <div className="row-wrap" style={{ marginBottom: 16 }}>
         <input className="input" style={{ maxWidth: 320 }} placeholder={L.search} value={q} onChange={(e) => setQ(e.target.value)} />
-        <select className="select" style={{ width: 240 }} value={model} onChange={(e) => { setModel(e.target.value); setOff(0); }}>
+        <Select style={{ width: 240 }} value={model} onChange={(e) => { setModel(e.target.value); setOff(0); }}>
           <option value="">{t.dash.allModels}</option>
           {models.data?.models.map((m) => <option key={m}>{m}</option>)}
-        </select>
+        </Select>
         <Seg value={status} onChange={(v) => { setStatus(v); setOff(0); }} options={[{ value: "", label: L.all }, { value: "ok", label: L.ok }, { value: "error", label: L.errors }]} />
       </div>
       {loading && !data ? <Skeleton h={300} /> : data && data.data.length === 0 ? <div className="empty">{L.empty}</div> : (

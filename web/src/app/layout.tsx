@@ -3,6 +3,7 @@ import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { I18nProvider } from "@/lib/i18n/client";
 import { getLang } from "@/lib/i18n/server";
 import { loadUsdRate } from "@/lib/server-data";
+import { Reveal } from "@/components/reveal";
 import { ToastProvider } from "@/components/ui";
 import "./globals.css";
 
@@ -10,7 +11,7 @@ const sans = IBM_Plex_Sans({ subsets: ["latin", "cyrillic"], weight: ["400", "50
 const mono = IBM_Plex_Mono({ subsets: ["latin", "cyrillic"], weight: ["400", "500"], variable: "--font-plex-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "NeuroGateway — один API для всех моделей", template: "%s · NeuroGateway" },
+  title: { default: "Strelka — один API для всех нейросетей", template: "%s · Strelka" },
   description: "OpenAI-совместимый шлюз к языковым моделям с оплатой в рублях.",
   icons: { icon: "/icon.svg" },
 };
@@ -27,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <I18nProvider lang={lang} usdRate={usdRate}>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>{children}<Reveal /></ToastProvider>
         </I18nProvider>
       </body>
     </html>

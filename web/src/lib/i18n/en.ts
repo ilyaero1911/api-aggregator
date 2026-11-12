@@ -1,7 +1,7 @@
 import type { Dict } from "./ru";
 
 const en: Dict = {
-  brand: "NeuroGateway",
+  brand: "Strelka",
   common: {
     save: "Save", cancel: "Cancel", delete: "Delete", create: "Create", edit: "Edit", close: "Close",
     copy: "Copy", copied: "Copied", loading: "Loading…", search: "Search", all: "All", yes: "Yes", no: "No",
@@ -13,9 +13,9 @@ const en: Dict = {
   },
   nav: {
     models: "Models", pricing: "Pricing", docs: "Docs", rankings: "Rankings", overview: "Overview",
-    playground: "Playground", images: "Images", keys: "API keys", managementKeys: "Management keys",
-    billing: "Billing", logs: "Logs", presets: "Presets", settings: "Settings",
-    groupWork: "Work", groupAccount: "Account", groupResources: "Resources",
+    playground: "Chat with models", images: "Images", keys: "API keys", managementKeys: "Management keys",
+    billing: "Billing", logs: "Request history", presets: "Presets", settings: "Settings",
+    groupWork: "Work", groupAccount: "Account and money", groupResources: "Resources",
   },
   landing: {
     kicker: "One API · {n} models · billed in rubles",
@@ -71,11 +71,11 @@ const en: Dict = {
     },
   },
   dash: {
-    hello: "Hello, {name}", overviewLead: "Usage summary for the selected period.",
-    inputTokens: "Input tokens", outputTokens: "Output tokens", cachedTokens: "Cache read", apiRequests: "Requests",
+    hello: "Hello, {name}", overviewLead: "How many requests you sent and what they cost. Switch the period on the right.",
+    inputTokens: "Tokens sent", outputTokens: "Tokens received", cachedTokens: "Cache read", apiRequests: "Requests",
     cost: "Spend", errors: "Errors", balance: "Balance", allModels: "All models", tokenUsage: "Tokens per day",
-    spend: "Spend per day", topModels: "Models", noData: "No data yet. Make your first request and it will show up here.",
-    quickStart: "Quick start", quick1: "Create an API key", quick2: "Top up or pick a plan", quick3: "Send a request",
+    spend: "Spend per day", topModels: "Where the money goes", noData: "No data yet. Make your first request and it will show up here.",
+    quickStart: "Quick start", quick1: "Create an API key", quick2: "Top up or pick a plan", quick3: "Ask a model in the chat",
     goDeeper: "See logs", plan: "Plan", planTokens: "Plan tokens", until: "until {date}", noPlan: "No plan",
   },
   keys: {

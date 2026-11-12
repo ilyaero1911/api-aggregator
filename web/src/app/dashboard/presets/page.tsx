@@ -7,6 +7,7 @@ import { ago } from "@/lib/format";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Model, Preset } from "@/lib/types";
+import { Select } from "@/components/select";
 
 type Form = { id?: string; slug: string; name: string; description: string; model_id: string; fallbacks: string; system_prompt: string; temperature: string; max_tokens: string };
 
@@ -82,9 +83,9 @@ export default function Presets() {
             </div>
             <label className="field"><span>{P.description}</span><input className="input" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></label>
             <label className="field"><span>{P.model}</span>
-              <select className="select" value={form.model_id} onChange={(e) => setForm({ ...form, model_id: e.target.value })}>
+              <Select value={form.model_id} onChange={(e) => setForm({ ...form, model_id: e.target.value })}>
                 {textModels.map((m) => <option key={m.id} value={m.id}>{m.name} — {m.id}</option>)}
-              </select>
+              </Select>
             </label>
             <label className="field"><span>{P.fallbacks}</span><input className="input mono" value={form.fallbacks} onChange={(e) => setForm({ ...form, fallbacks: e.target.value })} placeholder="openai/gpt-5-mini, deepseek/deepseek-v3.2" /><span className="hint">{P.fallbacksHint}</span></label>
             <label className="field"><span>{P.system}</span><textarea className="textarea" rows={4} value={form.system_prompt} onChange={(e) => setForm({ ...form, system_prompt: e.target.value })} /></label>

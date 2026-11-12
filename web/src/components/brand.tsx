@@ -2,15 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BRAND } from "@/lib/brand";
+import { Icon } from "./icons";
 import { useI18n } from "@/lib/i18n/client";
 
-/** Знак: маршрут из одной точки в другую. */
-export function Mark({ size = 22 }: { size?: number }) {
+/** Знак: железнодорожная стрелка — путь раздваивается, активная ветка подсвечена. При наведении стрелка переключается. */
+export function Mark({ size = 26 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-      <path d="M8 24 L8 15 Q8 8 15 8 L24 8" fill="none" stroke="currentColor" strokeWidth="2.6" />
-      <circle cx="8" cy="24" r="3.6" fill="var(--signal)" />
-      <circle cx="24" cy="8" r="3.6" fill="currentColor" />
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden className="mark">
+      <rect width="32" height="32" rx="9" className="mark-bg" />
+      <path d="M8 25 L13.5 18" className="mark-stem" />
+      <path d="M13.5 18 C16 14.5, 19 10.5, 24.5 8.5" className="mark-a" />
+      <path d="M13.5 18 C17 17, 20.5 19, 24.5 21.5" className="mark-b" />
+      <circle cx="13.5" cy="18" r="2.6" className="mark-dot" />
     </svg>
   );
 }
@@ -19,7 +23,7 @@ export function Logo({ href = "/" }: { href?: string }) {
   return (
     <Link href={href} className="logo">
       <Mark />
-      <span>NeuroGateway</span>
+      <span className="logo-word">{BRAND}</span>
     </Link>
   );
 }
@@ -41,7 +45,7 @@ export function ThemeToggle() {
       try { if (v === "auto") localStorage.removeItem("theme"); else localStorage.setItem("theme", v); } catch {}
       if (v === "auto") delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v;
     }}>
-      <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" /><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor" /></svg>
+      <Icon name={theme === "light" ? "sun" : theme === "dark" ? "moon" : "contrast"} size={15} />
       {label}
     </button>
   );

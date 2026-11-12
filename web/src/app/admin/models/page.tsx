@@ -6,6 +6,7 @@ import { ApiError, del, get, put } from "@/lib/api";
 import { ctx, perM } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import type { Model } from "@/lib/types";
+import { Select } from "@/components/select";
 
 type Ep = { model_id: string; provider_id: string; upstream_model: string; priority: number; enabled: boolean };
 type Prov = { id: string; name: string };
@@ -87,7 +88,7 @@ export default function AdminModels() {
             </div>
             <label className="field"><span>{t.presets.description}</span><input className="input" value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></label>
             <div className="grid-3" style={{ gap: 12 }}>
-              <label className="field"><span>{A.modality}</span><select className="select" value={f.modality} onChange={(e) => setF({ ...f, modality: e.target.value as F["modality"] })}><option value="text">text</option><option value="image">image</option></select></label>
+              <label className="field"><span>{A.modality}</span><Select value={f.modality} onChange={(e) => setF({ ...f, modality: e.target.value as F["modality"] })}><option value="text">text</option><option value="image">image</option></Select></label>
               <label className="field"><span>{A.contextLength}</span><input className="input" type="number" value={f.context_length} onChange={(e) => setF({ ...f, context_length: e.target.value })} /></label>
               <label className="field"><span>{A.maxOutput}</span><input className="input" type="number" value={f.max_output} onChange={(e) => setF({ ...f, max_output: e.target.value })} /></label>
             </div>
@@ -122,10 +123,10 @@ export default function AdminModels() {
                   ))}
                 </tbody></table>
                 <div className="row" style={{ gap: 8 }}>
-                  <select className="select" value={newEp.provider_id} onChange={(e) => setNewEp({ ...newEp, provider_id: e.target.value })}>
+                  <Select value={newEp.provider_id} onChange={(e) => setNewEp({ ...newEp, provider_id: e.target.value })}>
                     <option value="">{A.provider}…</option>
                     {provs.data?.data.filter((p) => !eps(f.id).some((e) => e.provider_id === p.id)).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-                  </select>
+                  </Select>
                   <input className="input mono" placeholder={A.upstream} value={newEp.upstream_model} onChange={(e) => setNewEp({ ...newEp, upstream_model: e.target.value })} />
                   <input className="input" style={{ width: 90 }} type="number" value={newEp.priority} onChange={(e) => setNewEp({ ...newEp, priority: e.target.value })} />
                   <button className="btn btn-ghost" disabled={!newEp.provider_id} onClick={async () => { await saveEp({ model_id: f.id, provider_id: newEp.provider_id, upstream_model: newEp.upstream_model || f.id, priority: Number(newEp.priority), enabled: true }); setNewEp({ provider_id: "", upstream_model: "", priority: "100" }); }}>+</button>
