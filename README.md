@@ -2,6 +2,30 @@
 
 API-агрегатор языковых моделей: один OpenAI-совместимый контракт, несколько провайдеров, учёт токенов и баланс.
 
+## Приложение
+
+Копия Routeway и OpenRouter: OpenAI-совместимый шлюз `/v1`, каталог моделей, кабинет и админка. Бэкенд на Go (chi, pgx, sqlc), фронтенд на Next.js + TypeScript, Postgres и Redis.
+
+```sh
+make up    # Postgres :55442 и Redis :56389 в docker
+make api   # Go-сервер :8090, миграции и сиды применяются сами
+make web   # кабинет http://localhost:3100
+```
+
+Первый зарегистрированный пользователь (или адрес из `ADMIN_EMAILS`, по умолчанию `admin@local.test`) получает роль администратора, админка на `/admin`. Остальные настройки в [.env.example](.env.example).
+
+| Часть | Где |
+|---|---|
+| Шлюз `/v1`: chat/completions (SSE), images, models, key, credits, generation, keys | `backend/internal/gateway`, `backend/internal/httpapi/v1.go` |
+| Провайдеры: сейчас мок с задержкой и долей ошибок, фолбэк на следующий | `backend/internal/gateway/provider.go` |
+| Баланс в микрорублях, тарифы, промокоды | `backend/internal/billing` |
+| Оплата: интерфейс `payments.Provider`, сейчас фиктивная страница `/pay/{id}` | `backend/internal/payments` |
+| Курс ЦБ: cbr.ru → cbr-xml-daily.ru → Redis → Postgres → резерв из настроек | `backend/internal/fx` |
+| Схема и сиды (модели, тарифы) | `backend/migrations` |
+| Кабинет, публичные страницы, админка, ru/en | `web/src` |
+
+Ниже материалы курса, которые были в репозитории до приложения.
+
 Текущее состояние: инженерные документы и прототип учета баланса в памяти. HTTP-сервер, интеграция PostgreSQL, реальные адаптеры и stage еще не реализованы. [Фактическое состояние и ограничения](docs/seminar-06/baseline.md).
 
 Артефакты: [SQL-схема](schema/001_init.sql), [OpenAPI](schema/openapi.yaml), [каталог источников](data/sources.json), [JSON Schema usage](schema/usage-event.schema.json).
