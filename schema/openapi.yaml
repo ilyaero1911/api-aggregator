@@ -39,10 +39,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatCompletionResponse'
+        '400':
+          description: invalid_request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: invalid_api_key
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '402':
-          description: Баланса не хватает, провайдер не вызывается
+          description: insufficient_balance, провайдер не вызывается
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: forbidden или moderation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: model_not_found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '408':
+          description: timeout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '413':
+          description: context_length_exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '415':
           description: Тело не JSON
+        '429':
+          description: rate_limit, metadata.limit_source = gateway или provider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: provider_error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: no_available_provider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /v1/credits:
     get:
       operationId: getCredits
@@ -123,6 +181,34 @@ paths:
           description: Страница журнала своей организации, без текста запроса
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [message, type, code, param]
+          properties:
+            message:
+              type: string
+            type:
+              type: string
+            code:
+              type: string
+              enum: [invalid_request, invalid_api_key, insufficient_balance, forbidden, moderation, model_not_found, timeout, context_length_exceeded, rate_limit, provider_error, no_available_provider]
+            param:
+              type: [string, 'null']
+            metadata:
+              type: object
+              properties:
+                provider:
+                  type: string
+                raw:
+                  type: string
+                  description: Ответ провайдера без ключей и токенов, не длиннее 512 байт
+                limit_source:
+                  type: string
+                  enum: [gateway, provider]
     ChatCompletionRequest:
       type: object
       additionalProperties: false
