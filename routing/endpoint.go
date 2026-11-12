@@ -37,6 +37,11 @@ func NewRegistry(endpoints ...Endpoint) *Registry {
 	return r
 }
 
+// Has — есть ли модель в реестре, даже если все её эндпоинты отключены.
+func (r *Registry) Has(model string) bool {
+	return len(r.byModel[model]) > 0
+}
+
 // For — включённые эндпоинты модели в порядке приоритета.
 func (r *Registry) For(model string) []Endpoint {
 	var out []Endpoint

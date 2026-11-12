@@ -3,6 +3,7 @@ package routing
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"sort"
 	"sync"
 	"time"
@@ -34,6 +35,7 @@ type Router struct {
 	Breaker  BreakerConfig
 	Now      func() time.Time
 	Sleep    func(context.Context, time.Duration) error
+	Logger   *slog.Logger // цепочка попыток и причины fallback; nil — без логов
 
 	mu       sync.Mutex
 	breakers map[string]*Breaker
@@ -74,6 +76,10 @@ func (r *Router) BreakerFor(endpoint string) *Breaker {
 func (r *Router) Model(ctx context.Context, model string, call Call, trace *[]Attempt) (adapters.Reply, Endpoint, error) {
 	endpoints := r.ordered(model)
 	if len(endpoints) == 0 {
+		if r.Registry.Has(model) {
+			add(trace, Attempt{Model: model, Code: apierr.NoAvailableProvider, Reason: "all_disabled"})
+			return adapters.Reply{}, Endpoint{}, apierr.New(apierr.NoAvailableProvider, "")
+		}
 		return adapters.Reply{}, Endpoint{}, apierr.New(apierr.ModelNotFound, "")
 	}
 	attempts := 0
