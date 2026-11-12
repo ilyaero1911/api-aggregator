@@ -537,5 +537,16 @@ func (s *Server) adminAudit(w http.ResponseWriter, r *http.Request) {
 		s.internal(w, err)
 		return
 	}
-	writeJSON(w, 200, map[string]any{"data": rows})
+	type row struct {
+		db.ListAuditRow
+		Details json.RawMessage `json:"details"`
+	}
+	out := make([]row, len(rows))
+	for i, r := range rows {
+		out[i] = row{ListAuditRow: r, Details: json.RawMessage(r.Details)}
+		if len(r.Details) == 0 {
+			out[i].Details = json.RawMessage("null")
+		}
+	}
+	writeJSON(w, 200, map[string]any{"data": out})
 }
