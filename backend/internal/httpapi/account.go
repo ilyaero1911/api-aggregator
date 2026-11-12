@@ -174,12 +174,13 @@ type KeyDTO struct {
 	LastUsedAt       *time.Time `json:"last_used_at"`
 	CreatedAt        time.Time  `json:"created_at"`
 	Secret           string     `json:"secret,omitempty"` // только при создании
+	BillingUserID    *uuid.UUID `json:"billing_user_id"`
 }
 
 func keyDTO(k db.ApiKey) KeyDTO {
 	return KeyDTO{ID: k.ID, Kind: k.Kind, Name: k.Name, Prefix: k.Prefix, LimitMicro: k.LimitMicro, LimitReset: k.LimitReset,
 		PeriodSpentMicro: k.PeriodSpentMicro, TotalSpentMicro: k.TotalSpentMicro, RpmLimit: k.RpmLimit, Disabled: k.Disabled,
-		ExpiresAt: k.ExpiresAt, LastUsedAt: k.LastUsedAt, CreatedAt: k.CreatedAt}
+		ExpiresAt: k.ExpiresAt, LastUsedAt: k.LastUsedAt, CreatedAt: k.CreatedAt, BillingUserID: k.BillingUserID}
 }
 
 func kindParam(r *http.Request) string {
@@ -214,6 +215,8 @@ type keyInput struct {
 	RpmLimit   *int32     `json:"rpm_limit"`
 	Disabled   bool       `json:"disabled"`
 	ExpiresAt  *time.Time `json:"expires_at"`
+	// TeamOwner — если задан, ключ списывает деньги с баланса владельца команды.
+	TeamOwner *uuid.UUID `json:"team_owner_id"`
 }
 
 func (in *keyInput) validate() (*int64, string, error) {
@@ -261,12 +264,26 @@ func (s *Server) createKeyFor(w http.ResponseWriter, r *http.Request, user uuid.
 	if in.Kind == "management" {
 		kind = "management"
 	}
+	if in.TeamOwner != nil {
+		if kind != "inference" {
+			writeErr(w, 400, "bad_input", "Team keys can only be inference keys")
+			return
+		}
+		if _, err := s.q.GetMembership(r.Context(), db.GetMembershipParams{OwnerID: *in.TeamOwner, MemberID: user}); err != nil {
+			writeErr(w, 403, "not_a_member", "You are not a member of this team")
+			return
+		}
+	}
 	secret, prefix, hash := auth.NewAPIKey(kind)
 	k, err := s.q.CreateKey(r.Context(), db.CreateKeyParams{UserID: user, Kind: kind, Name: in.Name, Prefix: prefix,
 		SecretHash: hash, LimitMicro: limit, LimitReset: reset, RpmLimit: in.RpmLimit, ExpiresAt: in.ExpiresAt})
 	if err != nil {
 		s.internal(w, err)
 		return
+	}
+	if in.TeamOwner != nil {
+		_ = s.q.SetKeyBilling(r.Context(), db.SetKeyBillingParams{ID: k.ID, BillingUserID: in.TeamOwner})
+		k.BillingUserID = in.TeamOwner
 	}
 	s.event(r, user, "key.create", in.Name)
 	d := keyDTO(k)
@@ -715,7 +732,7 @@ func (s *Server) deletePreset(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) playgroundCaller(r *http.Request) gateway.Caller {
 	u := currentUser(r)
-	return gateway.Caller{UserID: u.ID, LogPrompts: u.LogPrompts, App: "playground"}
+	return gateway.Caller{UserID: u.ID, LogPrompts: u.LogPrompts, App: "playground", Cache: u.CacheEnabled}
 }
 
 func (s *Server) playgroundChat(w http.ResponseWriter, r *http.Request) {
@@ -723,7 +740,11 @@ func (s *Server) playgroundChat(w http.ResponseWriter, r *http.Request) {
 	if !readJSON(w, r, &req) {
 		return
 	}
-	s.serveChat(w, r, s.playgroundCaller(r), req)
+	c := s.playgroundCaller(r)
+	if req.Cache != nil && !*req.Cache {
+		c.Cache = false
+	}
+	s.serveChat(w, r, c, req)
 }
 
 func (s *Server) playgroundImage(w http.ResponseWriter, r *http.Request) {

@@ -25,6 +25,14 @@ export default function BillingPage() {
   const [buy, setBuy] = useState<Plan | null>(null);
   const [busy, setBusy] = useState(false);
   const [ws, setWs] = useState<Wallet | null>(null);
+  const [inv, setInv] = useState<{ company: string; inn: string; kpp: string; address: string; email: string; amount: string } | null>(null);
+  const makeInvoice = async () => {
+    if (!inv) return;
+    try {
+      const p = await post<Payment>("/api/billing/invoice", { amount_rub: Number(inv.amount), company: inv.company, inn: inv.inn, kpp: inv.kpp, address: inv.address, email: inv.email });
+      setInv(null); reload(); window.open(p.confirmation_url, "_blank");
+    } catch (e) { fail(e); }
+  };
   useEffect(() => { if (data) setWs(data.wallet); }, [data]);
 
   const fail = (e: unknown) => toast(e instanceof ApiError ? (e.code === "insufficient_balance" ? B.insufficient : e.message) : t.common.error, true);
@@ -67,6 +75,7 @@ export default function BillingPage() {
           {low && <p className="note" style={{ borderColor: "var(--warn)" }}>{B.lowAlert}: {rub(ws!.low_balance_micro, lang)}</p>}
           <div className="row-wrap">
             <button className="btn btn-signal" onClick={() => setTopup(true)}>+ {B.topup}</button>
+            <button className="btn btn-ghost" onClick={() => setInv({ company: "", inn: "", kpp: "", address: "", email: "", amount: "10000" })}>{lang === "en" ? "Invoice for a company" : "Счёт для юрлица"}</button>
             <div className="row" style={{ gap: 6 }}>
               <input className="input mono" style={{ width: 160, textTransform: "uppercase" }} placeholder={B.promo} value={promo} onChange={(e) => setPromo(e.target.value)} />
               <button className="btn btn-ghost" disabled={!promo.trim()} onClick={redeem}>{B.promoApply}</button>
@@ -151,6 +160,25 @@ export default function BillingPage() {
           </table>
         </section>
       )}
+
+      <Modal open={!!inv} onClose={() => setInv(null)} title={lang === "en" ? "Invoice for a company" : "Счёт для юридического лица"}
+        footer={<><button className="btn btn-ghost" onClick={() => setInv(null)}>{t.common.cancel}</button><button className="btn btn-signal" disabled={!inv?.company || !inv?.inn} onClick={makeInvoice}>{lang === "en" ? "Issue invoice" : "Выставить счёт"}</button></>}>
+        {inv && (
+          <>
+            <p className="hint">{lang === "en" ? "We issue an invoice in rubles; the balance is credited once the payment arrives (usually 1–2 business days)." : "Выставим счёт в рублях без НДС. Деньги зачислятся на баланс, когда платёж поступит на счёт (обычно 1–2 рабочих дня)."}</p>
+            <label className="field"><span>{lang === "en" ? "Company name" : "Название организации"}</span><input className="input" value={inv.company} onChange={(e) => setInv({ ...inv, company: e.target.value })} placeholder="ООО «Ромашка»" autoFocus /></label>
+            <div className="grid-2" style={{ gap: 12 }}>
+              <label className="field"><span>{lang === "en" ? "INN (TIN)" : "ИНН"}</span><input className="input mono" inputMode="numeric" maxLength={12} value={inv.inn} onChange={(e) => setInv({ ...inv, inn: e.target.value.replace(/\D/g, "") })} /></label>
+              <label className="field"><span>{lang === "en" ? "KPP" : "КПП (если есть)"}</span><input className="input mono" inputMode="numeric" maxLength={9} value={inv.kpp} onChange={(e) => setInv({ ...inv, kpp: e.target.value.replace(/\D/g, "") })} /></label>
+            </div>
+            <label className="field"><span>{lang === "en" ? "Legal address" : "Юридический адрес"}</span><input className="input" value={inv.address} onChange={(e) => setInv({ ...inv, address: e.target.value })} /></label>
+            <div className="grid-2" style={{ gap: 12 }}>
+              <label className="field"><span>{lang === "en" ? "Accounting email" : "Почта бухгалтерии"}</span><input className="input" type="email" value={inv.email} onChange={(e) => setInv({ ...inv, email: e.target.value })} /></label>
+              <label className="field"><span>{lang === "en" ? "Amount, ₽" : "Сумма, ₽"}</span><input className="input num" type="number" min={min} value={inv.amount} onChange={(e) => setInv({ ...inv, amount: e.target.value })} /></label>
+            </div>
+          </>
+        )}
+      </Modal>
 
       <Modal open={topup} onClose={() => setTopup(false)} title={B.topupTitle}
         footer={<><button className="btn btn-ghost" onClick={() => setTopup(false)}>{t.common.cancel}</button><button className="btn btn-signal" disabled={busy || Number(amount) < min} onClick={startTopup}>{B.pay} →</button></>}>

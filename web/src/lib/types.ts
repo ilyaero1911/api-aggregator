@@ -1,6 +1,6 @@
 export type User = {
   id: string; email: string; name: string; avatar_url: string; role: "user" | "admin"; status: "active" | "blocked";
-  locale: "ru" | "en"; log_prompts: boolean; has_password: boolean; has_google: boolean; created_at: string; last_login_at: string | null;
+  locale: "ru" | "en"; log_prompts: boolean; cache_enabled: boolean; has_password: boolean; has_google: boolean; created_at: string; last_login_at: string | null;
 };
 
 export type Prices = { input_per_m: number; output_per_m: number; cache_read_per_m: number; image: number };
@@ -22,7 +22,7 @@ export type Plan = {
 export type Key = {
   id: string; kind: "inference" | "management"; name: string; prefix: string; limit_micro: number | null;
   limit_reset: "never" | "daily" | "weekly" | "monthly"; period_spent_micro: number; total_spent_micro: number;
-  rpm_limit: number | null; disabled: boolean; expires_at: string | null; last_used_at: string | null; created_at: string; secret?: string;
+  rpm_limit: number | null; disabled: boolean; expires_at: string | null; last_used_at: string | null; created_at: string; secret?: string; billing_user_id?: string | null;
 };
 
 export type Wallet = {
@@ -49,7 +49,7 @@ export type RequestLog = {
   id: string; user_id: string; api_key_id: string | null; model_id: string; provider_id: string; preset: string; endpoint: string;
   status: number; prompt_tokens: number; completion_tokens: number; cached_tokens: number; cost_micro: number;
   paid_by: "balance" | "plan" | "free"; latency_ms: number; ttft_ms: number; streamed: boolean; finish_reason: string;
-  error: string; app: string; prompt_preview: string; created_at: string; key_name?: string; email?: string;
+  error: string; app: string; prompt_preview: string; cache_hit?: boolean; created_at: string; key_name?: string; email?: string;
 };
 
 export type Preset = {

@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -44,7 +45,7 @@ func (q *Queries) AddSubscriptionTokens(ctx context.Context, arg AddSubscription
 }
 
 const adminListPayments = `-- name: AdminListPayments :many
-SELECT p.id, p.user_id, p.provider, p.purpose, p.plan_id, p.amount_kopecks, p.status, p.external_id, p.confirmation_url, p.created_at, p.paid_at, u.email FROM payments p JOIN users u ON u.id = p.user_id
+SELECT p.id, p.user_id, p.provider, p.purpose, p.plan_id, p.amount_kopecks, p.status, p.external_id, p.confirmation_url, p.created_at, p.paid_at, p.meta, u.email FROM payments p JOIN users u ON u.id = p.user_id
 WHERE ($1::text = '' OR p.status = $1)
 ORDER BY p.created_at DESC LIMIT $3 OFFSET $2
 `
@@ -56,18 +57,19 @@ type AdminListPaymentsParams struct {
 }
 
 type AdminListPaymentsRow struct {
-	ID              uuid.UUID  `json:"id"`
-	UserID          uuid.UUID  `json:"user_id"`
-	Provider        string     `json:"provider"`
-	Purpose         string     `json:"purpose"`
-	PlanID          *string    `json:"plan_id"`
-	AmountKopecks   int64      `json:"amount_kopecks"`
-	Status          string     `json:"status"`
-	ExternalID      string     `json:"external_id"`
-	ConfirmationUrl string     `json:"confirmation_url"`
-	CreatedAt       time.Time  `json:"created_at"`
-	PaidAt          *time.Time `json:"paid_at"`
-	Email           string     `json:"email"`
+	ID              uuid.UUID       `json:"id"`
+	UserID          uuid.UUID       `json:"user_id"`
+	Provider        string          `json:"provider"`
+	Purpose         string          `json:"purpose"`
+	PlanID          *string         `json:"plan_id"`
+	AmountKopecks   int64           `json:"amount_kopecks"`
+	Status          string          `json:"status"`
+	ExternalID      string          `json:"external_id"`
+	ConfirmationUrl string          `json:"confirmation_url"`
+	CreatedAt       time.Time       `json:"created_at"`
+	PaidAt          *time.Time      `json:"paid_at"`
+	Meta            json.RawMessage `json:"meta"`
+	Email           string          `json:"email"`
 }
 
 func (q *Queries) AdminListPayments(ctx context.Context, arg AdminListPaymentsParams) ([]AdminListPaymentsRow, error) {
@@ -91,6 +93,7 @@ func (q *Queries) AdminListPayments(ctx context.Context, arg AdminListPaymentsPa
 			&i.ConfirmationUrl,
 			&i.CreatedAt,
 			&i.PaidAt,
+			&i.Meta,
 			&i.Email,
 		); err != nil {
 			return nil, err
@@ -125,7 +128,7 @@ func (q *Queries) CountTransactions(ctx context.Context, userID uuid.UUID) (int6
 
 const createPayment = `-- name: CreatePayment :one
 INSERT INTO payments (user_id, provider, purpose, plan_id, amount_kopecks)
-VALUES ($1, $2, $3, $4, $5) RETURNING id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at
+VALUES ($1, $2, $3, $4, $5) RETURNING id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at, meta
 `
 
 type CreatePaymentParams struct {
@@ -157,6 +160,7 @@ func (q *Queries) CreatePayment(ctx context.Context, arg CreatePaymentParams) (P
 		&i.ConfirmationUrl,
 		&i.CreatedAt,
 		&i.PaidAt,
+		&i.Meta,
 	)
 	return i, err
 }
@@ -292,7 +296,7 @@ func (q *Queries) GetActiveSubscription(ctx context.Context, userID uuid.UUID) (
 }
 
 const getPayment = `-- name: GetPayment :one
-SELECT id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at FROM payments WHERE id = $1
+SELECT id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at, meta FROM payments WHERE id = $1
 `
 
 func (q *Queries) GetPayment(ctx context.Context, id uuid.UUID) (Payment, error) {
@@ -310,12 +314,13 @@ func (q *Queries) GetPayment(ctx context.Context, id uuid.UUID) (Payment, error)
 		&i.ConfirmationUrl,
 		&i.CreatedAt,
 		&i.PaidAt,
+		&i.Meta,
 	)
 	return i, err
 }
 
 const getPaymentForUpdate = `-- name: GetPaymentForUpdate :one
-SELECT id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at FROM payments WHERE id = $1 FOR UPDATE
+SELECT id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at, meta FROM payments WHERE id = $1 FOR UPDATE
 `
 
 func (q *Queries) GetPaymentForUpdate(ctx context.Context, id uuid.UUID) (Payment, error) {
@@ -333,6 +338,7 @@ func (q *Queries) GetPaymentForUpdate(ctx context.Context, id uuid.UUID) (Paymen
 		&i.ConfirmationUrl,
 		&i.CreatedAt,
 		&i.PaidAt,
+		&i.Meta,
 	)
 	return i, err
 }
@@ -558,7 +564,7 @@ func (q *Queries) ListTransactions(ctx context.Context, arg ListTransactionsPara
 }
 
 const listUserPayments = `-- name: ListUserPayments :many
-SELECT id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at FROM payments WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50
+SELECT id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at, meta FROM payments WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50
 `
 
 func (q *Queries) ListUserPayments(ctx context.Context, userID uuid.UUID) ([]Payment, error) {
@@ -582,6 +588,7 @@ func (q *Queries) ListUserPayments(ctx context.Context, userID uuid.UUID) ([]Pay
 			&i.ConfirmationUrl,
 			&i.CreatedAt,
 			&i.PaidAt,
+			&i.Meta,
 		); err != nil {
 			return nil, err
 		}
@@ -594,7 +601,7 @@ func (q *Queries) ListUserPayments(ctx context.Context, userID uuid.UUID) ([]Pay
 }
 
 const setPaymentExternal = `-- name: SetPaymentExternal :one
-UPDATE payments SET external_id = $2, confirmation_url = $3 WHERE id = $1 RETURNING id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at
+UPDATE payments SET external_id = $2, confirmation_url = $3 WHERE id = $1 RETURNING id, user_id, provider, purpose, plan_id, amount_kopecks, status, external_id, confirmation_url, created_at, paid_at, meta
 `
 
 type SetPaymentExternalParams struct {
@@ -618,6 +625,7 @@ func (q *Queries) SetPaymentExternal(ctx context.Context, arg SetPaymentExternal
 		&i.ConfirmationUrl,
 		&i.CreatedAt,
 		&i.PaidAt,
+		&i.Meta,
 	)
 	return i, err
 }

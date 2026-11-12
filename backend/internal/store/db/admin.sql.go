@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -88,7 +89,7 @@ func (q *Queries) AdminGetSubscription(ctx context.Context, id uuid.UUID) (Subsc
 }
 
 const adminListKeys = `-- name: AdminListKeys :many
-SELECT k.id, k.user_id, k.kind, k.name, k.prefix, k.secret_hash, k.limit_micro, k.limit_reset, k.period_spent_micro, k.period_started_at, k.total_spent_micro, k.rpm_limit, k.disabled, k.expires_at, k.last_used_at, k.created_at, k.revoked_at, u.email FROM api_keys k JOIN users u ON u.id = k.user_id
+SELECT k.id, k.user_id, k.kind, k.name, k.prefix, k.secret_hash, k.limit_micro, k.limit_reset, k.period_spent_micro, k.period_started_at, k.total_spent_micro, k.rpm_limit, k.disabled, k.expires_at, k.last_used_at, k.created_at, k.revoked_at, k.billing_user_id, u.email FROM api_keys k JOIN users u ON u.id = k.user_id
 WHERE ($1::text = '' OR k.user_id::text = $1)
   AND ($2::text = '' OR u.email ILIKE '%' || $2 || '%' OR k.name ILIKE '%' || $2 || '%' OR k.prefix ILIKE '%' || $2 || '%')
   AND ($3::boolean OR k.revoked_at IS NULL)
@@ -121,6 +122,7 @@ type AdminListKeysRow struct {
 	LastUsedAt       *time.Time `json:"last_used_at"`
 	CreatedAt        time.Time  `json:"created_at"`
 	RevokedAt        *time.Time `json:"revoked_at"`
+	BillingUserID    *uuid.UUID `json:"billing_user_id"`
 	Email            string     `json:"email"`
 }
 
@@ -157,6 +159,7 @@ func (q *Queries) AdminListKeys(ctx context.Context, arg AdminListKeysParams) ([
 			&i.LastUsedAt,
 			&i.CreatedAt,
 			&i.RevokedAt,
+			&i.BillingUserID,
 			&i.Email,
 		); err != nil {
 			return nil, err
@@ -170,7 +173,7 @@ func (q *Queries) AdminListKeys(ctx context.Context, arg AdminListKeysParams) ([
 }
 
 const adminListPaymentsFull = `-- name: AdminListPaymentsFull :many
-SELECT p.id, p.user_id, p.provider, p.purpose, p.plan_id, p.amount_kopecks, p.status, p.external_id, p.confirmation_url, p.created_at, p.paid_at, u.email FROM payments p JOIN users u ON u.id = p.user_id
+SELECT p.id, p.user_id, p.provider, p.purpose, p.plan_id, p.amount_kopecks, p.status, p.external_id, p.confirmation_url, p.created_at, p.paid_at, p.meta, u.email FROM payments p JOIN users u ON u.id = p.user_id
 WHERE ($1::text = '' OR p.status = $1)
   AND ($2::text = '' OR p.user_id::text = $2)
   AND ($3::text = '' OR u.email ILIKE '%' || $3 || '%' OR p.external_id ILIKE '%' || $3 || '%')
@@ -186,18 +189,19 @@ type AdminListPaymentsFullParams struct {
 }
 
 type AdminListPaymentsFullRow struct {
-	ID              uuid.UUID  `json:"id"`
-	UserID          uuid.UUID  `json:"user_id"`
-	Provider        string     `json:"provider"`
-	Purpose         string     `json:"purpose"`
-	PlanID          *string    `json:"plan_id"`
-	AmountKopecks   int64      `json:"amount_kopecks"`
-	Status          string     `json:"status"`
-	ExternalID      string     `json:"external_id"`
-	ConfirmationUrl string     `json:"confirmation_url"`
-	CreatedAt       time.Time  `json:"created_at"`
-	PaidAt          *time.Time `json:"paid_at"`
-	Email           string     `json:"email"`
+	ID              uuid.UUID       `json:"id"`
+	UserID          uuid.UUID       `json:"user_id"`
+	Provider        string          `json:"provider"`
+	Purpose         string          `json:"purpose"`
+	PlanID          *string         `json:"plan_id"`
+	AmountKopecks   int64           `json:"amount_kopecks"`
+	Status          string          `json:"status"`
+	ExternalID      string          `json:"external_id"`
+	ConfirmationUrl string          `json:"confirmation_url"`
+	CreatedAt       time.Time       `json:"created_at"`
+	PaidAt          *time.Time      `json:"paid_at"`
+	Meta            json.RawMessage `json:"meta"`
+	Email           string          `json:"email"`
 }
 
 func (q *Queries) AdminListPaymentsFull(ctx context.Context, arg AdminListPaymentsFullParams) ([]AdminListPaymentsFullRow, error) {
@@ -227,6 +231,7 @@ func (q *Queries) AdminListPaymentsFull(ctx context.Context, arg AdminListPaymen
 			&i.ConfirmationUrl,
 			&i.CreatedAt,
 			&i.PaidAt,
+			&i.Meta,
 			&i.Email,
 		); err != nil {
 			return nil, err
@@ -537,7 +542,7 @@ func (q *Queries) AdminTotals(ctx context.Context) (AdminTotalsRow, error) {
 
 const adminUpdateKey = `-- name: AdminUpdateKey :one
 UPDATE api_keys SET name = $2, limit_micro = $3, limit_reset = $4, rpm_limit = $5, disabled = $6, expires_at = $7
-WHERE id = $1 RETURNING id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at
+WHERE id = $1 RETURNING id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at, billing_user_id
 `
 
 type AdminUpdateKeyParams struct {
@@ -579,6 +584,7 @@ func (q *Queries) AdminUpdateKey(ctx context.Context, arg AdminUpdateKeyParams) 
 		&i.LastUsedAt,
 		&i.CreatedAt,
 		&i.RevokedAt,
+		&i.BillingUserID,
 	)
 	return i, err
 }
@@ -618,7 +624,7 @@ func (q *Queries) AdminUpdateSubscription(ctx context.Context, arg AdminUpdateSu
 }
 
 const adminUpdateUser = `-- name: AdminUpdateUser :one
-UPDATE users SET name = $2, email = $3, role = $4, status = $5, locale = $6, admin_note = $7 WHERE id = $1 RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version
+UPDATE users SET name = $2, email = $3, role = $4, status = $5, locale = $6, admin_note = $7 WHERE id = $1 RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version, cache_enabled
 `
 
 type AdminUpdateUserParams struct {
@@ -658,6 +664,7 @@ func (q *Queries) AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams
 		&i.AdminNote,
 		&i.PdConsentAt,
 		&i.PdConsentVersion,
+		&i.CacheEnabled,
 	)
 	return i, err
 }

@@ -58,6 +58,7 @@ type ChatRequest struct {
 	Stop        any       `json:"stop,omitempty"`
 	Tools       any       `json:"tools,omitempty"`
 	User        string    `json:"user,omitempty"`
+	Cache       *bool     `json:"cache,omitempty"`
 	Provider    *struct {
 		Order          []string `json:"order,omitempty"`
 		AllowFallbacks *bool    `json:"allow_fallbacks,omitempty"`

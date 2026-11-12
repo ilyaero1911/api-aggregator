@@ -15,6 +15,7 @@ type Resp = { data: Page[]; site: Record<string, string> };
 const SITE_FIELDS: [string, string, string][] = [
   ["company_name", "Название компании (оператор ПД)", "Company name"], ["company_inn", "ИНН", "TIN"], ["company_ogrn", "ОГРН", "PSRN"],
   ["company_address", "Адрес", "Address"], ["company_email", "Почта для обращений", "Contact email"], ["company_phone", "Телефон", "Phone"],
+  ["company_kpp", "КПП", "KPP"], ["company_bank", "Банк", "Bank"], ["company_bik", "БИК", "BIC"], ["company_account", "Расчётный счёт", "Account"], ["company_corr_account", "Корр. счёт", "Corr. account"],
   ["footer_tagline_ru", "Подпись в подвале (рус)", "Footer tagline (ru)"], ["footer_tagline_en", "Подпись в подвале (англ)", "Footer tagline (en)"],
 ];
 

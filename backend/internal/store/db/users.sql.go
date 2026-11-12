@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -25,7 +26,7 @@ func (q *Queries) AdminCountUsers(ctx context.Context, q_ string) (int64, error)
 }
 
 const adminListUsers = `-- name: AdminListUsers :many
-SELECT u.id, u.email, u.name, u.password_hash, u.google_sub, u.avatar_url, u.role, u.status, u.locale, u.log_prompts, u.created_at, u.last_login_at, u.admin_note, u.pd_consent_at, u.pd_consent_version, coalesce(w.balance_micro, 0)::bigint AS balance_micro,
+SELECT u.id, u.email, u.name, u.password_hash, u.google_sub, u.avatar_url, u.role, u.status, u.locale, u.log_prompts, u.created_at, u.last_login_at, u.admin_note, u.pd_consent_at, u.pd_consent_version, u.cache_enabled, coalesce(w.balance_micro, 0)::bigint AS balance_micro,
        (SELECT s.plan_id FROM subscriptions s WHERE s.user_id = u.id AND s.status = 'active' LIMIT 1)::text AS plan_id
 FROM users u LEFT JOIN wallets w ON w.user_id = u.id
 WHERE ($1::text = '' OR u.email ILIKE '%' || $1 || '%' OR u.name ILIKE '%' || $1 || '%')
@@ -55,6 +56,7 @@ type AdminListUsersRow struct {
 	AdminNote        string     `json:"admin_note"`
 	PdConsentAt      *time.Time `json:"pd_consent_at"`
 	PdConsentVersion string     `json:"pd_consent_version"`
+	CacheEnabled     bool       `json:"cache_enabled"`
 	BalanceMicro     int64      `json:"balance_micro"`
 	PlanID           string     `json:"plan_id"`
 }
@@ -84,6 +86,7 @@ func (q *Queries) AdminListUsers(ctx context.Context, arg AdminListUsersParams) 
 			&i.AdminNote,
 			&i.PdConsentAt,
 			&i.PdConsentVersion,
+			&i.CacheEnabled,
 			&i.BalanceMicro,
 			&i.PlanID,
 		); err != nil {
@@ -162,7 +165,7 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) er
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (email, name, password_hash, google_sub, avatar_url, role, locale)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version
+RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version, cache_enabled
 `
 
 type CreateUserParams struct {
@@ -202,6 +205,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.AdminNote,
 		&i.PdConsentAt,
 		&i.PdConsentVersion,
+		&i.CacheEnabled,
 	)
 	return i, err
 }
@@ -234,7 +238,7 @@ func (q *Queries) DeleteUserSessions(ctx context.Context, userID uuid.UUID) erro
 }
 
 const getSessionUser = `-- name: GetSessionUser :one
-SELECT u.id, u.email, u.name, u.password_hash, u.google_sub, u.avatar_url, u.role, u.status, u.locale, u.log_prompts, u.created_at, u.last_login_at, u.admin_note, u.pd_consent_at, u.pd_consent_version FROM sessions s JOIN users u ON u.id = s.user_id
+SELECT u.id, u.email, u.name, u.password_hash, u.google_sub, u.avatar_url, u.role, u.status, u.locale, u.log_prompts, u.created_at, u.last_login_at, u.admin_note, u.pd_consent_at, u.pd_consent_version, u.cache_enabled FROM sessions s JOIN users u ON u.id = s.user_id
 WHERE s.token_hash = $1 AND s.expires_at > now()
 `
 
@@ -257,12 +261,13 @@ func (q *Queries) GetSessionUser(ctx context.Context, tokenHash string) (User, e
 		&i.AdminNote,
 		&i.PdConsentAt,
 		&i.PdConsentVersion,
+		&i.CacheEnabled,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version FROM users WHERE id = $1
+SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version, cache_enabled FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -284,12 +289,13 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.AdminNote,
 		&i.PdConsentAt,
 		&i.PdConsentVersion,
+		&i.CacheEnabled,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version FROM users WHERE lower(email) = lower($1::text)
+SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version, cache_enabled FROM users WHERE lower(email) = lower($1::text)
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -311,12 +317,13 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.AdminNote,
 		&i.PdConsentAt,
 		&i.PdConsentVersion,
+		&i.CacheEnabled,
 	)
 	return i, err
 }
 
 const getUserByGoogleSub = `-- name: GetUserByGoogleSub :one
-SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version FROM users WHERE google_sub = $1
+SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version, cache_enabled FROM users WHERE google_sub = $1
 `
 
 func (q *Queries) GetUserByGoogleSub(ctx context.Context, googleSub *string) (User, error) {
@@ -338,6 +345,7 @@ func (q *Queries) GetUserByGoogleSub(ctx context.Context, googleSub *string) (Us
 		&i.AdminNote,
 		&i.PdConsentAt,
 		&i.PdConsentVersion,
+		&i.CacheEnabled,
 	)
 	return i, err
 }
@@ -347,10 +355,10 @@ INSERT INTO audit_log (actor_id, action, target, details) VALUES ($1, $2, $3, $4
 `
 
 type InsertAuditParams struct {
-	ActorID *uuid.UUID `json:"actor_id"`
-	Action  string     `json:"action"`
-	Target  string     `json:"target"`
-	Details []byte     `json:"details"`
+	ActorID *uuid.UUID      `json:"actor_id"`
+	Action  string          `json:"action"`
+	Target  string          `json:"target"`
+	Details json.RawMessage `json:"details"`
 }
 
 func (q *Queries) InsertAudit(ctx context.Context, arg InsertAuditParams) error {
@@ -384,13 +392,13 @@ ORDER BY a.id DESC LIMIT $1
 `
 
 type ListAuditRow struct {
-	ID         int64      `json:"id"`
-	ActorID    *uuid.UUID `json:"actor_id"`
-	Action     string     `json:"action"`
-	Target     string     `json:"target"`
-	Details    []byte     `json:"details"`
-	CreatedAt  time.Time  `json:"created_at"`
-	ActorEmail string     `json:"actor_email"`
+	ID         int64           `json:"id"`
+	ActorID    *uuid.UUID      `json:"actor_id"`
+	Action     string          `json:"action"`
+	Target     string          `json:"target"`
+	Details    json.RawMessage `json:"details"`
+	CreatedAt  time.Time       `json:"created_at"`
+	ActorEmail string          `json:"actor_email"`
 }
 
 func (q *Queries) ListAudit(ctx context.Context, limit int32) ([]ListAuditRow, error) {
@@ -445,14 +453,15 @@ func (q *Queries) TouchLogin(ctx context.Context, id uuid.UUID) error {
 }
 
 const updateProfile = `-- name: UpdateProfile :one
-UPDATE users SET name = $2, locale = $3, log_prompts = $4 WHERE id = $1 RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version
+UPDATE users SET name = $2, locale = $3, log_prompts = $4, cache_enabled = $5 WHERE id = $1 RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version, cache_enabled
 `
 
 type UpdateProfileParams struct {
-	ID         uuid.UUID `json:"id"`
-	Name       string    `json:"name"`
-	Locale     string    `json:"locale"`
-	LogPrompts bool      `json:"log_prompts"`
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Locale       string    `json:"locale"`
+	LogPrompts   bool      `json:"log_prompts"`
+	CacheEnabled bool      `json:"cache_enabled"`
 }
 
 func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (User, error) {
@@ -461,6 +470,7 @@ func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (U
 		arg.Name,
 		arg.Locale,
 		arg.LogPrompts,
+		arg.CacheEnabled,
 	)
 	var i User
 	err := row.Scan(
@@ -479,6 +489,7 @@ func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (U
 		&i.AdminNote,
 		&i.PdConsentAt,
 		&i.PdConsentVersion,
+		&i.CacheEnabled,
 	)
 	return i, err
 }

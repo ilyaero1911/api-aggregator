@@ -1,7 +1,8 @@
 -- name: InsertRequest :one
 INSERT INTO requests (user_id, api_key_id, model_id, provider_id, preset, endpoint, status, prompt_tokens,
-    completion_tokens, cached_tokens, cost_micro, paid_by, latency_ms, ttft_ms, streamed, finish_reason, error, app, prompt_preview)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+    completion_tokens, cached_tokens, cost_micro, paid_by, latency_ms, ttft_ms, streamed, finish_reason, error, app, prompt_preview,
+    cache_hit, billed_user_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
 RETURNING id;
 
 -- name: GetRequest :one

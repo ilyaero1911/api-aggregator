@@ -51,12 +51,12 @@ function Playground() {
   const { data } = useLoad(() => get<{ data: Model[] }>("/api/models"));
   const models = data?.data.filter((m) => m.modality === "text") ?? [];
   const [model, setModel] = useState(sp.get("model") ?? "");
-  const [system, setSystem] = useState("");
+  const [system, setSystem] = useState(sp.get("system") ?? "");
   const [temp, setTemp] = useState(0.7);
   const [len, setLen] = useState<"256" | "1024" | "4096">("1024");
   const [stream, setStream] = useState(true);
   const [msgs, setMsgs] = useState<Msg[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(sp.get("prompt") ?? "");
   const [busy, setBusy] = useState(false);
   const abort = useRef<AbortController | null>(null);
   const log = useRef<HTMLDivElement>(null);

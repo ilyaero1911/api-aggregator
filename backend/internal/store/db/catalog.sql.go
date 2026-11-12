@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 )
 
@@ -385,8 +386,8 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()
 `
 
 type SetSettingParams struct {
-	Key   string `json:"key"`
-	Value []byte `json:"value"`
+	Key   string          `json:"key"`
+	Value json.RawMessage `json:"value"`
 }
 
 func (q *Queries) SetSetting(ctx context.Context, arg SetSettingParams) error {

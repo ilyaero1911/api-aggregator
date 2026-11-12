@@ -9,7 +9,7 @@ import { useI18n } from "@/lib/i18n/client";
 import type { User } from "@/lib/types";
 
 export default function Settings() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const S = t.settings;
   const toast = useToast();
   const { user, setUser } = useSession();
@@ -43,6 +43,10 @@ export default function Settings() {
           <div className="spread" style={{ alignItems: "flex-start" }}>
             <div><div>{S.logPrompts}</div><p className="hint">{S.logPromptsText}</p></div>
             <Switch checked={user.log_prompts} onChange={(v) => save({ log_prompts: v })} />
+          </div>
+          <div className="spread" style={{ alignItems: "flex-start", marginTop: 16 }}>
+            <div><div>{lang === "en" ? "Cache identical requests" : "Кэшировать одинаковые запросы"}</div><p className="hint">{lang === "en" ? "If the same question with the same parameters was asked within an hour, the saved answer is returned instantly for 10% of the price. You can turn it off per request with \"cache\": false." : "Если тот же вопрос с теми же параметрами уже задавали в течение часа, сохранённый ответ придёт мгновенно и за 10% цены. Для отдельного запроса можно выключить полем \"cache\": false."}</p></div>
+            <Switch checked={user.cache_enabled} onChange={(v) => save({ cache_enabled: v } as Partial<User>)} />
           </div>
         </section>
         <section>

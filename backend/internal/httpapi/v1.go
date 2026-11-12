@@ -96,7 +96,11 @@ func (s *Server) keyCaller(r *http.Request) gateway.Caller {
 	if app == "" {
 		app = r.Header.Get("HTTP-Referer")
 	}
-	return gateway.Caller{UserID: k.UserID, Key: k, LogPrompts: k.UserLogPrompts, App: truncate(app, 100)}
+	c := gateway.Caller{UserID: k.UserID, Key: k, LogPrompts: k.UserLogPrompts, App: truncate(app, 100), Cache: k.UserCache && !strings.EqualFold(r.Header.Get("X-Cache"), "off")}
+	if k.BillingUserID != nil {
+		c.BillTo = *k.BillingUserID
+	}
+	return c
 }
 
 func (s *Server) v1Chat(w http.ResponseWriter, r *http.Request) {
@@ -104,7 +108,11 @@ func (s *Server) v1Chat(w http.ResponseWriter, r *http.Request) {
 	if !readJSON(w, r, &req) {
 		return
 	}
-	s.serveChat(w, r, s.keyCaller(r), req)
+	c := s.keyCaller(r)
+	if req.Cache != nil && !*req.Cache {
+		c.Cache = false
+	}
+	s.serveChat(w, r, c, req)
 }
 
 func (s *Server) gatewayErr(w http.ResponseWriter, err error) {
@@ -127,12 +135,13 @@ type usageOut struct {
 	Cost             float64 `json:"cost"` // в рублях
 	Currency         string  `json:"currency"`
 	PaidBy           string  `json:"paid_by"`
+	Cached           bool    `json:"cached"`
 }
 
 func usageOf(o gateway.Outcome) usageOut {
 	u := o.Result.Usage
 	return usageOut{PromptTokens: u.PromptTokens, CompletionTokens: u.CompletionTokens, TotalTokens: u.PromptTokens + u.CompletionTokens,
-		Cost: float64(o.CostMicro) / 1e6, Currency: "RUB", PaidBy: o.PaidBy}
+		Cost: float64(o.CostMicro) / 1e6, Currency: "RUB", PaidBy: o.PaidBy, Cached: o.Cached}
 }
 
 func genID(id uuid.UUID) string { return "gen-" + strings.ReplaceAll(id.String(), "-", "") }

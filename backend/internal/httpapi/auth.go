@@ -35,6 +35,7 @@ type UserDTO struct {
 	Status      string     `json:"status"`
 	Locale      string     `json:"locale"`
 	LogPrompts  bool       `json:"log_prompts"`
+	CacheOn     bool       `json:"cache_enabled"`
 	HasPassword bool       `json:"has_password"`
 	HasGoogle   bool       `json:"has_google"`
 	CreatedAt   time.Time  `json:"created_at"`
@@ -43,7 +44,7 @@ type UserDTO struct {
 
 func userDTO(u db.User) UserDTO {
 	return UserDTO{ID: u.ID, Email: u.Email, Name: u.Name, AvatarURL: u.AvatarUrl, Role: u.Role, Status: u.Status,
-		Locale: u.Locale, LogPrompts: u.LogPrompts, HasPassword: u.PasswordHash != nil, HasGoogle: u.GoogleSub != nil,
+		Locale: u.Locale, LogPrompts: u.LogPrompts, CacheOn: u.CacheEnabled, HasPassword: u.PasswordHash != nil, HasGoogle: u.GoogleSub != nil,
 		CreatedAt: u.CreatedAt, LastLoginAt: u.LastLoginAt}
 }
 
@@ -271,11 +272,15 @@ func (s *Server) updateProfile(w http.ResponseWriter, r *http.Request) {
 		Name       *string `json:"name"`
 		Locale     *string `json:"locale"`
 		LogPrompts *bool   `json:"log_prompts"`
+		Cache      *bool   `json:"cache_enabled"`
 	}
 	if !readJSON(w, r, &in) {
 		return
 	}
-	p := db.UpdateProfileParams{ID: u.ID, Name: u.Name, Locale: u.Locale, LogPrompts: u.LogPrompts}
+	p := db.UpdateProfileParams{ID: u.ID, Name: u.Name, Locale: u.Locale, LogPrompts: u.LogPrompts, CacheEnabled: u.CacheEnabled}
+	if in.Cache != nil {
+		p.CacheEnabled = *in.Cache
+	}
 	if in.Name != nil {
 		p.Name = truncate(strings.TrimSpace(*in.Name), 100)
 	}

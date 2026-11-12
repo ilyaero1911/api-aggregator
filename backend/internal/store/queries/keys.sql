@@ -10,7 +10,7 @@ SELECT * FROM api_keys WHERE user_id = $1 AND kind = $2 AND revoked_at IS NULL O
 SELECT * FROM api_keys WHERE id = $1 AND user_id = $2 AND revoked_at IS NULL;
 
 -- name: GetKeyBySecret :one
-SELECT k.*, u.status AS user_status, u.log_prompts AS user_log_prompts
+SELECT k.*, u.status AS user_status, u.log_prompts AS user_log_prompts, u.cache_enabled AS user_cache
 FROM api_keys k JOIN users u ON u.id = k.user_id
 WHERE k.secret_hash = $1 AND k.revoked_at IS NULL;
 

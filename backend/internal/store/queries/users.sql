@@ -19,7 +19,7 @@ UPDATE users SET google_sub = $2, avatar_url = CASE WHEN avatar_url = '' THEN $3
 UPDATE users SET last_login_at = now() WHERE id = $1;
 
 -- name: UpdateProfile :one
-UPDATE users SET name = $2, locale = $3, log_prompts = $4 WHERE id = $1 RETURNING *;
+UPDATE users SET name = $2, locale = $3, log_prompts = $4, cache_enabled = $5 WHERE id = $1 RETURNING *;
 
 -- name: SetPassword :exec
 UPDATE users SET password_hash = $2 WHERE id = $1;

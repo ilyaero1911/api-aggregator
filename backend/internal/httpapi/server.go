@@ -102,6 +102,7 @@ func (s *Server) Router() http.Handler {
 			s.accountRoutes(r)
 			s.contentAccountRoutes(r)
 			s.supportUserRoutes(r)
+			s.teamRoutes(r)
 		})
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(s.requireAdmin)

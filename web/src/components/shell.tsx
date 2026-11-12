@@ -83,8 +83,8 @@ export function Shell({ nav, children, home, badge }: { nav: NavGroup[]; childre
         <div className="topbar">
           <div className="row">
             <button className="btn btn-ghost btn-sm burger" onClick={() => setOpen(true)} aria-label="menu"><Icon name="menu" size={16} /></button>
-            <Link href="/models" className="top-link"><Icon name="cube" size={15} />{t.nav.models}</Link>
-            <Link href="/docs" className="top-link"><Icon name="book" size={15} />{t.nav.docs}</Link>
+            <Link href={path.startsWith("/admin") ? "/models" : "/dashboard/models"} className="top-link"><Icon name="cube" size={15} />{t.nav.models}</Link>
+            <Link href={path.startsWith("/admin") ? "/docs" : "/dashboard/docs"} className="top-link"><Icon name="book" size={15} />{t.nav.docs}</Link>
           </div>
           <div className="row" style={{ gap: 10 }}>
             {balance !== null && (

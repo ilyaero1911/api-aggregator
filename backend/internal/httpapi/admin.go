@@ -455,6 +455,8 @@ var editableSettings = map[string]bool{
 	"footer_tagline_ru": true, "footer_tagline_en": true, "company_name": true, "company_inn": true, "company_ogrn": true,
 	"company_address": true, "company_email": true, "company_phone": true,
 	"tg_chat_ids": true, "tg_notify_support": true, "tg_notify_payments": true,
+	"company_kpp": true, "company_bank": true, "company_bik": true, "company_account": true, "company_corr_account": true,
+	"cache_ttl_sec": true, "cache_discount_bps": true,
 }
 
 func (s *Server) adminSaveSettings(w http.ResponseWriter, r *http.Request) {

@@ -5,6 +5,7 @@
 package db
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -47,15 +48,16 @@ type ApiKey struct {
 	LastUsedAt       *time.Time `json:"last_used_at"`
 	CreatedAt        time.Time  `json:"created_at"`
 	RevokedAt        *time.Time `json:"revoked_at"`
+	BillingUserID    *uuid.UUID `json:"billing_user_id"`
 }
 
 type AuditLog struct {
-	ID        int64      `json:"id"`
-	ActorID   *uuid.UUID `json:"actor_id"`
-	Action    string     `json:"action"`
-	Target    string     `json:"target"`
-	Details   []byte     `json:"details"`
-	CreatedAt time.Time  `json:"created_at"`
+	ID        int64           `json:"id"`
+	ActorID   *uuid.UUID      `json:"actor_id"`
+	Action    string          `json:"action"`
+	Target    string          `json:"target"`
+	Details   json.RawMessage `json:"details"`
+	CreatedAt time.Time       `json:"created_at"`
 }
 
 type ContentPage struct {
@@ -106,17 +108,18 @@ type ModelEndpoint struct {
 }
 
 type Payment struct {
-	ID              uuid.UUID  `json:"id"`
-	UserID          uuid.UUID  `json:"user_id"`
-	Provider        string     `json:"provider"`
-	Purpose         string     `json:"purpose"`
-	PlanID          *string    `json:"plan_id"`
-	AmountKopecks   int64      `json:"amount_kopecks"`
-	Status          string     `json:"status"`
-	ExternalID      string     `json:"external_id"`
-	ConfirmationUrl string     `json:"confirmation_url"`
-	CreatedAt       time.Time  `json:"created_at"`
-	PaidAt          *time.Time `json:"paid_at"`
+	ID              uuid.UUID       `json:"id"`
+	UserID          uuid.UUID       `json:"user_id"`
+	Provider        string          `json:"provider"`
+	Purpose         string          `json:"purpose"`
+	PlanID          *string         `json:"plan_id"`
+	AmountKopecks   int64           `json:"amount_kopecks"`
+	Status          string          `json:"status"`
+	ExternalID      string          `json:"external_id"`
+	ConfirmationUrl string          `json:"confirmation_url"`
+	CreatedAt       time.Time       `json:"created_at"`
+	PaidAt          *time.Time      `json:"paid_at"`
+	Meta            json.RawMessage `json:"meta"`
 }
 
 type Plan struct {
@@ -203,6 +206,8 @@ type Request struct {
 	App              string     `json:"app"`
 	PromptPreview    string     `json:"prompt_preview"`
 	CreatedAt        time.Time  `json:"created_at"`
+	CacheHit         bool       `json:"cache_hit"`
+	BilledUserID     *uuid.UUID `json:"billed_user_id"`
 }
 
 type Session struct {
@@ -215,9 +220,9 @@ type Session struct {
 }
 
 type Setting struct {
-	Key       string    `json:"key"`
-	Value     []byte    `json:"value"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Key       string          `json:"key"`
+	Value     json.RawMessage `json:"value"`
+	UpdatedAt time.Time       `json:"updated_at"`
 }
 
 type Subscription struct {
@@ -251,6 +256,25 @@ type SupportTicket struct {
 	CreatedAt     time.Time `json:"created_at"`
 }
 
+type TeamInvite struct {
+	ID          uuid.UUID  `json:"id"`
+	OwnerID     uuid.UUID  `json:"owner_id"`
+	Email       string     `json:"email"`
+	Role        string     `json:"role"`
+	BudgetMicro *int64     `json:"budget_micro"`
+	TokenHash   string     `json:"token_hash"`
+	CreatedAt   time.Time  `json:"created_at"`
+	AcceptedAt  *time.Time `json:"accepted_at"`
+}
+
+type TeamMember struct {
+	OwnerID     uuid.UUID `json:"owner_id"`
+	MemberID    uuid.UUID `json:"member_id"`
+	Role        string    `json:"role"`
+	BudgetMicro *int64    `json:"budget_micro"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
 type Transaction struct {
 	ID                uuid.UUID `json:"id"`
 	UserID            uuid.UUID `json:"user_id"`
@@ -278,6 +302,7 @@ type User struct {
 	AdminNote        string     `json:"admin_note"`
 	PdConsentAt      *time.Time `json:"pd_consent_at"`
 	PdConsentVersion string     `json:"pd_consent_version"`
+	CacheEnabled     bool       `json:"cache_enabled"`
 }
 
 type UserEvent struct {

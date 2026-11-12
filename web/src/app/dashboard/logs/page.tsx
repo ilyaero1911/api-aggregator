@@ -50,7 +50,7 @@ export default function Logs() {
                   <td className="r num">{num(r.prompt_tokens, lang)} → {num(r.completion_tokens, lang)}</td>
                   <td className="r num">{r.paid_by === "balance" ? rub(r.cost_micro, lang) : <span className="faint">{L.paid[r.paid_by]}</span>}</td>
                   <td className="r num">{ms(r.latency_ms)}</td>
-                  <td><span className={`tag ${r.status < 400 ? "tag-ok" : "tag-bad"}`}>{r.status}</span></td>
+                  <td><span className={`tag ${r.status < 400 ? "tag-ok" : "tag-bad"}`}>{r.status}</span>{r.cache_hit && <span className="tag tag-signal" style={{ marginLeft: 6 }}>{lang === "en" ? "cache" : "кэш"}</span>}</td>
                 </tr>
               ))}
             </tbody>

@@ -9,8 +9,9 @@ import { useI18n } from "@/lib/i18n/client";
 import type { Key } from "@/lib/types";
 import { Select } from "@/components/select";
 
-type Form = { id?: string; name: string; limit: string; reset: Key["limit_reset"]; rpm: string; expires: string; disabled: boolean };
-const empty: Form = { name: "", limit: "", reset: "never", rpm: "", expires: "", disabled: false };
+type Form = { id?: string; name: string; limit: string; reset: Key["limit_reset"]; rpm: string; expires: string; disabled: boolean; team: string };
+const empty: Form = { name: "", limit: "", reset: "never", rpm: "", expires: "", disabled: false, team: "" };
+type TeamRef = { owner_id: string; owner_email: string; owner_name: string };
 
 export function KeysPage({ kind }: { kind: "inference" | "management" }) {
   const { t, lang } = useI18n();
@@ -18,6 +19,8 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
   const toast = useToast();
   const { ask, node } = useConfirm();
   const { data, loading, reload } = useLoad(() => get<{ data: Key[] }>(`/api/keys?kind=${kind}`), [kind]);
+  const teams = useLoad(() => (kind === "inference" ? get<{ teams: TeamRef[] }>("/api/team") : Promise.resolve({ teams: [] as TeamRef[] })), [kind]);
+  const teamName = (id: string | null | undefined) => { const tm = teams.data?.teams.find((x) => x.owner_id === id); return tm ? tm.owner_name || tm.owner_email : ""; };
   const [form, setForm] = useState<Form | null>(null);
   const [secret, setSecret] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -25,6 +28,7 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
   const body = (f: Form) => ({
     name: f.name, kind, limit_rub: f.limit ? inputToRub(Number(f.limit), lang) : null, limit_reset: f.reset,
     rpm_limit: f.rpm ? Number(f.rpm) : null, expires_at: f.expires ? new Date(f.expires + "T23:59:59").toISOString() : null, disabled: f.disabled,
+    team_owner_id: !f.id && f.team ? f.team : undefined,
   });
 
   async function save() {
@@ -60,7 +64,7 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
 
   const toForm = (k: Key): Form => ({
     id: k.id, name: k.name, limit: k.limit_micro !== null ? String(microToInput(k.limit_micro, lang)) : "", reset: k.limit_reset,
-    rpm: k.rpm_limit ? String(k.rpm_limit) : "", expires: k.expires_at ? k.expires_at.slice(0, 10) : "", disabled: k.disabled,
+    rpm: k.rpm_limit ? String(k.rpm_limit) : "", expires: k.expires_at ? k.expires_at.slice(0, 10) : "", disabled: k.disabled, team: k.billing_user_id ?? "",
   });
 
   const keys = data?.data ?? [];
@@ -83,6 +87,7 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
                         <b style={{ fontWeight: 500 }}>{k.name}</b>
                         {k.disabled && <span className="tag">{K.disabled}</span>}
                         {expired && <span className="tag tag-bad">{K.expired}</span>}
+                        {k.billing_user_id && <span className="tag tag-signal">{lang === "en" ? "team" : "команда"} {teamName(k.billing_user_id)}</span>}
                       </div>
                       <div className="hint">
                         {k.limit_micro !== null && <>{fmt(K.periodSpent, { spent: rub(k.period_spent_micro, lang), limit: rub(k.limit_micro, lang) })} · {{ never: K.resetNever, daily: K.resetDaily, weekly: K.resetWeekly, monthly: K.resetMonthly }[k.limit_reset]}</>}
@@ -116,6 +121,14 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
             <label className="field"><span>{K.name}</span><input className="input" autoFocus value={form.name} placeholder={K.namePh} onChange={(e) => setForm({ ...form, name: e.target.value })} /></label>
             {kind === "inference" && (
               <>
+                {!form.id && (teams.data?.teams.length ?? 0) > 0 && (
+                  <label className="field"><span>{lang === "en" ? "Who pays" : "Чей баланс оплачивает"}</span>
+                    <Select value={form.team} onChange={(e) => setForm({ ...form, team: e.target.value })}>
+                      <option value="">{lang === "en" ? "My balance" : "Мой баланс"}</option>
+                      {teams.data?.teams.map((tm) => <option key={tm.owner_id} value={tm.owner_id}>{(lang === "en" ? "Team: " : "Команда: ") + (tm.owner_name || tm.owner_email)}</option>)}
+                    </Select>
+                  </label>
+                )}
                 <div className="grid-2" style={{ gap: 12 }}>
                   <label className="field"><span>{K.limit}</span><input className="input" type="number" min="0" step="1" value={form.limit} placeholder={K.limitPh} onChange={(e) => setForm({ ...form, limit: e.target.value })} /></label>
                   <label className="field"><span>{K.reset}</span>

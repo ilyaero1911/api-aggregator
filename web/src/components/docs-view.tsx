@@ -100,7 +100,7 @@ function sections(base: string, en: boolean): Sec[] {
   ];
 }
 
-export function DocsView({ base }: { base: string }) {
+export function DocsView({ base, inShell }: { base: string; inShell?: boolean }) {
   const { lang, t } = useI18n();
   const secs = sections(base, lang === "en");
   const [active, setActive] = useState(secs[0].id);
@@ -114,7 +114,7 @@ export function DocsView({ base }: { base: string }) {
   }, [lang]);
   const groups = Array.from(new Set(secs.map((s) => s.group)));
   return (
-    <div className="wrap docs2">
+    <div className={inShell ? "docs2 in-shell" : "wrap docs2"}>
       <nav className="docs2-nav">
         {groups.map((g) => (
           <div key={g} className="stack" style={{ ["--gap" as string]: "2px" }}>

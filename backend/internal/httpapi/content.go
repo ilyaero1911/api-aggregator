@@ -12,7 +12,8 @@ import (
 
 // Тексты сайта, новости и журнал аккаунта.
 
-var siteKeys = []string{"footer_tagline_ru", "footer_tagline_en", "company_name", "company_inn", "company_ogrn", "company_address", "company_email", "company_phone"}
+var siteKeys = []string{"footer_tagline_ru", "footer_tagline_en", "company_name", "company_inn", "company_ogrn", "company_address", "company_email", "company_phone",
+	"company_kpp", "company_bank", "company_bik", "company_account", "company_corr_account"}
 
 func (s *Server) siteInfo(r *http.Request) map[string]string {
 	all := s.settings.All(r.Context())

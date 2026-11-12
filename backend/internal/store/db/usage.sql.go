@@ -52,7 +52,7 @@ func (q *Queries) AdminDaily(ctx context.Context) ([]AdminDailyRow, error) {
 }
 
 const adminListRequests = `-- name: AdminListRequests :many
-SELECT r.id, r.user_id, r.api_key_id, r.model_id, r.provider_id, r.preset, r.endpoint, r.status, r.prompt_tokens, r.completion_tokens, r.cached_tokens, r.cost_micro, r.paid_by, r.latency_ms, r.ttft_ms, r.streamed, r.finish_reason, r.error, r.app, r.prompt_preview, r.created_at, u.email FROM requests r JOIN users u ON u.id = r.user_id
+SELECT r.id, r.user_id, r.api_key_id, r.model_id, r.provider_id, r.preset, r.endpoint, r.status, r.prompt_tokens, r.completion_tokens, r.cached_tokens, r.cost_micro, r.paid_by, r.latency_ms, r.ttft_ms, r.streamed, r.finish_reason, r.error, r.app, r.prompt_preview, r.created_at, r.cache_hit, r.billed_user_id, u.email FROM requests r JOIN users u ON u.id = r.user_id
 WHERE ($1::text = '' OR u.email ILIKE '%' || $1 || '%' OR r.model_id ILIKE '%' || $1 || '%' OR r.id::text ILIKE $1 || '%')
 ORDER BY r.created_at DESC LIMIT $3 OFFSET $2
 `
@@ -85,6 +85,8 @@ type AdminListRequestsRow struct {
 	App              string     `json:"app"`
 	PromptPreview    string     `json:"prompt_preview"`
 	CreatedAt        time.Time  `json:"created_at"`
+	CacheHit         bool       `json:"cache_hit"`
+	BilledUserID     *uuid.UUID `json:"billed_user_id"`
 	Email            string     `json:"email"`
 }
 
@@ -119,6 +121,8 @@ func (q *Queries) AdminListRequests(ctx context.Context, arg AdminListRequestsPa
 			&i.App,
 			&i.PromptPreview,
 			&i.CreatedAt,
+			&i.CacheHit,
+			&i.BilledUserID,
 			&i.Email,
 		); err != nil {
 			return nil, err
@@ -316,7 +320,7 @@ func (q *Queries) GetPresetBySlug(ctx context.Context, arg GetPresetBySlugParams
 }
 
 const getRequest = `-- name: GetRequest :one
-SELECT r.id, r.user_id, r.api_key_id, r.model_id, r.provider_id, r.preset, r.endpoint, r.status, r.prompt_tokens, r.completion_tokens, r.cached_tokens, r.cost_micro, r.paid_by, r.latency_ms, r.ttft_ms, r.streamed, r.finish_reason, r.error, r.app, r.prompt_preview, r.created_at, coalesce(k.name, '')::text AS key_name FROM requests r LEFT JOIN api_keys k ON k.id = r.api_key_id
+SELECT r.id, r.user_id, r.api_key_id, r.model_id, r.provider_id, r.preset, r.endpoint, r.status, r.prompt_tokens, r.completion_tokens, r.cached_tokens, r.cost_micro, r.paid_by, r.latency_ms, r.ttft_ms, r.streamed, r.finish_reason, r.error, r.app, r.prompt_preview, r.created_at, r.cache_hit, r.billed_user_id, coalesce(k.name, '')::text AS key_name FROM requests r LEFT JOIN api_keys k ON k.id = r.api_key_id
 WHERE r.id = $1 AND r.user_id = $2
 `
 
@@ -347,6 +351,8 @@ type GetRequestRow struct {
 	App              string     `json:"app"`
 	PromptPreview    string     `json:"prompt_preview"`
 	CreatedAt        time.Time  `json:"created_at"`
+	CacheHit         bool       `json:"cache_hit"`
+	BilledUserID     *uuid.UUID `json:"billed_user_id"`
 	KeyName          string     `json:"key_name"`
 }
 
@@ -375,6 +381,8 @@ func (q *Queries) GetRequest(ctx context.Context, arg GetRequestParams) (GetRequ
 		&i.App,
 		&i.PromptPreview,
 		&i.CreatedAt,
+		&i.CacheHit,
+		&i.BilledUserID,
 		&i.KeyName,
 	)
 	return i, err
@@ -414,8 +422,9 @@ func (q *Queries) GlobalModelRanking(ctx context.Context, since time.Time) ([]Gl
 
 const insertRequest = `-- name: InsertRequest :one
 INSERT INTO requests (user_id, api_key_id, model_id, provider_id, preset, endpoint, status, prompt_tokens,
-    completion_tokens, cached_tokens, cost_micro, paid_by, latency_ms, ttft_ms, streamed, finish_reason, error, app, prompt_preview)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+    completion_tokens, cached_tokens, cost_micro, paid_by, latency_ms, ttft_ms, streamed, finish_reason, error, app, prompt_preview,
+    cache_hit, billed_user_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
 RETURNING id
 `
 
@@ -439,6 +448,8 @@ type InsertRequestParams struct {
 	Error            string     `json:"error"`
 	App              string     `json:"app"`
 	PromptPreview    string     `json:"prompt_preview"`
+	CacheHit         bool       `json:"cache_hit"`
+	BilledUserID     *uuid.UUID `json:"billed_user_id"`
 }
 
 func (q *Queries) InsertRequest(ctx context.Context, arg InsertRequestParams) (uuid.UUID, error) {
@@ -462,6 +473,8 @@ func (q *Queries) InsertRequest(ctx context.Context, arg InsertRequestParams) (u
 		arg.Error,
 		arg.App,
 		arg.PromptPreview,
+		arg.CacheHit,
+		arg.BilledUserID,
 	)
 	var id uuid.UUID
 	err := row.Scan(&id)
@@ -506,7 +519,7 @@ func (q *Queries) ListPresets(ctx context.Context, userID uuid.UUID) ([]Preset, 
 }
 
 const listRequests = `-- name: ListRequests :many
-SELECT r.id, r.user_id, r.api_key_id, r.model_id, r.provider_id, r.preset, r.endpoint, r.status, r.prompt_tokens, r.completion_tokens, r.cached_tokens, r.cost_micro, r.paid_by, r.latency_ms, r.ttft_ms, r.streamed, r.finish_reason, r.error, r.app, r.prompt_preview, r.created_at, coalesce(k.name, '')::text AS key_name FROM requests r LEFT JOIN api_keys k ON k.id = r.api_key_id
+SELECT r.id, r.user_id, r.api_key_id, r.model_id, r.provider_id, r.preset, r.endpoint, r.status, r.prompt_tokens, r.completion_tokens, r.cached_tokens, r.cost_micro, r.paid_by, r.latency_ms, r.ttft_ms, r.streamed, r.finish_reason, r.error, r.app, r.prompt_preview, r.created_at, r.cache_hit, r.billed_user_id, coalesce(k.name, '')::text AS key_name FROM requests r LEFT JOIN api_keys k ON k.id = r.api_key_id
 WHERE r.user_id = $1
   AND ($2::text = '' OR r.model_id = $2)
   AND ($3::text = '' OR ($3 = 'ok' AND r.status < 400) OR ($3 = 'error' AND r.status >= 400))
@@ -548,6 +561,8 @@ type ListRequestsRow struct {
 	App              string     `json:"app"`
 	PromptPreview    string     `json:"prompt_preview"`
 	CreatedAt        time.Time  `json:"created_at"`
+	CacheHit         bool       `json:"cache_hit"`
+	BilledUserID     *uuid.UUID `json:"billed_user_id"`
 	KeyName          string     `json:"key_name"`
 }
 
@@ -590,6 +605,8 @@ func (q *Queries) ListRequests(ctx context.Context, arg ListRequestsParams) ([]L
 			&i.App,
 			&i.PromptPreview,
 			&i.CreatedAt,
+			&i.CacheHit,
+			&i.BilledUserID,
 			&i.KeyName,
 		); err != nil {
 			return nil, err

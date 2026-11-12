@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -42,7 +43,20 @@ type Caller struct {
 	Key        *db.GetKeyBySecretRow
 	LogPrompts bool
 	App        string
+	// BillTo — чей баланс платит: владелец команды для командного ключа. Нулевой — сам пользователь.
+	BillTo uuid.UUID
+	// Cache — можно ли отдать ответ из кэша одинаковых запросов.
+	Cache bool
 }
+
+func (c Caller) payer() uuid.UUID {
+	if c.BillTo != uuid.Nil {
+		return c.BillTo
+	}
+	return c.UserID
+}
+
+func (c Caller) team() bool { return c.BillTo != uuid.Nil && c.BillTo != c.UserID }
 
 type Engine struct {
 	q        *db.Queries
@@ -104,6 +118,7 @@ type Outcome struct {
 	CostMicro  int64
 	PaidBy     string
 	Images     []string
+	Cached     bool
 }
 
 // resolve проверяет ключ, пресет, лимиты и подбирает список моделей для попыток.
@@ -173,9 +188,20 @@ func (e *Engine) prepare(ctx context.Context, c Caller, req *ChatRequest) ([]str
 
 func (e *Engine) choosePayment(ctx context.Context, c Caller, m db.Model) (plan, error) {
 	p := plan{model: m}
-	sub, err := e.q.GetActiveSubscription(ctx, c.UserID)
+	sub, err := e.q.GetActiveSubscription(ctx, c.payer())
 	if err == nil {
 		p.sub = &sub
+	}
+	if c.team() {
+		mem, err := e.q.GetMembership(ctx, db.GetMembershipParams{OwnerID: c.BillTo, MemberID: c.UserID})
+		if err != nil {
+			return p, apiErr(403, "team_access_revoked", "You are no longer a member of this team")
+		}
+		if mem.BudgetMicro != nil {
+			if spent, _ := e.q.MemberSpentMonth(ctx, db.MemberSpentMonthParams{UserID: c.UserID, BilledUserID: &c.BillTo}); spent >= *mem.BudgetMicro {
+				return p, apiErr(402, "team_budget", "Your monthly team budget is used up")
+			}
+		}
 	}
 	if IsFree(m) {
 		limit := e.settings.Int(ctx, settings.FreeDailyRequests, 50)
@@ -197,7 +223,7 @@ func (e *Engine) choosePayment(ctx context.Context, c Caller, m db.Model) (plan,
 		p.paidBy = "plan"
 		return p, nil
 	}
-	w, err := e.q.GetWallet(ctx, c.UserID)
+	w, err := e.q.GetWallet(ctx, c.payer())
 	if err != nil || w.BalanceMicro <= 0 {
 		return p, apiErr(402, "insufficient_balance", "Insufficient balance. Top up in the dashboard to continue.")
 	}
@@ -300,6 +326,24 @@ func (e *Engine) Chat(ctx context.Context, c Caller, req ChatRequest, onStart fu
 	if len(req.Messages) == 0 {
 		return Outcome{}, apiErr(400, "messages_required", "Field 'messages' must not be empty")
 	}
+	// кэш одинаковых запросов: тот же набор моделей, сообщения и параметры
+	ck := ""
+	if c.Cache {
+		ck = "cache:" + cacheKey(models, req)
+		if raw, err := e.rdb.Get(ctx, ck).Bytes(); err == nil {
+			var hit cachedAnswer
+			if json.Unmarshal(raw, &hit) == nil {
+				out, err := e.replay(ctx, c, req, preset, hit, onStart, onDelta, start)
+				if err == nil {
+					return out, nil
+				}
+				var ae *APIError
+				if errors.As(err, &ae) {
+					return Outcome{}, err
+				}
+			}
+		}
+	}
 	var order []string
 	allowFallbacks := true
 	if req.Provider != nil {
@@ -369,7 +413,13 @@ func (e *Engine) Chat(ctx context.Context, c Caller, req ChatRequest, onStart fu
 				_ = onStart(modelID)
 			}
 			release()
-			out := e.settle(ctx, c, p, ep.ProviderID, preset, "chat", req, res, nil, start, onDelta != nil)
+			if ck != "" && res.FinishReason != "" {
+				if raw, err := json.Marshal(cachedAnswer{Model: modelID, Provider: ep.ProviderID, Content: res.Content, Finish: res.FinishReason, Usage: res.Usage}); err == nil {
+					ttl := time.Duration(e.settings.Int(ctx, "cache_ttl_sec", 3600)) * time.Second
+					e.rdb.Set(context.WithoutCancel(ctx), ck, raw, ttl)
+				}
+			}
+			out := e.settle(ctx, c, p, ep.ProviderID, preset, "chat", req, res, nil, start, onDelta != nil, false)
 			return out, nil
 		}
 		release()
@@ -422,7 +472,7 @@ func (e *Engine) Image(ctx context.Context, c Caller, model, prompt string, n in
 			continue
 		}
 		res := Result{Usage: Usage{PromptTokens: EstimateTokens(prompt)}, FinishReason: "stop"}
-		return e.settle(ctx, c, p, ep.ProviderID, "", "image", req, res, imgs, start, false), nil
+		return e.settle(ctx, c, p, ep.ProviderID, "", "image", req, res, imgs, start, false, false), nil
 	}
 	return Outcome{}, lastErr
 }
@@ -443,11 +493,23 @@ func preview(c Caller, req ChatRequest) string {
 	return ""
 }
 
-func (e *Engine) settle(ctx context.Context, c Caller, p plan, provider, preset, endpoint string, req ChatRequest, res Result, imgs []string, start time.Time, streamed bool) Outcome {
+func (e *Engine) settle(ctx context.Context, c Caller, p plan, provider, preset, endpoint string, req ChatRequest, res Result, imgs []string, start time.Time, streamed, cacheHit bool) Outcome {
 	ctx = context.WithoutCancel(ctx)
 	cost := int64(0)
 	if p.paidBy == "balance" {
 		cost = e.cost(ctx, p.model, res.Usage, len(imgs))
+	}
+	planTokens := int64(res.Usage.PromptTokens + res.Usage.CompletionTokens)
+	if cacheHit {
+		// ответ из кэша: модель не вызывалась, берём только малую часть цены
+		keep := 10000 - e.settings.Int(ctx, "cache_discount_bps", 9000)
+		cost = cost * keep / 10000
+		planTokens = planTokens * keep / 10000
+		res.Usage.CachedTokens = res.Usage.PromptTokens
+	}
+	var billed *uuid.UUID
+	if c.team() {
+		billed = &c.BillTo
 	}
 	var keyID *uuid.UUID
 	if c.Key != nil {
@@ -459,20 +521,21 @@ func (e *Engine) settle(ctx context.Context, c Caller, p plan, provider, preset,
 		CachedTokens: int32(res.Usage.CachedTokens), CostMicro: cost, PaidBy: p.paidBy,
 		LatencyMs: int32(time.Since(start).Milliseconds()), TtftMs: int32(res.TTFT.Milliseconds()), Streamed: streamed,
 		FinishReason: res.FinishReason, App: c.App, PromptPreview: preview(c, req),
+		CacheHit: cacheHit, BilledUserID: billed,
 	})
 	if err != nil {
 		e.log.Error("gateway: log request", "err", err)
 	}
 	switch p.paidBy {
 	case "balance":
-		if _, err := e.billing.Charge(ctx, c.UserID, cost, p.model.Name, id.String()); err != nil {
+		if _, err := e.billing.Charge(ctx, c.payer(), cost, p.model.Name, id.String()); err != nil {
 			e.log.Error("gateway: charge", "err", err, "request", id)
 		}
 		if keyID != nil {
 			_ = e.q.AddKeySpend(ctx, db.AddKeySpendParams{ID: *keyID, Amount: cost})
 		}
 	case "plan":
-		_ = e.q.AddSubscriptionTokens(ctx, db.AddSubscriptionTokensParams{ID: p.sub.ID, Tokens: int64(res.Usage.PromptTokens + res.Usage.CompletionTokens)})
+		_ = e.q.AddSubscriptionTokens(ctx, db.AddSubscriptionTokensParams{ID: p.sub.ID, Tokens: planTokens})
 		if keyID != nil {
 			_ = e.q.AddKeySpend(ctx, db.AddKeySpendParams{ID: *keyID, Amount: 0})
 		}
@@ -481,7 +544,7 @@ func (e *Engine) settle(ctx context.Context, c Caller, p plan, provider, preset,
 			_ = e.q.AddKeySpend(ctx, db.AddKeySpendParams{ID: *keyID, Amount: 0})
 		}
 	}
-	return Outcome{ID: id, Model: p.model.ID, ProviderID: provider, Result: res, CostMicro: cost, PaidBy: p.paidBy, Images: imgs}
+	return Outcome{ID: id, Model: p.model.ID, ProviderID: provider, Result: res, CostMicro: cost, PaidBy: p.paidBy, Images: imgs, Cached: cacheHit}
 }
 
 func (e *Engine) logFailure(ctx context.Context, c Caller, model, preset, endpoint string, req ChatRequest, err error, start time.Time) {

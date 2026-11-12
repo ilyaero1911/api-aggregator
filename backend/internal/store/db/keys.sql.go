@@ -43,7 +43,7 @@ func (q *Queries) CountActiveKeys(ctx context.Context) (int64, error) {
 const createKey = `-- name: CreateKey :one
 INSERT INTO api_keys (user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, rpm_limit, expires_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at
+RETURNING id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at, billing_user_id
 `
 
 type CreateKeyParams struct {
@@ -89,12 +89,13 @@ func (q *Queries) CreateKey(ctx context.Context, arg CreateKeyParams) (ApiKey, e
 		&i.LastUsedAt,
 		&i.CreatedAt,
 		&i.RevokedAt,
+		&i.BillingUserID,
 	)
 	return i, err
 }
 
 const getKey = `-- name: GetKey :one
-SELECT id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at FROM api_keys WHERE id = $1 AND user_id = $2 AND revoked_at IS NULL
+SELECT id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at, billing_user_id FROM api_keys WHERE id = $1 AND user_id = $2 AND revoked_at IS NULL
 `
 
 type GetKeyParams struct {
@@ -123,12 +124,13 @@ func (q *Queries) GetKey(ctx context.Context, arg GetKeyParams) (ApiKey, error) 
 		&i.LastUsedAt,
 		&i.CreatedAt,
 		&i.RevokedAt,
+		&i.BillingUserID,
 	)
 	return i, err
 }
 
 const getKeyBySecret = `-- name: GetKeyBySecret :one
-SELECT k.id, k.user_id, k.kind, k.name, k.prefix, k.secret_hash, k.limit_micro, k.limit_reset, k.period_spent_micro, k.period_started_at, k.total_spent_micro, k.rpm_limit, k.disabled, k.expires_at, k.last_used_at, k.created_at, k.revoked_at, u.status AS user_status, u.log_prompts AS user_log_prompts
+SELECT k.id, k.user_id, k.kind, k.name, k.prefix, k.secret_hash, k.limit_micro, k.limit_reset, k.period_spent_micro, k.period_started_at, k.total_spent_micro, k.rpm_limit, k.disabled, k.expires_at, k.last_used_at, k.created_at, k.revoked_at, k.billing_user_id, u.status AS user_status, u.log_prompts AS user_log_prompts, u.cache_enabled AS user_cache
 FROM api_keys k JOIN users u ON u.id = k.user_id
 WHERE k.secret_hash = $1 AND k.revoked_at IS NULL
 `
@@ -151,8 +153,10 @@ type GetKeyBySecretRow struct {
 	LastUsedAt       *time.Time `json:"last_used_at"`
 	CreatedAt        time.Time  `json:"created_at"`
 	RevokedAt        *time.Time `json:"revoked_at"`
+	BillingUserID    *uuid.UUID `json:"billing_user_id"`
 	UserStatus       string     `json:"user_status"`
 	UserLogPrompts   bool       `json:"user_log_prompts"`
+	UserCache        bool       `json:"user_cache"`
 }
 
 func (q *Queries) GetKeyBySecret(ctx context.Context, secretHash string) (GetKeyBySecretRow, error) {
@@ -176,14 +180,16 @@ func (q *Queries) GetKeyBySecret(ctx context.Context, secretHash string) (GetKey
 		&i.LastUsedAt,
 		&i.CreatedAt,
 		&i.RevokedAt,
+		&i.BillingUserID,
 		&i.UserStatus,
 		&i.UserLogPrompts,
+		&i.UserCache,
 	)
 	return i, err
 }
 
 const listKeys = `-- name: ListKeys :many
-SELECT id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at FROM api_keys WHERE user_id = $1 AND kind = $2 AND revoked_at IS NULL ORDER BY created_at DESC
+SELECT id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at, billing_user_id FROM api_keys WHERE user_id = $1 AND kind = $2 AND revoked_at IS NULL ORDER BY created_at DESC
 `
 
 type ListKeysParams struct {
@@ -218,6 +224,7 @@ func (q *Queries) ListKeys(ctx context.Context, arg ListKeysParams) ([]ApiKey, e
 			&i.LastUsedAt,
 			&i.CreatedAt,
 			&i.RevokedAt,
+			&i.BillingUserID,
 		); err != nil {
 			return nil, err
 		}
@@ -258,7 +265,7 @@ func (q *Queries) RevokeKey(ctx context.Context, arg RevokeKeyParams) (int64, er
 const updateKey = `-- name: UpdateKey :one
 UPDATE api_keys SET name = $3, limit_micro = $4, limit_reset = $5, rpm_limit = $6, disabled = $7, expires_at = $8
 WHERE id = $1 AND user_id = $2 AND revoked_at IS NULL
-RETURNING id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at
+RETURNING id, user_id, kind, name, prefix, secret_hash, limit_micro, limit_reset, period_spent_micro, period_started_at, total_spent_micro, rpm_limit, disabled, expires_at, last_used_at, created_at, revoked_at, billing_user_id
 `
 
 type UpdateKeyParams struct {
@@ -302,6 +309,7 @@ func (q *Queries) UpdateKey(ctx context.Context, arg UpdateKeyParams) (ApiKey, e
 		&i.LastUsedAt,
 		&i.CreatedAt,
 		&i.RevokedAt,
+		&i.BillingUserID,
 	)
 	return i, err
 }

@@ -10,14 +10,17 @@ import { LangSwitch, Logo, Mark, ThemeToggle } from "./brand";
 import { Icon } from "./icons";
 
 export function SiteHeader() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const path = usePathname();
   const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [menu, setMenu] = useState(false);
+  useEffect(() => { setMenu(false); }, [path]);
   useEffect(() => { get<{ user: User | null }>("/api/auth/me").then((r) => setUser(r.user)).catch(() => setUser(null)); }, []);
   const links = [
     { href: "/models", label: t.nav.models, icon: "cube" as const },
     { href: "/pricing", label: t.nav.pricing, icon: "tag" as const },
     { href: "/rankings", label: t.nav.rankings, icon: "trophy" as const },
+    { href: "/scenarios", label: lang === "en" ? "Scenarios" : "Сценарии", icon: "sparkle" as const },
     { href: "/docs", label: t.nav.docs, icon: "book" as const },
   ];
   return (
@@ -31,6 +34,7 @@ export function SiteHeader() {
         </nav>
         <div className="row" style={{ marginLeft: "auto", gap: 10 }}>
           <LangSwitch />
+          <button className="btn btn-ghost btn-sm site-burger" onClick={() => setMenu((m) => !m)} aria-label="menu"><Icon name={menu ? "close" : "menu"} size={18} /></button>
           <div className="auth-slot" style={{ visibility: user === undefined ? "hidden" : "visible" }}>
             {user ? (
               <Link className="btn btn-sm" href="/dashboard">{t.common.dashboard} <Icon name="arrow" size={15} /></Link>
@@ -43,6 +47,14 @@ export function SiteHeader() {
           </div>
         </div>
       </div>
+      {menu && (
+        <nav className="site-menu">
+          {links.map((l) => <Link key={l.href} href={l.href} aria-current={path.startsWith(l.href) ? "page" : undefined}><Icon name={l.icon} size={18} />{l.label}</Link>)}
+          <div className="site-menu-auth">
+            {user ? <Link className="btn" href="/dashboard">{t.common.dashboard}</Link> : <><Link className="btn btn-ghost" href="/login">{t.common.signIn}</Link><Link className="btn btn-signal" href="/register">{t.common.signUp}</Link></>}
+          </div>
+        </nav>
+      )}
     </header>
   );
 }
