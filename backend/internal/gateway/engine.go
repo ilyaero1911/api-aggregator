@@ -32,7 +32,9 @@ type APIError struct {
 
 func (e *APIError) Error() string { return e.Message }
 
-func apiErr(status int, code, msg string) *APIError { return &APIError{Status: status, Code: code, Message: msg} }
+func apiErr(status int, code, msg string) *APIError {
+	return &APIError{Status: status, Code: code, Message: msg}
+}
 
 // Caller — кто делает запрос: ключ API или сессия в плейграунде (Key == nil).
 type Caller struct {

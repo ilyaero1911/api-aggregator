@@ -1,105 +1,124 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Drawer, Modal, PageHead, Pager, useConfirm, useLoad, useToast } from "@/components/ui";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useL } from "@/components/admin-kit";
+import { Modal, PageHead, Pager, Skeleton, useLoad, useToast } from "@/components/ui";
 import { ApiError, get, post } from "@/lib/api";
 import { ago, date, kopecks, num, rub } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
-import type { Key, Payment, Plan, Subscription, Transaction, User, Wallet } from "@/lib/types";
+import type { Plan, User } from "@/lib/types";
 
-type Row = User & { balance_micro: number; plan_id: string };
-type Detail = { user: User; wallet: Wallet; transactions: Transaction[]; subscriptions: Subscription[]; keys: Key[]; payments: Payment[]; usage: { requests: number; cost_micro: number; prompt_tokens: number; completion_tokens: number } };
+type Row = {
+  id: string; email: string; name: string; role: string; status: string; created_at: string; last_login_at: string | null; admin_note: string;
+  has_password: boolean; has_google: boolean; balance_micro: number; plan_id: string; plan_ends_at: string | null;
+  requests_30d: number; spend_30d: number; last_request_at: string | null; paid_kopecks: number; keys: number;
+};
 
-export default function Users() {
-  const { t, lang } = useI18n();
-  const A = t.adm;
+function Users() {
+  const { lang } = useI18n();
+  const L = useL();
   const toast = useToast();
-  const { ask, node } = useConfirm();
+  const router = useRouter();
+  const sp = useSearchParams();
   const [q, setQ] = useState("");
   const [qd, setQd] = useState("");
+  const [role, setRole] = useState("");
+  const [status, setStatus] = useState("");
+  const [plan, setPlan] = useState("");
+  const [sort, setSort] = useState(sp.get("sort") ?? "");
   const [off, setOff] = useState(0);
   useEffect(() => { const id = setTimeout(() => { setQd(q); setOff(0); }, 300); return () => clearTimeout(id); }, [q]);
-  const list = useLoad(() => get<{ data: Row[]; total: number }>(`/api/admin/users?q=${encodeURIComponent(qd)}&offset=${off}&limit=50`), [qd, off]);
+  const qs = `q=${encodeURIComponent(qd)}&role=${role}&status=${status}&plan=${plan}&sort=${sort}&offset=${off}&limit=50`;
+  const { data, loading, reload } = useLoad(() => get<{ data: Row[]; total: number }>(`/api/admin/users?${qs}`), [qs]);
   const plans = useLoad(() => get<{ data: Plan[] }>("/api/admin/plans"));
-  const [sel, setSel] = useState<string | null>(null);
-  const det = useLoad(() => (sel ? get<Detail>(`/api/admin/users/${sel}`) : Promise.resolve(null)), [sel]);
-  const [adj, setAdj] = useState<{ amount: string; reason: string } | null>(null);
+  const [nu, setNu] = useState<{ email: string; name: string; password: string; role: string; balance: string; plan: string } | null>(null);
 
-  const act = async (fn: () => Promise<unknown>) => {
-    try { await fn(); toast(t.common.saved); det.reload(); list.reload(); } catch (e) { toast(e instanceof ApiError ? e.message : t.common.error, true); }
+  const create = async () => {
+    if (!nu) return;
+    try {
+      const u = await post<User>("/api/admin/users", { email: nu.email, name: nu.name, password: nu.password, role: nu.role, balance_rub: Number(nu.balance || 0), plan_id: nu.plan });
+      setNu(null); toast(L("Пользователь создан", "User created")); router.push(`/admin/users/${u.id}`);
+    } catch (e) { toast(e instanceof ApiError ? e.message : "error", true); }
   };
-  const d = det.data;
+  const setF = (fn: () => void) => { fn(); setOff(0); };
 
   return (
     <>
-      <PageHead title={A.users} lead={list.data ? `${num(list.data.total, lang)}` : undefined}
-        actions={<input className="input" style={{ width: 280 }} placeholder={`${A.email}…`} value={q} onChange={(e) => setQ(e.target.value)} />} />
-      <div className="table-wrap">
-        <table className="table">
-          <thead><tr><th>{A.email}</th><th>{A.role}</th><th>{A.plan}</th><th className="r">{A.balance}</th><th>{A.registered}</th><th>{A.lastLogin}</th></tr></thead>
-          <tbody>
-            {list.data?.data.map((u) => (
-              <tr key={u.id} className="clickable" onClick={() => setSel(u.id)} style={{ opacity: u.status === "blocked" ? 0.5 : 1 }}>
-                <td><div>{u.email}</div><div className="hint">{u.name}{u.has_google ? " · Google" : ""}</div></td>
-                <td>{u.role === "admin" ? <span className="tag tag-ink">admin</span> : <span className="faint small">user</span>}{u.status === "blocked" && <span className="tag tag-bad" style={{ marginLeft: 6 }}>blocked</span>}</td>
-                <td className="mono small">{u.plan_id || "—"}</td>
-                <td className="r num">{rub(u.balance_micro, lang)}</td>
-                <td className="small muted">{date(u.created_at, lang)}</td>
-                <td className="small muted">{ago(u.last_login_at, lang)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <PageHead title={L("Пользователи", "Users")} lead={data ? L(`Найдено: ${num(data.total, lang)}`, `Found: ${num(data.total, lang)}`) : undefined}
+        actions={<button className="btn" onClick={() => setNu({ email: "", name: "", password: "", role: "user", balance: "", plan: "" })}>+ {L("Добавить пользователя", "Add user")}</button>} />
+      <div className="filters">
+        <input className="input" style={{ minWidth: 260 }} placeholder={L("Email, имя или ID", "Email, name or ID")} value={q} onChange={(e) => setQ(e.target.value)} />
+        <select className="select" value={role} onChange={(e) => setF(() => setRole(e.target.value))}><option value="">{L("Любая роль", "Any role")}</option><option value="user">user</option><option value="admin">admin</option></select>
+        <select className="select" value={status} onChange={(e) => setF(() => setStatus(e.target.value))}><option value="">{L("Любой статус", "Any status")}</option><option value="active">{L("Активные", "Active")}</option><option value="blocked">{L("Заблокированные", "Blocked")}</option></select>
+        <select className="select" value={plan} onChange={(e) => setF(() => setPlan(e.target.value))}>
+          <option value="">{L("Любой тариф", "Any plan")}</option><option value="none">{L("Без тарифа", "No plan")}</option>
+          {plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}
+        </select>
+        <select className="select" value={sort} onChange={(e) => setF(() => setSort(e.target.value))}>
+          <option value="">{L("Сначала новые", "Newest first")}</option><option value="active">{L("По активности", "Recently active")}</option>
+          <option value="spend">{L("Больше потратили (30 дн.)", "Top spend (30d)")}</option><option value="paid">{L("Больше заплатили", "Top paid")}</option>
+          <option value="balance">{L("Больший баланс", "Highest balance")}</option><option value="requests">{L("Больше запросов", "Most requests")}</option>
+        </select>
+        <button className="btn btn-ghost btn-sm" onClick={reload}>↻</button>
       </div>
-      {list.data && <Pager offset={off} limit={50} total={list.data.total} onChange={setOff} />}
+      {loading && !data ? <Skeleton h={300} /> : (
+        <div className="table-wrap">
+          <table className="table">
+            <thead><tr>
+              <th>{L("Пользователь", "User")}</th><th>{L("Тариф", "Plan")}</th><th className="r">{L("Баланс", "Balance")}</th>
+              <th className="r">{L("Потратил 30 дн.", "Spent 30d")}</th><th className="r">{L("Запросов 30 дн.", "Requests 30d")}</th>
+              <th className="r">{L("Оплатил всего", "Paid total")}</th><th className="r">{L("Ключей", "Keys")}</th>
+              <th>{L("Активность", "Activity")}</th><th>{L("Регистрация", "Joined")}</th>
+            </tr></thead>
+            <tbody>
+              {data?.data.map((u) => (
+                <tr key={u.id} className="clickable" onClick={() => router.push(`/admin/users/${u.id}`)} style={{ opacity: u.status === "blocked" ? 0.55 : 1 }}>
+                  <td>
+                    <div className="row" style={{ gap: 6 }}>
+                      <span>{u.email}</span>
+                      {u.role === "admin" && <span className="tag tag-ink">admin</span>}
+                      {u.status === "blocked" && <span className="tag tag-bad">{L("блок", "blocked")}</span>}
+                      {u.has_google && <span className="tag">G</span>}
+                    </div>
+                    <div className="hint">{u.name}{u.admin_note && <> · <span title={u.admin_note} className="signal">{u.admin_note.slice(0, 40)}</span></>}</div>
+                  </td>
+                  <td className="small">{u.plan_id ? <><span className="mono">{u.plan_id}</span><div className="hint">{L("до", "until")} {date(u.plan_ends_at, lang)}</div></> : <span className="faint">—</span>}</td>
+                  <td className={`r num ${u.balance_micro < 0 ? "bad" : ""}`}>{rub(u.balance_micro, lang)}</td>
+                  <td className="r num">{rub(u.spend_30d, lang)}</td>
+                  <td className="r num">{num(u.requests_30d, lang)}</td>
+                  <td className="r num">{kopecks(u.paid_kopecks, lang)}</td>
+                  <td className="r num">{u.keys}</td>
+                  <td className="small muted">{ago(u.last_request_at ?? u.last_login_at, lang)}</td>
+                  <td className="small muted">{date(u.created_at, lang)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {data && <Pager offset={off} limit={50} total={data.total} onChange={setOff} />}
 
-      <Drawer open={!!sel} onClose={() => setSel(null)}>
-        {d && (
-          <div style={{ padding: 24 }} className="stack">
-            <div className="spread"><div><h2 className="h2">{d.user.email}</h2><p className="hint">{d.user.name} · {d.user.id}</p></div><button className="x-btn" onClick={() => setSel(null)}>×</button></div>
-            <div className="board">
-              <div><span className="label">{A.balance}</span><span className="v" style={{ fontSize: 22 }}>{rub(d.wallet.balance_micro, lang)}</span></div>
-              <div><span className="label">{A.requests}</span><span className="v" style={{ fontSize: 22 }}>{num(d.usage.requests, lang)}</span></div>
-              <div><span className="label">{t.dash.cost}</span><span className="v" style={{ fontSize: 22 }}>{rub(d.usage.cost_micro, lang)}</span></div>
-            </div>
-            <div className="row-wrap" style={{ ["--gap" as string]: "6px" }}>
-              <button className="btn btn-sm" onClick={() => setAdj({ amount: "", reason: "" })}>{A.adjust}</button>
-              <button className="btn btn-ghost btn-sm" onClick={async () => (await ask(d.user.status === "active" ? A.block + "?" : A.unblock + "?")) && act(() => post(`/api/admin/users/${d.user.id}/status`, { status: d.user.status === "active" ? "blocked" : "active" }))}>{d.user.status === "active" ? A.block : A.unblock}</button>
-              <button className="btn btn-ghost btn-sm" onClick={() => act(() => post(`/api/admin/users/${d.user.id}/role`, { role: d.user.role === "admin" ? "user" : "admin" }))}>{d.user.role === "admin" ? A.makeUser : A.makeAdmin}</button>
-            </div>
-            <div className="row" style={{ gap: 8 }}>
-              <select className="select" id="grant" defaultValue="">{[<option key="" value="">{A.cancelPlan}</option>, ...(plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>) ?? [])]}</select>
-              <button className="btn btn-ghost btn-sm" onClick={() => act(() => post(`/api/admin/users/${d.user.id}/plan`, { plan_id: (document.getElementById("grant") as HTMLSelectElement).value }))}>{A.grantPlan}</button>
-            </div>
-            <div className="label">{A.plan}</div>
-            {d.subscriptions.length === 0 ? <p className="hint">—</p> : (
-              <table className="table"><tbody>{d.subscriptions.map((s) => <tr key={s.id}><td>{s.name_ru}</td><td><span className={`tag ${s.status === "active" ? "tag-ok" : ""}`}>{s.status}</span></td><td className="small muted">{date(s.started_at, lang)} → {date(s.ends_at, lang)}</td><td className="r num small">{num(s.tokens_used, lang)}</td></tr>)}</tbody></table>
-            )}
-            <div className="label">{t.nav.keys}</div>
-            {d.keys.length === 0 ? <p className="hint">—</p> : (
-              <table className="table"><tbody>{d.keys.map((k) => <tr key={k.id}><td>{k.name}</td><td className="mono small">{k.prefix}</td><td className="r num">{rub(k.total_spent_micro, lang)}</td></tr>)}</tbody></table>
-            )}
-            <div className="label">{A.payments}</div>
-            {d.payments.length === 0 ? <p className="hint">—</p> : (
-              <table className="table"><tbody>{d.payments.map((p) => <tr key={p.id}><td className="small muted">{date(p.created_at, lang, true)}</td><td>{p.purpose}</td><td><span className="tag">{p.status}</span></td><td className="r num">{kopecks(p.amount_kopecks, lang)}</td></tr>)}</tbody></table>
-            )}
-            <div className="label">{t.billing.history}</div>
-            <table className="table"><tbody>{d.transactions.map((x) => <tr key={x.id}><td className="small muted">{date(x.created_at, lang, true)}</td><td className="small">{x.description}</td><td className={`r num ${x.amount_micro > 0 ? "ok" : ""}`}>{rub(x.amount_micro, lang)}</td></tr>)}</tbody></table>
-          </div>
-        )}
-      </Drawer>
-
-      <Modal open={!!adj} onClose={() => setAdj(null)} title={A.adjust}
-        footer={<><button className="btn btn-ghost" onClick={() => setAdj(null)}>{t.common.cancel}</button>
-          <button className="btn" disabled={!adj?.amount || !adj.reason} onClick={() => { act(() => post(`/api/admin/users/${sel}/balance`, { amount_rub: Number(adj!.amount), reason: adj!.reason })); setAdj(null); }}>{t.common.save}</button></>}>
-        {adj && (
+      <Modal open={!!nu} onClose={() => setNu(null)} title={L("Новый пользователь", "New user")}
+        footer={<><button className="btn btn-ghost" onClick={() => setNu(null)}>{L("Отмена", "Cancel")}</button><button className="btn" disabled={!nu?.email || (nu?.password.length ?? 0) < 8} onClick={create}>{L("Создать", "Create")}</button></>}>
+        {nu && (
           <>
-            <label className="field"><span>{A.adjustAmount}</span><input className="input num" type="number" value={adj.amount} onChange={(e) => setAdj({ ...adj, amount: e.target.value })} autoFocus /></label>
-            <label className="field"><span>{A.reason}</span><input className="input" value={adj.reason} onChange={(e) => setAdj({ ...adj, reason: e.target.value })} /></label>
+            <div className="grid-2" style={{ gap: 12 }}>
+              <label className="field"><span>Email</span><input className="input" type="email" value={nu.email} onChange={(e) => setNu({ ...nu, email: e.target.value })} autoFocus /></label>
+              <label className="field"><span>{L("Имя", "Name")}</span><input className="input" value={nu.name} onChange={(e) => setNu({ ...nu, name: e.target.value })} /></label>
+              <label className="field"><span>{L("Пароль (от 8 символов)", "Password (8+ chars)")}</span><input className="input" value={nu.password} onChange={(e) => setNu({ ...nu, password: e.target.value })} /></label>
+              <label className="field"><span>{L("Роль", "Role")}</span><select className="select" value={nu.role} onChange={(e) => setNu({ ...nu, role: e.target.value })}><option value="user">user</option><option value="admin">admin</option></select></label>
+              <label className="field"><span>{L("Начислить на баланс, ₽", "Add to balance, ₽")}</span><input className="input" type="number" value={nu.balance} onChange={(e) => setNu({ ...nu, balance: e.target.value })} /></label>
+              <label className="field"><span>{L("Выдать тариф", "Grant plan")}</span>
+                <select className="select" value={nu.plan} onChange={(e) => setNu({ ...nu, plan: e.target.value })}><option value="">—</option>{plans.data?.data.map((p) => <option key={p.id} value={p.id}>{p.name_ru} · {p.period_days}d</option>)}</select>
+              </label>
+            </div>
+            <p className="hint">{L("Приветственный бонус из настроек тоже начислится.", "The sign-up bonus from settings is added too.")}</p>
           </>
         )}
       </Modal>
-      {node}
     </>
   );
 }
+
+export default function Page() { return <Suspense><Users /></Suspense>; }

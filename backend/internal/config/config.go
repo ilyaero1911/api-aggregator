@@ -26,8 +26,8 @@ type Config struct {
 
 	AdminEmails []string // эти адреса получают роль admin при регистрации
 
-	FxRefresh  time.Duration
-	FxCBRURL   string
+	FxRefresh   time.Duration
+	FxCBRURL    string
 	FxBackupURL string
 
 	PaymentProvider string // сейчас только "fake"

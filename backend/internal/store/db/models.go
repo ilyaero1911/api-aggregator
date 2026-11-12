@@ -226,6 +226,7 @@ type User struct {
 	LogPrompts   bool       `json:"log_prompts"`
 	CreatedAt    time.Time  `json:"created_at"`
 	LastLoginAt  *time.Time `json:"last_login_at"`
+	AdminNote    string     `json:"admin_note"`
 }
 
 type Wallet struct {

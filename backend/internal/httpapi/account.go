@@ -719,5 +719,3 @@ func (s *Server) playgroundChat(w http.ResponseWriter, r *http.Request) {
 func (s *Server) playgroundImage(w http.ResponseWriter, r *http.Request) {
 	s.serveImage(w, r, s.playgroundCaller(r))
 }
-
-

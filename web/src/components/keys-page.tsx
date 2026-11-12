@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CopyButton, Modal, PageHead, Skeleton, useConfirm, useLoad, useToast } from "@/components/ui";
 import { ApiError, del, get, patch, post } from "@/lib/api";
-import { ago, date, rub } from "@/lib/format";
+import { ago, date, inputToRub, microToInput, rub } from "@/lib/format";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Key } from "@/lib/types";
@@ -22,7 +22,7 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
   const [busy, setBusy] = useState(false);
 
   const body = (f: Form) => ({
-    name: f.name, kind, limit_rub: f.limit ? Number(f.limit) : null, limit_reset: f.reset,
+    name: f.name, kind, limit_rub: f.limit ? inputToRub(Number(f.limit), lang) : null, limit_reset: f.reset,
     rpm_limit: f.rpm ? Number(f.rpm) : null, expires_at: f.expires ? new Date(f.expires + "T23:59:59").toISOString() : null, disabled: f.disabled,
   });
 
@@ -58,7 +58,7 @@ export function KeysPage({ kind }: { kind: "inference" | "management" }) {
   }
 
   const toForm = (k: Key): Form => ({
-    id: k.id, name: k.name, limit: k.limit_micro !== null ? String(k.limit_micro / 1e6) : "", reset: k.limit_reset,
+    id: k.id, name: k.name, limit: k.limit_micro !== null ? String(microToInput(k.limit_micro, lang)) : "", reset: k.limit_reset,
     rpm: k.rpm_limit ? String(k.rpm_limit) : "", expires: k.expires_at ? k.expires_at.slice(0, 10) : "", disabled: k.disabled,
   });
 

@@ -30,14 +30,16 @@ export function SiteHeader() {
         </nav>
         <div className="row" style={{ marginLeft: "auto", gap: 10 }}>
           <LangSwitch />
-          {user === undefined ? null : user ? (
-            <Link className="btn btn-sm" href="/dashboard">{t.common.dashboard}</Link>
-          ) : (
-            <>
-              <Link className="btn btn-ghost btn-sm" href="/login">{t.common.signIn}</Link>
-              <Link className="btn btn-sm" href="/register">{t.common.signUp}</Link>
-            </>
-          )}
+          <div className="auth-slot" style={{ visibility: user === undefined ? "hidden" : "visible" }}>
+            {user ? (
+              <Link className="btn btn-sm" href="/dashboard">{t.common.dashboard} →</Link>
+            ) : (
+              <>
+                <Link className="btn btn-ghost btn-sm" href="/login">{t.common.signIn}</Link>
+                <Link className="btn btn-sm" href="/register">{t.common.signUp}</Link>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </header>

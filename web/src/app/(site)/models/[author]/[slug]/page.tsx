@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CodeBlock } from "@/components/ui";
+import { TokenExplainer } from "@/components/token-explainer";
+import { loadModels } from "@/lib/server-data";
 import { api } from "@/lib/api";
 import { ctx, date, perM } from "@/lib/format";
 import { getDict } from "@/lib/i18n/server";
@@ -24,7 +26,7 @@ export default async function ModelPage({ params }: { params: Promise<{ author: 
     notFound();
   }
   const { model: m, endpoints } = data;
-  const cfg = await loadConfig();
+  const [cfg, { data: all }] = await Promise.all([loadConfig(), loadModels()]);
   const M = t.models;
   const body = m.modality === "image"
     ? `curl ${cfg.api_base_url}/images/generations \\\n  -H "Authorization: Bearer $NG_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "${m.id}", "prompt": "a lighthouse in fog"}'`
@@ -84,6 +86,7 @@ export default async function ModelPage({ params }: { params: Promise<{ author: 
           </table>
         </section>
       </div>
+      {m.modality === "text" && <div className="section"><TokenExplainer models={all} initialModel={m.id} /></div>}
     </div>
   );
 }

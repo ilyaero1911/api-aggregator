@@ -98,10 +98,10 @@ func (s *Store) Set(ctx context.Context, key string, value any) error {
 
 // Ключи настроек, которыми пользуется код.
 const (
-	MarkupBps          = "markup_bps"
-	SignupBonusMicro   = "signup_bonus_micro"
-	FxFallbackUSD      = "fx_fallback_usd_rub_micro"
-	FreeDailyRequests  = "free_daily_requests"
-	MinTopupKopecks    = "min_topup_kopecks"
-	RegistrationOpen   = "registration_open"
+	MarkupBps         = "markup_bps"
+	SignupBonusMicro  = "signup_bonus_micro"
+	FxFallbackUSD     = "fx_fallback_usd_rub_micro"
+	FreeDailyRequests = "free_daily_requests"
+	MinTopupKopecks   = "min_topup_kopecks"
+	RegistrationOpen  = "registration_open"
 )

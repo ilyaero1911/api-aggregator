@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CodeBlock } from "@/components/ui";
 import { PlanGrid } from "@/components/plans";
-import { RouteDiagram } from "@/components/route-diagram";
+import { RouteLive } from "@/components/route-live";
 import { ctx, perM } from "@/lib/format";
 import { fmt } from "@/lib/i18n";
 import { getDict } from "@/lib/i18n/server";
@@ -53,7 +53,7 @@ const resp = await client.chat.completions.create({
             <Link href="/docs" className="btn btn-lg btn-ghost">{L.docs}</Link>
           </div>
         </div>
-        <div className="hero-art"><RouteDiagram providers={authors} /></div>
+        <div className="hero-art"><RouteLive providers={authors} /></div>
       </section>
 
       <section className="wrap">

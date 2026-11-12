@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Modal, PageHead, Switch, useLoad, useToast } from "@/components/ui";
-import { ApiError, get, put } from "@/lib/api";
+import { ApiError, del, get, put } from "@/lib/api";
 import { kopecks, num } from "@/lib/format";
 import { useI18n } from "@/lib/i18n/client";
 import type { Plan } from "@/lib/types";
@@ -48,7 +48,9 @@ export default function Plans() {
         </tbody>
       </table>
       <Modal wide open={!!f} onClose={() => setF(null)} title={f?.isNew ? A.newPlan : f?.id}
-        footer={<><button className="btn btn-ghost" onClick={() => setF(null)}>{t.common.cancel}</button><button className="btn" onClick={save}>{t.common.save}</button></>}>
+        footer={<>
+          {f && !f.isNew && <button className="btn btn-danger" style={{ marginRight: "auto" }} onClick={async () => { try { await del(`/api/admin/plans/${f.id}`); toast(t.common.saved); setF(null); reload(); } catch (e) { toast(e instanceof ApiError ? (e.code === "plan_in_use" ? (lang === "en" ? "Plan has subscriptions, turn it off instead" : "На тарифе есть подписки, выключите его вместо удаления") : e.message) : t.common.error, true); } }}>{t.common.delete}</button>}
+          <button className="btn btn-ghost" onClick={() => setF(null)}>{t.common.cancel}</button><button className="btn" onClick={save}>{t.common.save}</button></>}>
         {f && (
           <>
             <div className="grid-3" style={{ gap: 12 }}>

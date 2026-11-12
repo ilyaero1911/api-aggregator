@@ -84,6 +84,7 @@ export function Catalog({ models }: { models: Model[] }) {
             <h1 className="h1">{M.title}</h1>
             <p className="muted" style={{ marginTop: 8 }}>{fmt(M.lead, { n: models.length })}</p>
           </div>
+          <Link href="/pricing#how" className="btn btn-ghost btn-sm">{lang === "en" ? "How is the price calculated?" : "Как считается цена?"}</Link>
         </div>
         <div className="row-wrap" style={{ marginBottom: 14 }}>
           <input className="input grow" style={{ maxWidth: 360 }} placeholder={M.search} value={q} onChange={(e) => setQ(e.target.value)} />

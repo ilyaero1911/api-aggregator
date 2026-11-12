@@ -35,7 +35,7 @@ export function ThemeToggle() {
   const next: Record<Theme, Theme> = { auto: "light", light: "dark", dark: "auto" };
   const label = { auto: t.settings.themeAuto, light: t.settings.themeLight, dark: t.settings.themeDark }[theme];
   return (
-    <button className="btn btn-ghost btn-sm" title={t.common.theme} onClick={() => {
+    <button className="btn btn-ghost btn-sm theme-btn" title={t.common.theme} onClick={() => {
       const v = next[theme];
       setTheme(v);
       try { if (v === "auto") localStorage.removeItem("theme"); else localStorage.setItem("theme", v); } catch {}

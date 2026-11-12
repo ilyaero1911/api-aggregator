@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { PlanGrid } from "@/components/plans";
 import { Modal, PageHead, Pager, Skeleton, Switch, useLoad, useToast } from "@/components/ui";
 import { ApiError, get, patch, post } from "@/lib/api";
-import { date, kopecks, num, rub } from "@/lib/format";
+import { amount as inCur, date, inputToRub, kopecks, microToInput, num, rub } from "@/lib/format";
 import { fmt } from "@/lib/i18n";
 import { useI18n } from "@/lib/i18n/client";
 import type { Payment, Plan, Subscription, Transaction, Wallet } from "@/lib/types";
@@ -20,7 +20,7 @@ export default function BillingPage() {
   const [off, setOff] = useState(0);
   const txs = useLoad(() => get<{ data: Transaction[]; total: number }>(`/api/billing/transactions?limit=20&offset=${off}`), [off, data]);
   const [topup, setTopup] = useState(false);
-  const [amount, setAmount] = useState("500");
+  const [amount, setAmount] = useState(lang === "en" ? "10" : "500");
   const [promo, setPromo] = useState("");
   const [buy, setBuy] = useState<Plan | null>(null);
   const [busy, setBusy] = useState(false);
@@ -31,7 +31,7 @@ export default function BillingPage() {
 
   async function startTopup() {
     setBusy(true);
-    try { const p = await post<Payment>("/api/billing/topup", { amount_rub: Number(amount) }); location.href = p.confirmation_url; } catch (e) { fail(e); setBusy(false); }
+    try { const p = await post<Payment>("/api/billing/topup", { amount_rub: Math.round(inputToRub(Number(amount), lang) * 100) / 100 }); location.href = p.confirmation_url; } catch (e) { fail(e); setBusy(false); }
   }
   async function subscribe(method: "balance" | "payment") {
     if (!buy) return;
@@ -43,7 +43,7 @@ export default function BillingPage() {
     } catch (e) { fail(e); } finally { setBusy(false); }
   }
   async function redeem() {
-    try { const r = await post<{ amount_micro: number }>("/api/billing/promo", { code: promo }); toast(fmt(B.promoOk, { n: num(r.amount_micro / 1e6, lang) })); setPromo(""); reload(); } catch (e) { fail(e); }
+    try { const r = await post<{ amount_micro: number }>("/api/billing/promo", { code: promo }); toast(fmt(B.promoOk, { n: rub(r.amount_micro, lang) })); setPromo(""); reload(); } catch (e) { fail(e); }
   }
   async function saveWallet(next: Wallet) {
     setWs(next);
@@ -53,7 +53,8 @@ export default function BillingPage() {
   }
 
   const sub = data?.subscription;
-  const min = (data?.min_topup_kopecks ?? 10000) / 100;
+  const minMicro = (data?.min_topup_kopecks ?? 10000) * 10_000;
+  const min = Math.ceil(inCur(minMicro, lang) * 100) / 100;
   const low = ws && ws.low_balance_alert && data && data.wallet.balance_micro < ws.low_balance_micro;
 
   return (
@@ -71,7 +72,8 @@ export default function BillingPage() {
               <button className="btn btn-ghost" disabled={!promo.trim()} onClick={redeem}>{B.promoApply}</button>
             </div>
           </div>
-          {data && <p className="hint">{B.rate}: {(data.usd_rub_micro / 1e6).toFixed(2)} ₽ · ЦБ РФ</p>}
+          {data && <p className="hint">{B.rate}: {(data.usd_rub_micro / 1e6).toFixed(2)} ₽ · {lang === "en" ? "Bank of Russia" : "ЦБ РФ"}</p>}
+          <a href="/pricing#how" className="small muted" style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>{lang === "en" ? "How is the price calculated?" : "Как считается цена за токены?"}</a>
         </section>
         <section className="bill-settings">
           {ws && (
@@ -79,15 +81,15 @@ export default function BillingPage() {
               <div className="bill-set">
                 <div className="spread"><div><div className="h3">{B.lowAlert}</div><p className="hint">{B.lowAlertText}</p></div><Switch checked={ws.low_balance_alert} onChange={(v) => saveWallet({ ...ws, low_balance_alert: v })} /></div>
                 {ws.low_balance_alert && (
-                  <label className="field"><span>{B.threshold}</span><input className="input" type="number" min="0" defaultValue={ws.low_balance_micro / 1e6} onBlur={(e) => saveWallet({ ...ws, low_balance_micro: Number(e.target.value) * 1e6 })} /></label>
+                  <label className="field"><span>{B.threshold}</span><input className="input" type="number" min="0" defaultValue={microToInput(ws.low_balance_micro, lang)} onBlur={(e) => saveWallet({ ...ws, low_balance_micro: inputToRub(Number(e.target.value), lang) * 1e6 })} /></label>
                 )}
               </div>
               <div className="bill-set">
                 <div className="spread"><div><div className="h3">{B.autoTopup}</div><p className="hint">{B.autoTopupText}</p></div><Switch checked={ws.auto_topup} onChange={(v) => saveWallet({ ...ws, auto_topup: v })} /></div>
                 {ws.auto_topup && (
                   <div className="grid-2" style={{ gap: 12 }}>
-                    <label className="field"><span>{B.below}</span><input className="input" type="number" defaultValue={ws.auto_topup_below_micro / 1e6} onBlur={(e) => saveWallet({ ...ws, auto_topup_below_micro: Number(e.target.value) * 1e6 })} /></label>
-                    <label className="field"><span>{B.topupAmount}</span><input className="input" type="number" defaultValue={ws.auto_topup_amount_micro / 1e6} onBlur={(e) => saveWallet({ ...ws, auto_topup_amount_micro: Number(e.target.value) * 1e6 })} /></label>
+                    <label className="field"><span>{B.below}</span><input className="input" type="number" defaultValue={microToInput(ws.auto_topup_below_micro, lang)} onBlur={(e) => saveWallet({ ...ws, auto_topup_below_micro: inputToRub(Number(e.target.value), lang) * 1e6 })} /></label>
+                    <label className="field"><span>{B.topupAmount}</span><input className="input" type="number" defaultValue={microToInput(ws.auto_topup_amount_micro, lang)} onBlur={(e) => saveWallet({ ...ws, auto_topup_amount_micro: inputToRub(Number(e.target.value), lang) * 1e6 })} /></label>
                   </div>
                 )}
               </div>
@@ -152,9 +154,9 @@ export default function BillingPage() {
 
       <Modal open={topup} onClose={() => setTopup(false)} title={B.topupTitle}
         footer={<><button className="btn btn-ghost" onClick={() => setTopup(false)}>{t.common.cancel}</button><button className="btn btn-signal" disabled={busy || Number(amount) < min} onClick={startTopup}>{B.pay} →</button></>}>
-        <label className="field"><span>{B.amount}</span><input className="input num" type="number" min={min} value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus /><span className="hint">{fmt(B.min, { n: min })}</span></label>
+        <label className="field"><span>{B.amount}</span><input className="input num" type="number" min={min} value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus /><span className="hint">{fmt(B.min, { n: rub(minMicro, lang) })}{lang === "en" && ` · ≈ ${rub(inputToRub(Number(amount), lang) * 1e6, "ru")}`}</span></label>
         <div className="row-wrap" style={{ ["--gap" as string]: "6px" }}>
-          {[300, 500, 1000, 3000, 5000].map((v) => <button key={v} className={`chip${amount === String(v) ? " on" : ""}`} onClick={() => setAmount(String(v))}>{num(v, lang)} ₽</button>)}
+          {(lang === "en" ? [5, 10, 20, 50, 100] : [300, 500, 1000, 3000, 5000]).map((v) => <button key={v} className={`chip${amount === String(v) ? " on" : ""}`} onClick={() => setAmount(String(v))}>{lang === "en" ? `$${v}` : `${num(v, lang)} ₽`}</button>)}
         </div>
       </Modal>
 

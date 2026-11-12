@@ -39,7 +39,7 @@ export function PlanGrid({ plans, currentId, onChoose, busy }: {
               </div>
               <div className="plan-price">
                 {p.price_kopecks === 0 ? <span className="num">{t.common.free}</span> : (
-                  <><span className="num">{kopecks(p.price_kopecks, lang).replace(" ₽", "")}</span><span className="faint"> ₽ {fmt(t.pricing.period, { n: p.period_days })}</span></>
+                  <><span className="num">{kopecks(p.price_kopecks, lang)}</span><span className="faint"> {fmt(t.pricing.period, { n: p.period_days })}</span></>
                 )}
               </div>
               <p className="muted small">{desc}</p>

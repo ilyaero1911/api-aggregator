@@ -106,7 +106,7 @@ export function CopyButton({ text, className = "btn btn-ghost btn-sm" }: { text:
 
 /** Подсветка без библиотек: ключевые слова, строки, комментарии. */
 function highlight(code: string): ReactNode[] {
-  const re = /(#[^\n]*|\/\/[^\n]*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|\b(import|from|const|await|async|for|in|print|curl|def|return|new|let)\b/g;
+  const re = /((?<=^|\s)(?:#|\/\/)[^\n]*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|\b(import|from|const|await|async|for|in|print|curl|def|return|new|let)\b/g;
   const out: ReactNode[] = [];
   let last = 0, m: RegExpExecArray | null, i = 0;
   while ((m = re.exec(code))) {

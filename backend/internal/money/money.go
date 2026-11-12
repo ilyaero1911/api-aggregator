@@ -2,10 +2,10 @@
 package money
 
 const (
-	Micro        int64 = 1_000_000
-	KopeckMicro  int64 = 10_000 // 1 копейка в микрорублях
-	PerMillion   int64 = 1_000_000
-	BpsDenom     int64 = 10_000
+	Micro       int64 = 1_000_000
+	KopeckMicro int64 = 10_000 // 1 копейка в микрорублях
+	PerMillion  int64 = 1_000_000
+	BpsDenom    int64 = 10_000
 )
 
 // FromKopecks переводит копейки в микрорубли.

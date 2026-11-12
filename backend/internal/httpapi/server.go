@@ -205,3 +205,5 @@ func clientIP(r *http.Request) string {
 	}
 	return ip
 }
+
+func chiParam(r *http.Request, name string) string { return chi.URLParam(r, name) }

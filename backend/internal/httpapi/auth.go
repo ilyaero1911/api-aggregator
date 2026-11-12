@@ -376,5 +376,3 @@ func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, 200, map[string]bool{"ok": true})
 }
-
-

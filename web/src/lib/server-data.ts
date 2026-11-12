@@ -35,3 +35,8 @@ export async function loadConfig(): Promise<PublicConfig> {
     return { api_base_url: "http://localhost:3100/v1", google_enabled: false, registration_open: true, min_topup_kopecks: 10000, payment_provider: "fake" };
   }
 }
+
+export async function loadUsdRate(): Promise<number> {
+  const fx = await loadFx();
+  return fx.data.find((r) => r.currency === "USD")?.rub_micro ?? 95_000_000;
+}

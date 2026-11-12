@@ -14,16 +14,31 @@ import (
 )
 
 func (s *Server) adminRoutes(r chi.Router) {
-	r.Get("/stats", s.adminStats)
+	r.Get("/stats", s.adminStats2)
 
-	r.Get("/users", s.adminUsers)
-	r.Get("/users/{id}", s.adminUser)
+	r.Get("/users", s.adminUsers2)
+	r.Post("/users", s.adminCreateUser)
+	r.Get("/users/{id}", s.adminUser2)
+	r.Patch("/users/{id}", s.adminPatchUser)
+	r.Delete("/users/{id}", s.adminDeleteUser)
+	r.Post("/users/{id}/password", s.adminUserPassword)
+	r.Post("/users/{id}/logout", s.adminUserLogout)
+
+	r.Get("/subscriptions", s.adminSubscriptions)
+	r.Patch("/subscriptions/{id}", s.adminPatchSubscription)
+	r.Get("/keys", s.adminKeys)
+	r.Patch("/keys/{id}", s.adminPatchKey)
+	r.Delete("/keys/{id}", s.adminRevokeKey)
+	r.Get("/transactions", s.adminTransactions)
+	r.Post("/payments/{id}/cancel", s.adminCancelPayment)
+	r.Post("/payments/{id}/refund", s.adminRefundPayment)
+	r.Delete("/plans/{id}", s.adminDeletePlan)
 	r.Post("/users/{id}/balance", s.adminAdjust)
 	r.Post("/users/{id}/status", s.adminUserStatus)
 	r.Post("/users/{id}/role", s.adminUserRole)
 	r.Post("/users/{id}/plan", s.adminGrantPlan)
 
-	r.Get("/payments", s.adminPayments)
+	r.Get("/payments", s.adminPayments2)
 	r.Post("/payments/{id}/complete", s.adminCompletePayment)
 	r.Get("/requests", s.adminRequests)
 

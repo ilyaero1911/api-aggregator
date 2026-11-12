@@ -42,7 +42,7 @@ const en: Dict = {
     footer: "A language model gateway billed in rubles.",
   },
   models: {
-    title: "Models", lead: "{n} models from leading providers. Prices in rubles per 1M tokens at today's rate.",
+    title: "Models", lead: "{n} models from leading providers. Prices per 1M tokens in USD at today’s rate.",
     search: "Name, author, use case…", sortNew: "Newest", sortCheap: "Cheapest", sortContext: "Longest context", sortName: "Name",
     type: "Type", typeChat: "Text", typeImage: "Images", capabilities: "Capabilities", context: "Context", price: "Price",
     priceFree: "Free", pricePlan: "In plan", pricePaid: "Paid", author: "Author",
@@ -54,15 +54,15 @@ const en: Dict = {
     tryIt: "Open in playground", apiExample: "Request example", grid: "Grid", list: "List",
   },
   pricing: {
-    title: "Pricing", lead: "Prices in rubles. A subscription covers models marked “in plan”; everything else is billed from your balance.",
+    title: "Pricing", lead: "Prices are shown in US dollars at today’s Bank of Russia rate; payments are made in rubles. A subscription covers models marked “in plan”, everything else is billed from your balance.",
     weeks2: "2 weeks", month: "Monthly", period: "/ {n} days", choose: "Choose", current: "Current plan", popular: "Most picked",
-    starter: "Start for free", payg: "Pay as you go", paygText: "Top up from {min} ₽ and pay only for tokens. No subscription, nothing expires.",
+    starter: "Start for free", payg: "Pay as you go", paygText: "Top up from {min} and pay only for tokens. No subscription, nothing expires.",
     rateNote: "USD rate: {rate} ₽ (Bank of Russia, {source}). Markup {markup}%.",
   },
   auth: {
     loginTitle: "Sign in", registerTitle: "Create account", email: "Email", password: "Password", name: "Name",
     google: "Continue with Google", or: "or", noAccount: "No account?", haveAccount: "Already have an account?",
-    createAccount: "Create account", passwordHint: "At least 8 characters", bonus: "We add {n} ₽ to your balance on sign-up",
+    createAccount: "Create account", passwordHint: "At least 8 characters", bonus: "We add {n} to your balance on sign-up",
     errors: {
       bad_credentials: "Wrong email or password", email_taken: "This email is already registered", weak_password: "Password is too short",
       bad_email: "Check the email", too_many_attempts: "Too many attempts, try later", account_blocked: "Account is blocked",
@@ -81,7 +81,7 @@ const en: Dict = {
   keys: {
     title: "API keys", lead: "Keys for /v1 requests. The secret is shown once — save it right away.",
     mgmtTitle: "Management keys", mgmtLead: "Keys for managing API keys programmatically via /v1/keys. They cannot call models.",
-    create: "Create key", name: "Name", namePh: "e.g. prod-backend", limit: "Spend limit, ₽", limitPh: "No limit",
+    create: "Create key", name: "Name", namePh: "e.g. prod-backend", limit: "Spend limit, $", limitPh: "No limit",
     reset: "Limit reset", resetNever: "Never", resetDaily: "Daily", resetWeekly: "Weekly", resetMonthly: "Monthly",
     rpm: "Requests per minute", rpmPh: "Unlimited", expires: "Expires", expiresPh: "Never",
     secretTitle: "Key created", secretText: "Copy the key now. You won't be able to see it again after closing this window.",
@@ -91,10 +91,10 @@ const en: Dict = {
   },
   billing: {
     title: "Billing", lead: "Top-ups, subscription and history.", balance: "Balance",
-    topup: "Top up", topupTitle: "Top up balance", amount: "Amount, ₽", min: "Minimum {n} ₽",
-    pay: "Continue to payment", promo: "Promo code", promoApply: "Apply", promoOk: "{n} ₽ added",
-    lowAlert: "Low balance alert", lowAlertText: "We'll warn you when the balance drops below the threshold.", threshold: "Threshold, ₽",
-    autoTopup: "Auto top-up", autoTopupText: "Works once a payment provider with saved cards is connected.", below: "When below, ₽", topupAmount: "Top up by, ₽",
+    topup: "Top up", topupTitle: "Top up balance", amount: "Amount, $", min: "Minimum {n}",
+    pay: "Continue to payment", promo: "Promo code", promoApply: "Apply", promoOk: "{n} added",
+    lowAlert: "Low balance alert", lowAlertText: "We'll warn you when the balance drops below the threshold.", threshold: "Threshold, $",
+    autoTopup: "Auto top-up", autoTopupText: "Works once a payment provider with saved cards is connected.", below: "When below, $", topupAmount: "Top up by, $",
     plan: "Plan", noPlan: "No subscription: free models within the daily limit, everything else from the balance.",
     planActive: "{name} until {date}", planUsage: "{used} of {quota} tokens used",
     changePlan: "Change plan", choosePlan: "Choose a plan", payFromBalance: "Pay from balance", payByCard: "Pay by card",
