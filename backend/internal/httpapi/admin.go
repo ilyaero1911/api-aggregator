@@ -452,6 +452,8 @@ func (s *Server) adminSettings(w http.ResponseWriter, r *http.Request) {
 var editableSettings = map[string]bool{
 	"markup_bps": true, "signup_bonus_micro": true, "fx_fallback_usd_rub_micro": true,
 	"free_daily_requests": true, "min_topup_kopecks": true, "registration_open": true,
+	"footer_tagline_ru": true, "footer_tagline_en": true, "company_name": true, "company_inn": true, "company_ogrn": true,
+	"company_address": true, "company_email": true, "company_phone": true,
 }
 
 func (s *Server) adminSaveSettings(w http.ResponseWriter, r *http.Request) {

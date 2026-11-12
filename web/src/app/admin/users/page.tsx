@@ -80,7 +80,7 @@ function Users() {
                       <span>{u.email}</span>
                       {u.role === "admin" && <span className="tag tag-ink">admin</span>}
                       {u.status === "blocked" && <span className="tag tag-bad">{L("блок", "blocked")}</span>}
-                      {u.has_google && <span className="tag">G</span>}
+                      
                     </div>
                     <div className="hint">{u.name}{u.admin_note && <> · <span title={u.admin_note} className="signal">{u.admin_note.slice(0, 40)}</span></>}</div>
                   </td>

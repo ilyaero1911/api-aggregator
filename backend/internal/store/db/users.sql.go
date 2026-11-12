@@ -25,7 +25,7 @@ func (q *Queries) AdminCountUsers(ctx context.Context, q_ string) (int64, error)
 }
 
 const adminListUsers = `-- name: AdminListUsers :many
-SELECT u.id, u.email, u.name, u.password_hash, u.google_sub, u.avatar_url, u.role, u.status, u.locale, u.log_prompts, u.created_at, u.last_login_at, u.admin_note, coalesce(w.balance_micro, 0)::bigint AS balance_micro,
+SELECT u.id, u.email, u.name, u.password_hash, u.google_sub, u.avatar_url, u.role, u.status, u.locale, u.log_prompts, u.created_at, u.last_login_at, u.admin_note, u.pd_consent_at, u.pd_consent_version, coalesce(w.balance_micro, 0)::bigint AS balance_micro,
        (SELECT s.plan_id FROM subscriptions s WHERE s.user_id = u.id AND s.status = 'active' LIMIT 1)::text AS plan_id
 FROM users u LEFT JOIN wallets w ON w.user_id = u.id
 WHERE ($1::text = '' OR u.email ILIKE '%' || $1 || '%' OR u.name ILIKE '%' || $1 || '%')
@@ -40,21 +40,23 @@ type AdminListUsersParams struct {
 }
 
 type AdminListUsersRow struct {
-	ID           uuid.UUID  `json:"id"`
-	Email        string     `json:"email"`
-	Name         string     `json:"name"`
-	PasswordHash *string    `json:"password_hash"`
-	GoogleSub    *string    `json:"google_sub"`
-	AvatarUrl    string     `json:"avatar_url"`
-	Role         string     `json:"role"`
-	Status       string     `json:"status"`
-	Locale       string     `json:"locale"`
-	LogPrompts   bool       `json:"log_prompts"`
-	CreatedAt    time.Time  `json:"created_at"`
-	LastLoginAt  *time.Time `json:"last_login_at"`
-	AdminNote    string     `json:"admin_note"`
-	BalanceMicro int64      `json:"balance_micro"`
-	PlanID       string     `json:"plan_id"`
+	ID               uuid.UUID  `json:"id"`
+	Email            string     `json:"email"`
+	Name             string     `json:"name"`
+	PasswordHash     *string    `json:"password_hash"`
+	GoogleSub        *string    `json:"google_sub"`
+	AvatarUrl        string     `json:"avatar_url"`
+	Role             string     `json:"role"`
+	Status           string     `json:"status"`
+	Locale           string     `json:"locale"`
+	LogPrompts       bool       `json:"log_prompts"`
+	CreatedAt        time.Time  `json:"created_at"`
+	LastLoginAt      *time.Time `json:"last_login_at"`
+	AdminNote        string     `json:"admin_note"`
+	PdConsentAt      *time.Time `json:"pd_consent_at"`
+	PdConsentVersion string     `json:"pd_consent_version"`
+	BalanceMicro     int64      `json:"balance_micro"`
+	PlanID           string     `json:"plan_id"`
 }
 
 func (q *Queries) AdminListUsers(ctx context.Context, arg AdminListUsersParams) ([]AdminListUsersRow, error) {
@@ -80,6 +82,8 @@ func (q *Queries) AdminListUsers(ctx context.Context, arg AdminListUsersParams) 
 			&i.CreatedAt,
 			&i.LastLoginAt,
 			&i.AdminNote,
+			&i.PdConsentAt,
+			&i.PdConsentVersion,
 			&i.BalanceMicro,
 			&i.PlanID,
 		); err != nil {
@@ -158,7 +162,7 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) er
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (email, name, password_hash, google_sub, avatar_url, role, locale)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note
+RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version
 `
 
 type CreateUserParams struct {
@@ -196,6 +200,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.CreatedAt,
 		&i.LastLoginAt,
 		&i.AdminNote,
+		&i.PdConsentAt,
+		&i.PdConsentVersion,
 	)
 	return i, err
 }
@@ -228,7 +234,7 @@ func (q *Queries) DeleteUserSessions(ctx context.Context, userID uuid.UUID) erro
 }
 
 const getSessionUser = `-- name: GetSessionUser :one
-SELECT u.id, u.email, u.name, u.password_hash, u.google_sub, u.avatar_url, u.role, u.status, u.locale, u.log_prompts, u.created_at, u.last_login_at, u.admin_note FROM sessions s JOIN users u ON u.id = s.user_id
+SELECT u.id, u.email, u.name, u.password_hash, u.google_sub, u.avatar_url, u.role, u.status, u.locale, u.log_prompts, u.created_at, u.last_login_at, u.admin_note, u.pd_consent_at, u.pd_consent_version FROM sessions s JOIN users u ON u.id = s.user_id
 WHERE s.token_hash = $1 AND s.expires_at > now()
 `
 
@@ -249,12 +255,14 @@ func (q *Queries) GetSessionUser(ctx context.Context, tokenHash string) (User, e
 		&i.CreatedAt,
 		&i.LastLoginAt,
 		&i.AdminNote,
+		&i.PdConsentAt,
+		&i.PdConsentVersion,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note FROM users WHERE id = $1
+SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -274,12 +282,14 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.CreatedAt,
 		&i.LastLoginAt,
 		&i.AdminNote,
+		&i.PdConsentAt,
+		&i.PdConsentVersion,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note FROM users WHERE lower(email) = lower($1::text)
+SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version FROM users WHERE lower(email) = lower($1::text)
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -299,12 +309,14 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.CreatedAt,
 		&i.LastLoginAt,
 		&i.AdminNote,
+		&i.PdConsentAt,
+		&i.PdConsentVersion,
 	)
 	return i, err
 }
 
 const getUserByGoogleSub = `-- name: GetUserByGoogleSub :one
-SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note FROM users WHERE google_sub = $1
+SELECT id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version FROM users WHERE google_sub = $1
 `
 
 func (q *Queries) GetUserByGoogleSub(ctx context.Context, googleSub *string) (User, error) {
@@ -324,6 +336,8 @@ func (q *Queries) GetUserByGoogleSub(ctx context.Context, googleSub *string) (Us
 		&i.CreatedAt,
 		&i.LastLoginAt,
 		&i.AdminNote,
+		&i.PdConsentAt,
+		&i.PdConsentVersion,
 	)
 	return i, err
 }
@@ -431,7 +445,7 @@ func (q *Queries) TouchLogin(ctx context.Context, id uuid.UUID) error {
 }
 
 const updateProfile = `-- name: UpdateProfile :one
-UPDATE users SET name = $2, locale = $3, log_prompts = $4 WHERE id = $1 RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note
+UPDATE users SET name = $2, locale = $3, log_prompts = $4 WHERE id = $1 RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version
 `
 
 type UpdateProfileParams struct {
@@ -463,6 +477,8 @@ func (q *Queries) UpdateProfile(ctx context.Context, arg UpdateProfileParams) (U
 		&i.CreatedAt,
 		&i.LastLoginAt,
 		&i.AdminNote,
+		&i.PdConsentAt,
+		&i.PdConsentVersion,
 	)
 	return i, err
 }

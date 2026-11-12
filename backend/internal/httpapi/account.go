@@ -117,7 +117,7 @@ func (s *Server) rankings(w http.ResponseWriter, r *http.Request) {
 func (s *Server) publicConfig(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{
 		"api_base_url":      s.cfg.APIBaseURL,
-		"google_enabled":    s.google != nil,
+		"oauth":             s.oauthList(),
 		"registration_open": s.settings.Bool(r.Context(), settings.RegistrationOpen, true),
 		"min_topup_kopecks": s.settings.Int(r.Context(), settings.MinTopupKopecks, 10000),
 		"payment_provider":  s.payments.Default().Name(),
@@ -267,6 +267,7 @@ func (s *Server) createKeyFor(w http.ResponseWriter, r *http.Request, user uuid.
 		s.internal(w, err)
 		return
 	}
+	s.event(r, user, "key.create", in.Name)
 	d := keyDTO(k)
 	d.Secret = secret
 	writeJSON(w, 201, d)
@@ -317,6 +318,7 @@ func (s *Server) revokeKeyFor(w http.ResponseWriter, r *http.Request, user, id u
 		writeErr(w, 404, "not_found", "Key not found")
 		return
 	}
+	s.event(r, user, "key.revoke", id.String())
 	writeJSON(w, 200, map[string]bool{"ok": true})
 }
 
@@ -442,6 +444,7 @@ func (s *Server) subscribe(w http.ResponseWriter, r *http.Request) {
 			s.internal(w, err)
 			return
 		}
+		s.event(r, currentUser(r).ID, "plan", plan.ID)
 		writeJSON(w, 200, map[string]any{"subscription": sub})
 		return
 	}
@@ -509,6 +512,9 @@ func (s *Server) fakePay(w http.ResponseWriter, r *http.Request) {
 	switch in.Action {
 	case "pay":
 		p, err = s.billing.CompletePayment(r.Context(), id)
+		if err == nil {
+			s.event(r, p.UserID, "payment", p.ExternalID)
+		}
 	case "cancel":
 		err = s.billing.FailPayment(r.Context(), id, "canceled")
 	case "fail":

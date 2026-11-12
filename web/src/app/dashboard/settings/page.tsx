@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { LangSwitch, ThemeToggle } from "@/components/brand";
 import { useSession } from "@/components/session";
-import { PageHead, Switch, useToast } from "@/components/ui";
-import { ApiError, patch, post } from "@/lib/api";
+import { PageHead, Switch, useLoad, useToast } from "@/components/ui";
+import { ApiError, get, patch, post } from "@/lib/api";
 import { useI18n } from "@/lib/i18n/client";
 import type { User } from "@/lib/types";
 
@@ -52,9 +52,9 @@ export default function Settings() {
             {user.has_password && <label className="field"><span>{S.current}</span><input className="input" type="password" value={cur} onChange={(e) => setCur(e.target.value)} autoComplete="current-password" /></label>}
             <label className="field"><span>{S.new}</span><input className="input" type="password" minLength={8} value={nw} onChange={(e) => setNw(e.target.value)} autoComplete="new-password" /></label>
             <div><button className="btn" disabled={nw.length < 8}>{t.common.save}</button></div>
-            <div className="spread small"><span>{S.google}</span><span className={user.has_google ? "ok" : "faint"}>{user.has_google ? S.googleLinked : S.googleNot}</span></div>
           </form>
         </section>
+        <Linked />
         <section>
           <h2 className="h3">{S.interface}</h2>
           <div className="stack">
@@ -64,5 +64,30 @@ export default function Settings() {
         </section>
       </div>
     </>
+  );
+}
+
+function Linked() {
+  const { lang } = useI18n();
+  const en = lang === "en";
+  const { data } = useLoad(() => get<{ data: { provider: string; email: string; created_at: string }[]; providers: { id: string; enabled: boolean }[] }>("/api/me/identities"));
+  const names: Record<string, string> = { github: "GitHub", yandex: "Яндекс ID", vk: "VK ID" };
+  return (
+    <section>
+      <h2 className="h3">{en ? "Sign-in services" : "Вход через сервисы"}</h2>
+      <div className="stack" style={{ ["--gap" as string]: "8px" }}>
+        {(data?.providers ?? []).map((p) => {
+          const link = data?.data.find((x) => x.provider === p.id);
+          return (
+            <div key={p.id} className="spread small">
+              <span>{names[p.id] ?? p.id}</span>
+              {link ? <span className="ok">{en ? "linked" : "привязан"}{link.email ? ` · ${link.email}` : ""}</span>
+                : p.enabled ? <a className="btn btn-ghost btn-sm" href={`/api/auth/oauth/${p.id}?next=/dashboard/settings`}>{en ? "Link" : "Привязать"}</a>
+                : <span className="faint">{en ? "not connected on the server" : "не подключён на сервере"}</span>}
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

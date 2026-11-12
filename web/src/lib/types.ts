@@ -69,5 +69,5 @@ export type Stats = {
 };
 
 export type PublicConfig = {
-  api_base_url: string; google_enabled: boolean; registration_open: boolean; min_topup_kopecks: number; payment_provider: string;
+  api_base_url: string; oauth: { id: string; enabled: boolean }[]; registration_open: boolean; min_topup_kopecks: number; payment_provider: string;
 };

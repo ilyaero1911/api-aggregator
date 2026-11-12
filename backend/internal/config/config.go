@@ -12,7 +12,7 @@ type Config struct {
 	Addr        string
 	DatabaseURL string
 	RedisURL    string
-	// PublicURL — адрес фронтенда, на него возвращаем после входа через Google и оплаты.
+	// PublicURL — адрес фронтенда, на него возвращаем после входа через GitHub, Яндекс или VK и оплаты.
 	PublicURL string
 	// APIBaseURL — адрес, который показываем пользователю в примерах кода.
 	APIBaseURL string
@@ -21,8 +21,10 @@ type Config struct {
 	SecureCookies bool
 	SessionTTL    time.Duration
 
-	GoogleClientID     string
-	GoogleClientSecret string
+	// Вход через внешние сервисы. Пустые значения — кнопка показывается, но вход не настроен.
+	GitHubID, GitHubSecret string
+	YandexID, YandexSecret string
+	VKID, VKSecret         string
 
 	AdminEmails []string // эти адреса получают роль admin при регистрации
 
@@ -35,25 +37,37 @@ type Config struct {
 
 func Load() Config {
 	return Config{
-		Addr:               env("ADDR", ":8090"),
-		DatabaseURL:        env("DATABASE_URL", "postgres://aggregator:aggregator@localhost:55442/aggregator?sslmode=disable"),
-		RedisURL:           env("REDIS_URL", "redis://localhost:56389/0"),
-		PublicURL:          strings.TrimRight(env("PUBLIC_URL", "http://localhost:3100"), "/"),
-		APIBaseURL:         strings.TrimRight(env("API_BASE_URL", "http://localhost:3100/v1"), "/"),
-		SecretKey:          env("SECRET_KEY", "dev-secret-change-me-32-bytes-long!"),
-		SecureCookies:      env("SECURE_COOKIES", "false") == "true",
-		SessionTTL:         dur("SESSION_TTL", 30*24*time.Hour),
-		GoogleClientID:     env("GOOGLE_CLIENT_ID", ""),
-		GoogleClientSecret: env("GOOGLE_CLIENT_SECRET", ""),
-		AdminEmails:        list(env("ADMIN_EMAILS", "admin@local.test")),
-		FxRefresh:          dur("FX_REFRESH", time.Hour),
-		FxCBRURL:           env("FX_CBR_URL", "https://www.cbr.ru/scripts/XML_daily.asp"),
-		FxBackupURL:        env("FX_BACKUP_URL", "https://www.cbr-xml-daily.ru/daily_json.js"),
-		PaymentProvider:    env("PAYMENT_PROVIDER", "fake"),
+		Addr:          env("ADDR", ":8090"),
+		DatabaseURL:   env("DATABASE_URL", "postgres://aggregator:aggregator@localhost:55442/aggregator?sslmode=disable"),
+		RedisURL:      env("REDIS_URL", "redis://localhost:56389/0"),
+		PublicURL:     strings.TrimRight(env("PUBLIC_URL", "http://localhost:3100"), "/"),
+		APIBaseURL:    strings.TrimRight(env("API_BASE_URL", "http://localhost:3100/v1"), "/"),
+		SecretKey:     env("SECRET_KEY", "dev-secret-change-me-32-bytes-long!"),
+		SecureCookies: env("SECURE_COOKIES", "false") == "true",
+		SessionTTL:    dur("SESSION_TTL", 30*24*time.Hour),
+		GitHubID:      env("GITHUB_CLIENT_ID", ""), GitHubSecret: env("GITHUB_CLIENT_SECRET", ""),
+		YandexID: env("YANDEX_CLIENT_ID", ""), YandexSecret: env("YANDEX_CLIENT_SECRET", ""),
+		VKID: env("VK_CLIENT_ID", ""), VKSecret: env("VK_CLIENT_SECRET", ""),
+		AdminEmails:     list(env("ADMIN_EMAILS", "admin@local.test")),
+		FxRefresh:       dur("FX_REFRESH", time.Hour),
+		FxCBRURL:        env("FX_CBR_URL", "https://www.cbr.ru/scripts/XML_daily.asp"),
+		FxBackupURL:     env("FX_BACKUP_URL", "https://www.cbr-xml-daily.ru/daily_json.js"),
+		PaymentProvider: env("PAYMENT_PROVIDER", "fake"),
 	}
 }
 
-func (c Config) GoogleEnabled() bool { return c.GoogleClientID != "" && c.GoogleClientSecret != "" }
+// OAuthCreds возвращает id и secret провайдера входа.
+func (c Config) OAuthCreds(name string) (string, string) {
+	switch name {
+	case "github":
+		return c.GitHubID, c.GitHubSecret
+	case "yandex":
+		return c.YandexID, c.YandexSecret
+	case "vk":
+		return c.VKID, c.VKSecret
+	}
+	return "", ""
+}
 
 func (c Config) IsAdminEmail(email string) bool {
 	for _, e := range c.AdminEmails {

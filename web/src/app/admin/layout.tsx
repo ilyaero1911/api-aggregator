@@ -16,6 +16,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       { href: "/admin/requests", label: A.requests, icon: "pulse" },
     ] },
     { label: L("Каталог", "Catalog"), items: [{ href: "/admin/models", label: A.models, icon: "cube" }, { href: "/admin/providers", label: A.providers, icon: "server" }, { href: "/admin/plans", label: A.plans, icon: "tag" }, { href: "/admin/promos", label: A.promos, icon: "ticket" }] },
+    { label: L("Контент", "Content"), items: [{ href: "/admin/news", label: L("Новости", "News"), icon: "sparkle" }, { href: "/admin/content", label: L("Документы и подвал", "Documents and footer"), icon: "book" }] },
     { label: A.settings, items: [{ href: "/admin/settings", label: L("Наценка и курс", "Markup and FX"), icon: "coins" }, { href: "/admin/audit", label: A.audit, icon: "history" }] },
   ];
   return <SessionGate admin><Shell nav={nav} home="/admin" badge={<span className="tag tag-ink">ADMIN</span>}>{children}</Shell></SessionGate>;

@@ -38,7 +38,7 @@ type Server struct {
 	settings *settings.Store
 	engine   *gateway.Engine
 	payments *payments.Registry
-	google   *auth.Google
+	oauth    map[string]*auth.OAuth
 	sealer   *auth.Sealer
 	log      *slog.Logger
 }
@@ -61,8 +61,11 @@ func New(d Deps) *Server {
 		cfg: d.Cfg, pool: d.Pool, q: db.New(d.Pool), rdb: d.Redis, billing: d.Billing, fx: d.FX,
 		settings: d.Settings, engine: d.Engine, payments: d.Payments, sealer: d.Sealer, log: d.Log,
 	}
-	if d.Cfg.GoogleEnabled() {
-		s.google = auth.NewGoogle(d.Cfg.GoogleClientID, d.Cfg.GoogleClientSecret, d.Cfg.PublicURL+"/api/auth/google/callback", d.Cfg.SecretKey)
+	s.oauth = map[string]*auth.OAuth{}
+	for name, mk := range map[string]func(id, secret, redirect string) *auth.OAuth{"github": auth.NewGitHub, "yandex": auth.NewYandex, "vk": auth.NewVK} {
+		if id, sec := d.Cfg.OAuthCreds(name); id != "" && sec != "" {
+			s.oauth[name] = mk(id, sec, d.Cfg.PublicURL+"/api/auth/oauth/"+name+"/callback")
+		}
 	}
 	return s
 }
@@ -89,14 +92,17 @@ func (s *Server) Router() http.Handler {
 		r.Use(middleware.Timeout(60 * time.Second))
 		r.Use(s.sessionUser)
 		s.publicRoutes(r)
+		s.contentPublicRoutes(r)
 		s.authRoutes(r)
 		r.Group(func(r chi.Router) {
 			r.Use(s.requireUser)
 			s.accountRoutes(r)
+			s.contentAccountRoutes(r)
 		})
 		r.Route("/admin", func(r chi.Router) {
 			r.Use(s.requireAdmin)
 			s.adminRoutes(r)
+			s.contentAdminRoutes(r)
 		})
 	})
 

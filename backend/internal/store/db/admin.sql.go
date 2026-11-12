@@ -618,7 +618,7 @@ func (q *Queries) AdminUpdateSubscription(ctx context.Context, arg AdminUpdateSu
 }
 
 const adminUpdateUser = `-- name: AdminUpdateUser :one
-UPDATE users SET name = $2, email = $3, role = $4, status = $5, locale = $6, admin_note = $7 WHERE id = $1 RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note
+UPDATE users SET name = $2, email = $3, role = $4, status = $5, locale = $6, admin_note = $7 WHERE id = $1 RETURNING id, email, name, password_hash, google_sub, avatar_url, role, status, locale, log_prompts, created_at, last_login_at, admin_note, pd_consent_at, pd_consent_version
 `
 
 type AdminUpdateUserParams struct {
@@ -656,6 +656,8 @@ func (q *Queries) AdminUpdateUser(ctx context.Context, arg AdminUpdateUserParams
 		&i.CreatedAt,
 		&i.LastLoginAt,
 		&i.AdminNote,
+		&i.PdConsentAt,
+		&i.PdConsentVersion,
 	)
 	return i, err
 }

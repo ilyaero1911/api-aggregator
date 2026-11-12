@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Bars, Shares } from "@/components/charts";
 import { Icon, type IconName } from "@/components/icons";
+import { NewsBanner } from "@/components/news";
 import { useSession } from "@/components/session";
 import { PageHead, Seg, Skeleton, useLoad } from "@/components/ui";
 import { get } from "@/lib/api";
@@ -39,6 +40,7 @@ export default function Overview() {
           <Seg value={range} onChange={setRange} options={[{ value: "24h", label: "24h" }, { value: "7d", label: "7d" }, { value: "30d", label: "30d" }, { value: "all", label: t.common.all }]} />
         </>} />
 
+      <NewsBanner />
       <div className="board">
         {[
           [D.cost, tot && rub(tot.cost_micro, lang), "wallet"],

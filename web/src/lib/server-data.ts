@@ -32,7 +32,7 @@ export async function loadConfig(): Promise<PublicConfig> {
   try {
     return await api<PublicConfig>("/api/config", opts);
   } catch {
-    return { api_base_url: "http://localhost:3100/v1", google_enabled: false, registration_open: true, min_topup_kopecks: 10000, payment_provider: "fake" };
+    return { api_base_url: "http://localhost:3100/v1", oauth: [], registration_open: true, min_topup_kopecks: 10000, payment_provider: "fake" };
   }
 }
 

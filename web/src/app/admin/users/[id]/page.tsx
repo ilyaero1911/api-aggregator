@@ -56,7 +56,7 @@ export default function AdminUser({ params }: { params: Promise<{ id: string }> 
             <h1 className="h1">{u.email}</h1>
             {u.role === "admin" && <span className="tag tag-ink">admin</span>}
             {u.status === "blocked" ? <span className="tag tag-bad">{L("заблокирован", "blocked")}</span> : <span className="tag tag-ok">{L("активен", "active")}</span>}
-            {u.has_google && <span className="tag">Google</span>}
+            
           </div>
           <p className="muted small">{u.name} · <span className="mono">{u.id}</span> · {L("с", "since")} {date(u.created_at, lang)} · {L("вход", "login")} {ago(u.last_login_at, lang)}</p>
         </div>
@@ -213,7 +213,7 @@ export default function AdminUser({ params }: { params: Promise<{ id: string }> 
               <button className="btn btn-ghost" onClick={() => setPw(Math.random().toString(36).slice(2, 8) + Math.random().toString(36).slice(2, 8))}>{L("Сгенерировать", "Generate")}</button>
               <button className="btn" disabled={pw.length < 8} onClick={() => act(async () => { await post(`/api/admin/users/${id}/password`, { password: pw }); })}>{L("Сохранить", "Save")}</button>
             </div>
-            <div className="small muted">{L("Вход по паролю", "Password sign-in")}: {u.has_password ? L("есть", "yes") : L("нет", "no")} · Google: {u.has_google ? L("привязан", "linked") : L("нет", "no")}</div>
+            <div className="small muted">{L("Вход по паролю", "Password sign-in")}: {u.has_password ? L("есть", "yes") : L("нет", "no")}</div>
           </section>
           <section className="panel">
             <h2 className="h3" style={{ marginBottom: 12 }}>{L("Активные сессии", "Active sessions")}</h2>

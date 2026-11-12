@@ -2,16 +2,12 @@ package httpapi
 
 import (
 	"context"
-	"errors"
 	"net/http"
-	"net/mail"
-	"net/url"
 	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 
 	"github.com/ilyaero1911/api-aggregator/backend/internal/auth"
 	"github.com/ilyaero1911/api-aggregator/backend/internal/settings"
@@ -92,8 +88,9 @@ func (s *Server) authRoutes(r chi.Router) {
 	r.Post("/auth/login", s.login)
 	r.Post("/auth/logout", s.logout)
 	r.Get("/auth/me", s.me)
-	r.Get("/auth/google", s.googleStart)
-	r.Get("/auth/google/callback", s.googleCallback)
+	r.Get("/auth/oauth/{provider}", s.oauthStart)
+	r.Get("/auth/oauth/{provider}/callback", s.oauthCallback)
+	r.Get("/auth/check-email", s.checkEmail)
 }
 
 func (s *Server) startSession(w http.ResponseWriter, r *http.Request, u db.User) error {
@@ -161,8 +158,13 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 		Name     string `json:"name"`
 		Locale   string `json:"locale"`
+		Consent  bool   `json:"consent"`
 	}
 	if !readJSON(w, r, &in) {
+		return
+	}
+	if !in.Consent {
+		writeErr(w, 400, "consent_required", "Consent to personal data processing is required")
 		return
 	}
 	if !s.settings.Bool(r.Context(), settings.RegistrationOpen, true) {
@@ -170,12 +172,12 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	in.Email = strings.TrimSpace(strings.ToLower(in.Email))
-	if _, err := mail.ParseAddress(in.Email); err != nil || len(in.Email) > 200 {
+	if !validEmail(in.Email) {
 		writeErr(w, 400, "bad_email", "Invalid email")
 		return
 	}
-	if len(in.Password) < 8 || len(in.Password) > 200 {
-		writeErr(w, 400, "weak_password", "Password must be at least 8 characters")
+	if p := auth.PasswordProblem(in.Password, in.Email); p != "" {
+		writeErr(w, 400, "password_"+p, "Password is not strong enough")
 		return
 	}
 	if s.loginThrottled(r.Context(), "reg:"+clientIP(r)) {
@@ -200,6 +202,8 @@ func (s *Server) register(w http.ResponseWriter, r *http.Request) {
 		s.internal(w, err)
 		return
 	}
+	s.recordConsent(r, u.ID)
+	s.event(r, u.ID, "signup", "email")
 	if err := s.startSession(w, r, u); err != nil {
 		s.internal(w, err)
 		return
@@ -233,6 +237,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		s.internal(w, err)
 		return
 	}
+	s.event(r, u.ID, "login", "password")
 	writeJSON(w, 200, userDTO(u))
 }
 
@@ -247,10 +252,10 @@ func (s *Server) logout(w http.ResponseWriter, r *http.Request) {
 func (s *Server) me(w http.ResponseWriter, r *http.Request) {
 	u := currentUser(r)
 	if u == nil {
-		writeJSON(w, 200, map[string]any{"user": nil, "google_enabled": s.google != nil})
+		writeJSON(w, 200, map[string]any{"user": nil, "oauth": s.oauthList()})
 		return
 	}
-	writeJSON(w, 200, map[string]any{"user": userDTO(*u), "google_enabled": s.google != nil})
+	writeJSON(w, 200, map[string]any{"user": userDTO(*u), "oauth": s.oauthList()})
 }
 
 func safeNext(next string) string {
@@ -258,64 +263,6 @@ func safeNext(next string) string {
 		return "/dashboard"
 	}
 	return next
-}
-
-func (s *Server) googleStart(w http.ResponseWriter, r *http.Request) {
-	if s.google == nil {
-		http.Redirect(w, r, s.cfg.PublicURL+"/login?error=google_disabled", http.StatusFound)
-		return
-	}
-	http.Redirect(w, r, s.google.AuthURL(s.google.State(safeNext(r.URL.Query().Get("next")))), http.StatusFound)
-}
-
-func (s *Server) googleCallback(w http.ResponseWriter, r *http.Request) {
-	fail := func(code string) {
-		http.Redirect(w, r, s.cfg.PublicURL+"/login?error="+url.QueryEscape(code), http.StatusFound)
-	}
-	if s.google == nil {
-		fail("google_disabled")
-		return
-	}
-	next, err := s.google.CheckState(r.URL.Query().Get("state"))
-	if err != nil {
-		fail("bad_state")
-		return
-	}
-	prof, err := s.google.Exchange(r.Context(), r.URL.Query().Get("code"))
-	if err != nil {
-		s.log.Warn("google exchange", "err", err)
-		fail("google_failed")
-		return
-	}
-	u, err := s.q.GetUserByGoogleSub(r.Context(), &prof.Sub)
-	if errors.Is(err, pgx.ErrNoRows) {
-		u, err = s.q.GetUserByEmail(r.Context(), prof.Email)
-		if err == nil {
-			// email подтверждён Google — привязываем аккаунт
-			err = s.q.LinkGoogle(r.Context(), db.LinkGoogleParams{ID: u.ID, GoogleSub: &prof.Sub, AvatarUrl: prof.Picture})
-		} else if errors.Is(err, pgx.ErrNoRows) {
-			if !s.settings.Bool(r.Context(), settings.RegistrationOpen, true) {
-				fail("registration_closed")
-				return
-			}
-			u, err = s.createUser(r.Context(), db.CreateUserParams{Email: strings.ToLower(prof.Email), Name: prof.Name,
-				GoogleSub: &prof.Sub, AvatarUrl: prof.Picture})
-		}
-	}
-	if err != nil {
-		s.log.Error("google login", "err", err)
-		fail("internal")
-		return
-	}
-	if u.Status != "active" {
-		fail("account_blocked")
-		return
-	}
-	if err := s.startSession(w, r, u); err != nil {
-		fail("internal")
-		return
-	}
-	http.Redirect(w, r, s.cfg.PublicURL+next, http.StatusFound)
 }
 
 func (s *Server) updateProfile(w http.ResponseWriter, r *http.Request) {
@@ -369,6 +316,7 @@ func (s *Server) changePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// выходим из всех сессий, кроме текущей: проще — из всех и сразу заводим новую
+	s.event(r, u.ID, "password", "")
 	_ = s.q.DeleteUserSessions(r.Context(), u.ID)
 	if err := s.startSession(w, r, *u); err != nil {
 		s.internal(w, err)

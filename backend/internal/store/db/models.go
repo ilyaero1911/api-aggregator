@@ -10,6 +10,25 @@ import (
 	"github.com/google/uuid"
 )
 
+type Announcement struct {
+	ID        uuid.UUID `json:"id"`
+	TitleRu   string    `json:"title_ru"`
+	TitleEn   string    `json:"title_en"`
+	BodyRu    string    `json:"body_ru"`
+	BodyEn    string    `json:"body_en"`
+	Kind      string    `json:"kind"`
+	Published bool      `json:"published"`
+	Pinned    bool      `json:"pinned"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type AnnouncementRead struct {
+	UserID         uuid.UUID `json:"user_id"`
+	AnnouncementID uuid.UUID `json:"announcement_id"`
+	ReadAt         time.Time `json:"read_at"`
+}
+
 type ApiKey struct {
 	ID               uuid.UUID  `json:"id"`
 	UserID           uuid.UUID  `json:"user_id"`
@@ -37,6 +56,16 @@ type AuditLog struct {
 	Target    string     `json:"target"`
 	Details   []byte     `json:"details"`
 	CreatedAt time.Time  `json:"created_at"`
+}
+
+type ContentPage struct {
+	Slug      string    `json:"slug"`
+	TitleRu   string    `json:"title_ru"`
+	TitleEn   string    `json:"title_en"`
+	BodyRu    string    `json:"body_ru"`
+	BodyEn    string    `json:"body_en"`
+	Version   int32     `json:"version"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type FxRate struct {
@@ -214,19 +243,38 @@ type Transaction struct {
 }
 
 type User struct {
-	ID           uuid.UUID  `json:"id"`
-	Email        string     `json:"email"`
-	Name         string     `json:"name"`
-	PasswordHash *string    `json:"password_hash"`
-	GoogleSub    *string    `json:"google_sub"`
-	AvatarUrl    string     `json:"avatar_url"`
-	Role         string     `json:"role"`
-	Status       string     `json:"status"`
-	Locale       string     `json:"locale"`
-	LogPrompts   bool       `json:"log_prompts"`
-	CreatedAt    time.Time  `json:"created_at"`
-	LastLoginAt  *time.Time `json:"last_login_at"`
-	AdminNote    string     `json:"admin_note"`
+	ID               uuid.UUID  `json:"id"`
+	Email            string     `json:"email"`
+	Name             string     `json:"name"`
+	PasswordHash     *string    `json:"password_hash"`
+	GoogleSub        *string    `json:"google_sub"`
+	AvatarUrl        string     `json:"avatar_url"`
+	Role             string     `json:"role"`
+	Status           string     `json:"status"`
+	Locale           string     `json:"locale"`
+	LogPrompts       bool       `json:"log_prompts"`
+	CreatedAt        time.Time  `json:"created_at"`
+	LastLoginAt      *time.Time `json:"last_login_at"`
+	AdminNote        string     `json:"admin_note"`
+	PdConsentAt      *time.Time `json:"pd_consent_at"`
+	PdConsentVersion string     `json:"pd_consent_version"`
+}
+
+type UserEvent struct {
+	ID        int64     `json:"id"`
+	UserID    uuid.UUID `json:"user_id"`
+	Kind      string    `json:"kind"`
+	Details   string    `json:"details"`
+	Ip        string    `json:"ip"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type UserIdentity struct {
+	Provider  string    `json:"provider"`
+	Subject   string    `json:"subject"`
+	UserID    uuid.UUID `json:"user_id"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Wallet struct {

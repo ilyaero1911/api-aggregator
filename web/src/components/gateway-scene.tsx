@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n/client";
+import { DEMO_EN, DEMO_RU, type Demo } from "@/lib/demo-prompts";
 import { Icon } from "./icons";
 
 /**
@@ -22,11 +23,6 @@ type Packet = { id: number; stage: "in" | "out" | "back" | "reply"; to: number; 
 type Reply = { text: string; shown: number; meta: string; done: boolean };
 
 const W = 600, H = 360, GX = 270, GY = H / 2, PX = 430;
-const ANSWERS = {
-  ru: ["Конечно! Вот короткий план письма: поблагодарить, назвать новую дату и предложить два слота на выбор.", "Токен — это кусочек слова. Чем длиннее ответ, тем больше токенов и тем дороже запрос.", "Готово: я перевёл текст и сохранил исходный тон."],
-  en: ["Sure! Here is a short plan: thank them, propose the new date and offer two time slots.", "A token is a piece of a word. Longer answers mean more tokens and a higher price.", "Done: I translated the text and kept the original tone."],
-};
-const EXAMPLES = { ru: ["Напиши письмо клиенту", "Что такое токен?", "Переведи на английский"], en: ["Write an email to a client", "What is a token?", "Translate into Spanish"] };
 
 export function GatewayScene() {
   const { lang } = useI18n();
@@ -35,8 +31,24 @@ export function GatewayScene() {
   const py = (i: number) => rowH * i + rowH / 2;
   const [down, setDown] = useState<boolean[]>(PROVS.map(() => false));
   const [lat, setLat] = useState<number[]>(PROVS.map((p) => p.base));
-  const [strategy, setStrategy] = useState<Strategy>("rr");
-  const [auto, setAuto] = useState(true);
+  const strategy = "rr" as Strategy;
+  const auto = true;
+  const bank: Demo[] = ru ? DEMO_RU : DEMO_EN;
+  const pick3 = (exclude: number[] = []) => {
+    const pool = bank.map((_, i) => i).filter((i) => !exclude.includes(i));
+    for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+    return pool.slice(0, 3);
+  };
+  const [shown, setShown] = useState<number[]>(() => [0, 1, 2]);
+  const [taps, setTaps] = useState<number[]>([]);
+  useEffect(() => { setShown(pick3()); // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ru]);
+  // одна из подсказок сама меняется раз в несколько секунд
+  useEffect(() => {
+    const id = setInterval(() => setShown((s) => { const n = [...s]; const k = Math.floor(Math.random() * 3); n[k] = pick3(s)[0]; return n; }), 7000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ru]);
   const [hover, setHover] = useState<number | null>(null);
   const [prompt, setPrompt] = useState("");
   const [reply, setReply] = useState<Reply | null>(null);
@@ -48,7 +60,7 @@ export function GatewayScene() {
   const inPath = useRef<SVGPathElement | null>(null);
   const st = useRef({ down, lat, strategy, auto });
   st.current = { down, lat, strategy, auto };
-  const seq = useRef(0), rr = useRef(0), askIdx = useRef(0);
+  const seq = useRef(0), rr = useRef(0), askIdx = useRef(-1);
 
   // живые задержки провайдеров
   useEffect(() => {
@@ -71,10 +83,9 @@ export function GatewayScene() {
     setStats((x) => ({ ...x, sent: x.sent + 1 }));
   }, [ranking]);
 
-  const send = () => {
-    const q = prompt.trim() || EXAMPLES[ru ? "ru" : "en"][0];
-    const k = EXAMPLES[ru ? "ru" : "en"].indexOf(q);
-    askIdx.current = k >= 0 ? k : Math.floor(Math.random() * 3);
+  const send = (text?: string) => {
+    const q = (text ?? prompt).trim() || bank[shown[0]].q;
+    askIdx.current = bank.findIndex((d) => d.q === q);
     setPrompt(q);
     setReply({ text: "", shown: 0, meta: "", done: false });
     fire(true);
@@ -105,7 +116,8 @@ export function GatewayScene() {
             setFlash({ i: p.to, ok: true, k: p.id });
             setStats((x) => ({ ...x, ok: x.ok + 1 }));
             if (p.user) {
-              const ans = ANSWERS[ru ? "ru" : "en"][askIdx.current];
+              const d = bank[askIdx.current] ?? bank[Math.floor(Math.random() * bank.length)];
+              const ans = askIdx.current >= 0 ? d.a[Math.floor(Math.random() * 4)] : (ru ? "Ответ на ваш вопрос пришёл через шлюз. Здесь тестовый режим: подключите API-ключ, чтобы получить настоящий ответ модели." : "The answer came back through the gateway. This is a demo: connect an API key to get a real model answer.");
               const ms = st.current.lat[p.to] + p.hops * 140;
               const cost = (0.002 + PROVS[p.to].price * 0.03).toFixed(3);
               setReply({ text: ans, shown: 0, done: false, meta: `${PROVS[p.to].name} · ${ms} ms · ${ru ? cost.replace(".", ",") + " ₽" : "$" + (Number(cost) / 83).toFixed(4)}${p.hops ? (ru ? " · через запасной маршрут" : " · via backup route") : ""}` });
@@ -147,17 +159,9 @@ export function GatewayScene() {
     if (n.every(Boolean)) n[(i + 1) % n.length] = false;
     return n;
   });
-  const S = { price: ru ? "Дешевле" : "Cheapest", speed: ru ? "Быстрее" : "Fastest", rr: ru ? "По очереди" : "Round robin" };
 
   return (
     <div className="gw">
-      <div className="gw-top">
-        <div className="seg" role="group" aria-label="strategy">
-          {(Object.keys(S) as Strategy[]).map((k) => <button key={k} aria-pressed={strategy === k} onClick={() => setStrategy(k)}>{S[k]}</button>)}
-        </div>
-        <label className="gw-auto"><input type="checkbox" checked={auto} onChange={(e) => setAuto(e.target.checked)} />{ru ? "Фоновый трафик" : "Background traffic"}</label>
-      </div>
-
       <div className="gw-stage">
         <svg viewBox={`0 0 ${W} ${H}`} className="gw-svg" aria-hidden>
           <defs>
@@ -179,10 +183,13 @@ export function GatewayScene() {
           })}
         </svg>
 
-        <div className="gw-app" style={{ top: `${(GY / H) * 100}%` }}>
+        <button className="gw-app" style={{ top: `${(GY / H) * 100}%` }} title={ru ? "Нажмите, чтобы отправить запрос" : "Click to send a request"}
+          onClick={() => { fire(false); const k = Date.now(); setTaps((t) => [...t.slice(-6), k]); setTimeout(() => setTaps((t) => t.filter((x) => x !== k)), 600); }}>
           <Icon name="bolt" size={16} />
           <span>{ru ? "Ваше приложение" : "Your app"}</span>
-        </div>
+          {taps.map((k) => <i key={k} className="gw-tap" />)}
+        </button>
+        <div className="gw-hint" style={{ top: `${((GY + 34) / H) * 100}%` }}>{ru ? "жмите — полетят запросы" : "click to send requests"}</div>
         <div className="gw-label" style={{ left: `${(GX / W) * 100}%`, top: `${((GY + 46) / H) * 100}%` }}>{ru ? "шлюз" : "gateway"}</div>
 
         {PROVS.map((p, i) => (
@@ -202,7 +209,7 @@ export function GatewayScene() {
         <button className="btn btn-signal" aria-label="send"><Icon name="send" size={16} /></button>
       </form>
       <div className="gw-ex">
-        {EXAMPLES[ru ? "ru" : "en"].map((x) => <button key={x} className="chip" onClick={() => { setPrompt(x); setTimeout(() => document.querySelector<HTMLFormElement>(".gw-ask")?.requestSubmit(), 0); }}>{x}</button>)}
+        {shown.map((i, slot) => <button key={bank[i].q} className="chip gw-chip" onClick={() => { setPrompt(bank[i].q); send(bank[i].q); setShown((s) => { const n = [...s]; n[slot] = pick3(s)[0]; return n; }); }}>{bank[i].q}</button>)}
       </div>
       {reply && (
         <div className="gw-reply">

@@ -28,14 +28,25 @@ func TestSealer(t *testing.T) {
 	}
 }
 
-func TestGoogleState(t *testing.T) {
-	g := NewGoogle("id", "sec", "http://x/cb", "secret")
-	st := g.State("/dashboard")
-	next, err := g.CheckState(st)
+func TestState(t *testing.T) {
+	st := SignState("secret", "/dashboard")
+	next, err := CheckState("secret", st)
 	if err != nil || next != "/dashboard" {
 		t.Fatal(next, err)
 	}
-	if _, err := g.CheckState(st + "x"); err == nil {
+	if _, err := CheckState("secret", st+"x"); err == nil {
 		t.Fatal("tampered state accepted")
+	}
+}
+
+func TestPasswordProblem(t *testing.T) {
+	cases := map[string]string{"short": "too_short", "alllowercase1": "weak", "Qwerty123x": "common", "Ivanov2024x": "", "Пароль2024Ок": "common", "СложнаяФраза7": ""}
+	for p, want := range cases {
+		if got := PasswordProblem(p, "user@example.com"); got != want {
+			t.Errorf("%s: got %q want %q", p, got, want)
+		}
+	}
+	if PasswordProblem("Maksim1234", "maksim@mail.ru") != "contains_email" {
+		t.Error("email in password")
 	}
 }
