@@ -29,6 +29,8 @@ const (
 	NoAvailableProvider   Code = "no_available_provider"
 )
 
+func (c Code) String() string { return string(c) }
+
 // Kind описывает строку таблицы ошибок: HTTP-статус, тип и текст для клиента.
 type Kind struct {
 	Status  int

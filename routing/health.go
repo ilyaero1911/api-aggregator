@@ -73,6 +73,7 @@ type Bucket struct {
 type track struct {
 	buckets     map[int64]*Bucket
 	consecutive int
+	last        time.Time
 }
 
 // Health — health-трекинг эндпоинтов пода со скользящими окнами 1/5/30 минут.
@@ -95,7 +96,8 @@ func (h *Health) Observe(endpoint string, o Outcome) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	t := h.track(endpoint)
-	sec := h.now().Unix()
+	t.last = h.now()
+	sec := t.last.Unix()
 	b := t.buckets[sec]
 	if b == nil {
 		b = &Bucket{Second: sec}
@@ -118,6 +120,17 @@ func (h *Health) Observe(endpoint string, o Outcome) {
 		b.Errors++
 	}
 	h.prune(t, sec)
+}
+
+// Idle — сколько времени эндпоинт не вызывался на этом поде.
+func (h *Health) Idle(endpoint string) time.Duration {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	t := h.track(endpoint)
+	if t.last.IsZero() {
+		return 0
+	}
+	return h.now().Sub(t.last)
 }
 
 // Stats — агрегаты эндпоинта за окно.
