@@ -164,7 +164,7 @@ func (s *Server) serveChat(w http.ResponseWriter, r *http.Request, c gateway.Cal
 		}
 		writeJSON(w, 200, map[string]any{
 			"id": genID(out.ID), "object": "chat.completion", "created": created, "model": out.Model, "provider": out.ProviderID,
-			"choices": []any{map[string]any{"index": 0, "message": map[string]string{"role": "assistant", "content": out.Result.Content},
+			"choices": []any{map[string]any{"index": 0, "message": assistantMessage(out.Result),
 				"finish_reason": out.Result.FinishReason}},
 			"usage": usageOf(out),
 		})
@@ -343,4 +343,16 @@ func (s *Server) v1Generation(w http.ResponseWriter, r *http.Request) {
 		"currency": "RUB", "paid_by": row.PaidBy, "latency": row.LatencyMs, "ttft": row.TtftMs, "streamed": row.Streamed,
 		"finish_reason": row.FinishReason, "app": row.App,
 	}})
+}
+
+// assistantMessage собирает message ответа: текст и, если модель вызвала инструменты, tool_calls.
+func assistantMessage(r gateway.Result) map[string]any {
+	m := map[string]any{"role": "assistant", "content": r.Content}
+	if len(r.ToolCalls) > 0 {
+		m["tool_calls"] = r.ToolCalls
+		if r.Content == "" {
+			m["content"] = nil
+		}
+	}
+	return m
 }

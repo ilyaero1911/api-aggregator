@@ -42,7 +42,7 @@ export default function Providers() {
           ))}
         </tbody>
       </table>
-      <p className="hint" style={{ marginTop: 12 }}>openai_compatible — заготовка под реальных провайдеров; сейчас маршрутизация на него возвращает 501 и переходит к следующему.</p>
+      <p className="hint" style={{ marginTop: 12 }}>openai_compatible — настоящий провайдер с OpenAI-совместимым API (OpenAI, DeepSeek, OpenRouter, Together и др.): укажите Base URL вида https://api.openai.com/v1 и API-ключ, затем добавьте маршрут к модели в разделе «Модели».</p>
       <Modal open={!!f} onClose={() => setF(null)} title={f?.isNew ? A.newProvider : f?.id}
         footer={<>
           {f && !f.isNew && <button className="btn btn-danger" style={{ marginRight: "auto" }} onClick={async () => { if (await ask(`${t.common.delete} ${f.id}?`)) { await del(`/api/admin/providers/${f.id}`); setF(null); reload(); } }}>{t.common.delete}</button>}

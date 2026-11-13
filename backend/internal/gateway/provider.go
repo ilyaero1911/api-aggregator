@@ -57,6 +57,8 @@ type ChatRequest struct {
 	MaxTokens   *int      `json:"max_tokens,omitempty"`
 	Stop        any       `json:"stop,omitempty"`
 	Tools       any       `json:"tools,omitempty"`
+	ToolChoice  json.RawMessage `json:"tool_choice,omitempty"`
+	RespFormat  json.RawMessage `json:"response_format,omitempty"`
 	User        string    `json:"user,omitempty"`
 	Cache       *bool     `json:"cache,omitempty"`
 	Provider    *struct {
@@ -73,6 +75,7 @@ type Usage struct {
 
 type Result struct {
 	Content      string
+	ToolCalls    json.RawMessage
 	Usage        Usage
 	FinishReason string
 	TTFT         time.Duration
@@ -109,7 +112,10 @@ func NewUpstream(e Endpoint) (Upstream, error) {
 	case "mock":
 		return &Mock{Latency: time.Duration(e.LatencyMS) * time.Millisecond, ErrorRate: e.ErrorRate, Name: e.ProviderID}, nil
 	case "openai_compatible":
-		return nil, &UpstreamError{Status: 501, Message: "openai_compatible providers are not enabled yet", Retryable: true}
+		if e.BaseURL == "" || e.APIKey == "" {
+			return nil, &UpstreamError{Status: 503, Message: e.ProviderID + ": base URL or API key is not set", Retryable: true}
+		}
+		return &OpenAICompat{Name: e.ProviderID, BaseURL: strings.TrimRight(e.BaseURL, "/"), Key: e.APIKey}, nil
 	}
 	return nil, errors.New("unknown provider kind " + e.Kind)
 }

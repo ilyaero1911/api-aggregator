@@ -413,7 +413,7 @@ func (e *Engine) Chat(ctx context.Context, c Caller, req ChatRequest, onStart fu
 				_ = onStart(modelID)
 			}
 			release()
-			if ck != "" && res.FinishReason != "" {
+			if ck != "" && res.FinishReason != "" && len(res.ToolCalls) == 0 {
 				if raw, err := json.Marshal(cachedAnswer{Model: modelID, Provider: ep.ProviderID, Content: res.Content, Finish: res.FinishReason, Usage: res.Usage}); err == nil {
 					ttl := time.Duration(e.settings.Int(ctx, "cache_ttl_sec", 3600)) * time.Second
 					e.rdb.Set(context.WithoutCancel(ctx), ck, raw, ttl)
@@ -429,7 +429,12 @@ func (e *Engine) Chat(ctx context.Context, c Caller, req ChatRequest, onStart fu
 	}
 	var ue *UpstreamError
 	if errors.As(lastErr, &ue) {
-		lastErr = apiErr(502, "upstream_error", "All providers failed: "+ue.Message)
+		if !ue.Retryable && ue.Status >= 400 && ue.Status < 500 {
+			// провайдер отклонил сам запрос (например, неверные параметры): отдаём его ответ как есть
+			lastErr = apiErr(ue.Status, "upstream_rejected", ue.Message)
+		} else {
+			lastErr = apiErr(502, "upstream_error", "All providers failed: "+ue.Message)
+		}
 	}
 	e.logFailure(ctx, c, current, preset, "chat", req, lastErr, start)
 	return Outcome{}, lastErr
