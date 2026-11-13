@@ -38,7 +38,7 @@ export function Shell({ nav, children, home, badge }: { nav: NavGroup[]; childre
     <div className={`shell${mini ? " mini" : ""}`}>
       <aside className={`side${open ? " open" : ""}`}>
         <div className="side-top">
-          <Link href={home} className="logo"><Mark /><span className="logo-word side-text">{BRAND}</span></Link>
+          <Link href="/" className="logo" title="На главную"><Mark /><span className="logo-word side-text">{BRAND}</span></Link>
           <span className="side-text">{badge}</span>
           <button className="side-toggle" onClick={toggleMini} title={mini ? (en ? "Expand panel" : "Развернуть панель") : (en ? "Collapse panel" : "Свернуть панель")} aria-label="toggle sidebar">
             <Icon name="chevron" size={16} />

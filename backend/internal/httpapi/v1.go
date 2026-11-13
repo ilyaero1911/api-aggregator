@@ -64,7 +64,7 @@ func (s *Server) requireKey(next http.Handler) http.Handler {
 		h := r.Header.Get("Authorization")
 		token := strings.TrimSpace(strings.TrimPrefix(h, "Bearer "))
 		if token == "" || token == h {
-			writeErr(w, 401, "missing_api_key", "Provide an API key: Authorization: Bearer ng-v1-…")
+			writeErr(w, 401, "missing_api_key", "Provide an API key: Authorization: Bearer st-v1-…")
 			return
 		}
 		k, err := s.q.GetKeyBySecret(r.Context(), auth.HashToken(token))

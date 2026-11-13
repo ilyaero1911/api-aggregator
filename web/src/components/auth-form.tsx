@@ -160,7 +160,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <span>{L.password}</span>
         <div className="input-wrap">
           <input className="input" type={show ? "text" : "password"} value={password} onChange={(x) => setPassword(x.target.value)} onBlur={() => setTouched((t) => ({ ...t, password: true }))} autoComplete={reg ? "new-password" : "current-password"} />
-          <button type="button" className="input-eye" onClick={() => setShow((s) => !s)} aria-label={L.show}><Icon name={show ? "lock" : "search"} size={16} /></button>
+          <button type="button" className="input-eye" onClick={() => setShow((s) => !s)} aria-label={L.show}><Icon name={show ? "eyeOff" : "eye"} size={17} /></button>
         </div>
         {reg && (password || touched.password) && (
           <div className="pw">

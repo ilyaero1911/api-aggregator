@@ -7,11 +7,11 @@ import (
 
 func TestAPIKey(t *testing.T) {
 	s, p, h := NewAPIKey("inference")
-	if !strings.HasPrefix(s, "ng-v1-") || HashToken(s) != h || !strings.Contains(p, "…") {
+	if !strings.HasPrefix(s, "st-v1-") || HashToken(s) != h || !strings.Contains(p, "…") {
 		t.Fatal(s, p)
 	}
 	m, _, _ := NewAPIKey("management")
-	if !strings.HasPrefix(m, "ng-mgmt-") {
+	if !strings.HasPrefix(m, "st-mgmt-") {
 		t.Fatal(m)
 	}
 }

@@ -8,7 +8,7 @@ export type IconName =
   | "overview" | "chat" | "image" | "preset" | "key" | "shieldKey" | "wallet" | "logs" | "settings" | "cube" | "book"
   | "users" | "repeat" | "card" | "receipt" | "pulse" | "server" | "tag" | "ticket" | "history" | "coins" | "trophy"
   | "logout" | "search" | "plus" | "copy" | "check" | "arrow" | "chevron" | "sparkle" | "bolt" | "route" | "globe"
-  | "lock" | "send" | "stop" | "trash" | "edit" | "download" | "refresh" | "menu" | "close" | "home" | "admin" | "sun" | "moon" | "contrast";
+  | "lock" | "send" | "stop" | "trash" | "edit" | "download" | "refresh" | "menu" | "close" | "home" | "admin" | "sun" | "moon" | "contrast" | "eye" | "eyeOff" | "info" | "warn";
 
 const P: Record<IconName, React.ReactNode> = {
   overview: <><rect x="3.5" y="3.5" width="7" height="9" rx="2" /><rect x="13.5" y="3.5" width="7" height="5" rx="2" /><rect x="13.5" y="11.5" width="7" height="9" rx="2" /><rect x="3.5" y="15.5" width="7" height="5" rx="2" /></>,
@@ -57,6 +57,10 @@ const P: Record<IconName, React.ReactNode> = {
   admin: <><path d="M12 3.5 19 6v5.5c0 4.2-2.9 7.7-7 9-4.1-1.3-7-4.8-7-9V6z" /><path d="m9 12 2 2 4-4" /></>,
   sun: <><circle cx="12" cy="12" r="3.8" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" /></>,
   moon: <path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z" />,
+  eye: <><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></>,
+  eyeOff: <><path d="M4 4l16 16" /><path d="M9.9 5.8A9.7 9.7 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a16.6 16.6 0 0 1-3.2 4M6.5 7.6A16 16 0 0 0 2.5 12S6 18.5 12 18.5a9.4 9.4 0 0 0 4.4-1.1" /><path d="M10 10.2a2.8 2.8 0 0 0 3.8 3.8" /></>,
+  info: <><circle cx="12" cy="12" r="8.5" /><path d="M12 11v5.5M12 7.8h.01" /></>,
+  warn: <><path d="M12 4 21 19.5H3z" /><path d="M12 10v4.5M12 17h.01" /></>,
   contrast: <><circle cx="12" cy="12" r="8" /><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none" /></>,
 };
 

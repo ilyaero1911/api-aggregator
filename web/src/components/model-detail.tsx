@@ -26,8 +26,8 @@ export async function ModelDetail({ author, slug, base, inShell }: { author: str
   const [cfg, { data: all }] = await Promise.all([loadConfig(), loadModels()]);
   const M = t.models;
   const body = m.modality === "image"
-    ? `curl ${cfg.api_base_url}/images/generations \\\n  -H "Authorization: Bearer $NG_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "${m.id}", "prompt": "a lighthouse in fog"}'`
-    : `curl ${cfg.api_base_url}/chat/completions \\\n  -H "Authorization: Bearer $NG_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${m.id}",\n    "stream": true,\n    "messages": [{"role": "user", "content": "Привет!"}]\n  }'`;
+    ? `curl ${cfg.api_base_url}/images/generations \\\n  -H "Authorization: Bearer $STRELKA_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"model": "${m.id}", "prompt": "a lighthouse in fog"}'`
+    : `curl ${cfg.api_base_url}/chat/completions \\\n  -H "Authorization: Bearer $STRELKA_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{\n    "model": "${m.id}",\n    "stream": true,\n    "messages": [{"role": "user", "content": "Привет!"}]\n  }'`;
 
   return (
     <div className={inShell ? "" : "wrap"} style={{ paddingTop: inShell ? 0 : 40 }}>

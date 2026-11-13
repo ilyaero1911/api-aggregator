@@ -14,7 +14,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const KeyPrefix = "ng-"
+const KeyPrefix = "st-"
 
 func HashPassword(p string) (string, error) {
 	b, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
