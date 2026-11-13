@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { ENTRIES, TABS, findEntry, type Entry } from "@/lib/docs";
+import { entriesFor, tabsFor, type Entry } from "@/lib/docs";
 import type { Block } from "@/lib/docs/types";
 import { useI18n } from "@/lib/i18n/client";
 import { Icon } from "./icons";
@@ -12,7 +12,9 @@ import { CodeBlock } from "./ui";
 export function DocsApp({ slug, base, apiBase, inShell }: { slug?: string[]; base: string; apiBase: string; inShell?: boolean }) {
   const { lang } = useI18n();
   const en = lang === "en";
-  const cur = findEntry(slug);
+  const ENTRIES = entriesFor(lang), TABS = tabsFor(lang);
+  const key = (slug ?? []).join("/");
+  const cur = ENTRIES.find((e) => e.path === key) ?? ENTRIES[0];
   const sub = (s: string) => s.replaceAll("{BASE}", apiBase);
   const href = (path: string) => `${base}/${path}`;
   const fixLink = (h: string) => (h.startsWith("/docs/") ? base + h.slice(5) : h);
@@ -36,7 +38,7 @@ export function DocsApp({ slug, base, apiBase, inShell }: { slug?: string[]; bas
     const s = q.trim().toLowerCase();
     if (s.length < 2) return [];
     return ENTRIES.filter((e) => `${e.page.title} ${e.page.desc} ${JSON.stringify(e.page.blocks)}`.toLowerCase().includes(s)).slice(0, 8);
-  }, [q]);
+  }, [q, ENTRIES]);
 
   const tabEntries = ENTRIES.filter((e) => e.tab.id === cur.tab.id);
   const idx = tabEntries.findIndex((e) => e.path === cur.path);
@@ -148,7 +150,6 @@ export function DocsApp({ slug, base, apiBase, inShell }: { slug?: string[]; bas
             <button className="btn btn-ghost btn-sm" onClick={copyPage}><Icon name={copied ? "check" : "copy"} size={15} />{copied ? (en ? "Copied" : "Скопировано") : (en ? "Copy page" : "Копировать страницу")}</button>
           </div>
           <p className="dx-desc">{cur.page.desc}</p>
-          {en && <p className="dx-callout dx-note"><Icon name="info" size={18} /><span>The documentation is currently available in Russian. Code examples work as is.</span></p>}
           <div className="dx-body">{cur.page.blocks.map(render)}</div>
           <div className="dx-pager">
             {prev ? <Link href={href(prev.path)} className="dx-pg"><span className="hint">← {en ? "Previous" : "Назад"}</span><b>{prev.page.title}</b></Link> : <span />}

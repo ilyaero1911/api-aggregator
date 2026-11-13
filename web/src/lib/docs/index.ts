@@ -21,3 +21,21 @@ export function findEntry(slug: string[] | undefined): Entry {
   const key = (slug ?? []).join("/");
   return ENTRIES.find((e) => e.path === key) ?? ENTRIES[0];
 }
+
+// Английская версия: те же страницы и адреса, тексты из en.ts, примеры кода берутся из русской версии.
+import { EN, EN_GROUPS, EN_TABS } from "./en";
+import type { Block } from "./types";
+
+const EN_ENTRIES: Entry[] = (() => {
+  const tabs = new Map<string, Tab>(TABS.map((t) => [t.id, { ...t, title: EN_TABS[t.id] ?? t.title, groups: t.groups.map((g) => ({ ...g, title: EN_GROUPS[g.title] ?? g.title })) }]));
+  return ENTRIES.map((e) => {
+    const tr = EN[e.path];
+    const page: Page = tr
+      ? { ...e.page, title: tr.title, desc: tr.desc, blocks: tr.blocks.map((b) => (b[0] === "same" ? e.page.blocks[b[1] as number] : b) as Block) }
+      : e.page;
+    return { tab: tabs.get(e.tab.id) as Tab, group: EN_GROUPS[e.group] ?? e.group, page, path: e.path };
+  });
+})();
+
+export const entriesFor = (lang: string): Entry[] => (lang === "en" ? EN_ENTRIES : ENTRIES);
+export const tabsFor = (lang: string): Tab[] => (lang === "en" ? TABS.map((t) => EN_ENTRIES.find((e) => e.tab.id === t.id)!.tab) : TABS);
