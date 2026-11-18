@@ -215,6 +215,8 @@ type Payment struct {
 	ID      string `json:"id"`
 	Account string `json:"account"`
 	Amount  int64  `json:"amount"`
+	Method  string `json:"method"`
+	Status  string `json:"status"`
 }
 
 func Sign(secret string, body []byte) string {

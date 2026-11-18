@@ -246,6 +246,23 @@ func ValidSpeech(model, voice, input string) error {
 	return nil
 }
 
+// Counter кэширует оценку, чтобы повтор того же текста не считался заново.
+type Counter struct {
+	cache map[string]int
+}
+
+func (c *Counter) Estimate(text string) int {
+	if c.cache == nil {
+		c.cache = map[string]int{}
+	}
+	if n, ok := c.cache[text]; ok {
+		return n
+	}
+	n := Count(text)
+	c.cache[text] = n
+	return n
+}
+
 // Count оценивает число токенов по словам и знакам. Это не ответ провайдера.
 func Count(text string) int {
 	if text == "" {
