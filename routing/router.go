@@ -74,7 +74,10 @@ func (r *Router) BreakerFor(endpoint string) *Breaker {
 // Model вызывает модель: эндпоинты по приоритету и здоровью, ретраи только для
 // повторяемых ошибок и только до первого байта клиенту. Попытки дописываются в trace.
 func (r *Router) Model(ctx context.Context, model string, call Call, trace *[]Attempt) (adapters.Reply, Endpoint, error) {
-	endpoints := r.ordered(model)
+	endpoints := r.rank(r.Registry.For(model))
+	if picked, ok := pickedFrom(ctx); ok {
+		endpoints = r.rank(picked)
+	}
 	if len(endpoints) == 0 {
 		if r.Registry.Has(model) {
 			add(trace, Attempt{Model: model, Code: apierr.NoAvailableProvider, Reason: "all_disabled"})
@@ -137,13 +140,31 @@ func (r *Router) Model(ctx context.Context, model string, call Call, trace *[]At
 	return adapters.Reply{}, Endpoint{}, last
 }
 
-// ordered — эндпоинты модели: сначала up, потом degraded, потом down;
-// внутри статуса — порядок реестра. Эндпоинт, у которого истёк cooldown
-// breaker или который в down и не вызывался дольше cooldown, идёт на своё
-// место по приоритету: так он получает пробный вызов и после восстановления
-// возвращает себе трафик.
+type pickedKey struct{}
+
+// WithPicked подменяет список эндпоинтов на один запрос. nil не подменяет.
+func WithPicked(ctx context.Context, list []Endpoint) context.Context {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	return context.WithValue(ctx, pickedKey{}, list)
+}
+
+func pickedFrom(ctx context.Context) ([]Endpoint, bool) {
+	if ctx == nil {
+		return nil, false
+	}
+	list, ok := ctx.Value(pickedKey{}).([]Endpoint)
+	return list, ok && list != nil
+}
+
+// ordered — эндпоинты модели: сначала up, потом degraded, потом down.
+// Эндпоинт после cooldown получает пробный вызов и может вернуть себе трафик.
 func (r *Router) ordered(model string) []Endpoint {
-	endpoints := r.Registry.For(model)
+	return r.rank(r.Registry.For(model))
+}
+
+func (r *Router) rank(endpoints []Endpoint) []Endpoint {
 	statusRank := map[Status]int{Up: 0, Degraded: 1, Down: 2}
 	rank := make(map[string]int, len(endpoints))
 	for _, e := range endpoints {

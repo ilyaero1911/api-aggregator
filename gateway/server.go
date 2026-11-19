@@ -48,10 +48,20 @@ func ConfigFrom(getenv func(string) string) (Config, error) {
 
 // Key — запись ключа клиента.
 type Key struct {
-	Account   string
-	Active    bool
-	Expires   time.Time
-	OrgActive bool
+	ID         string
+	Account    string
+	Active     bool
+	Expires    time.Time
+	OrgActive  bool
+	Management bool
+	Models     []string
+	DenyModels []string
+	Providers  []string
+	CIDRs      []string
+	RPM        int
+	TPM        int
+	Budget     int64
+	Spent      int64
 }
 
 type cachedKey struct {
@@ -154,6 +164,21 @@ type Service struct {
 	Mock        Mock
 	BodyLimit   int64
 	Now         func() time.Time
+	Vault       *Vault
+	Limiter     *Limiter
+	Fair        *Fair
+	Free        *FreeQuota
+	Tiers       map[string]Tier
+	Flags       *Flags
+	Presets     *Presets
+	Catalog     *Catalog
+	Idem        *Idem
+	Cache       *ResponseCache
+	Gens        *Generations
+	Abuse       *Abuse
+	Policies    map[string]OrgPolicy
+	Moderator   func(string) (bool, string)
+	StreamMock  func(ctx context.Context, model string, emit func(string) error) (adapters.Reply, error)
 	requests    atomic.Int64
 }
 
@@ -173,7 +198,14 @@ func (s *Service) Handler() http.Handler {
 	r.Get("/readyz", s.ready)
 	r.Get("/metrics", s.metrics)
 	r.Post("/v1/chat/completions", s.complete)
+	r.Get("/v1/models", s.models)
 	r.Get("/v1/models/{model}/endpoints", s.endpoints)
+	r.Get("/v1/generation", s.generation)
+	r.Get("/v1/key", s.keyInfo)
+	r.Post("/v1/keys", s.createKey)
+	r.Get("/v1/keys", s.listKeys)
+	r.Delete("/v1/keys/{id}", s.deleteKey)
+	r.Post("/v1/abuse", s.abuse)
 	return r
 }
 
@@ -215,14 +247,31 @@ func (s *Service) ready(w http.ResponseWriter, _ *http.Request) {
 func (s *Service) metrics(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	_, _ = io.WriteString(w, "gateway_requests_total "+strconv.FormatInt(s.requests.Load(), 10)+"\n")
+	version := 0
+	if s.Catalog != nil {
+		s.Catalog.mu.Lock()
+		version = s.Catalog.Version
+		s.Catalog.mu.Unlock()
+	}
+	_, _ = io.WriteString(w, "gateway_catalog_version "+strconv.Itoa(version)+"\n")
+}
+
+type chatMessage struct {
+	Role    string          `json:"role"`
+	Content json.RawMessage `json:"content"`
 }
 
 type chatRequest struct {
-	Model    string `json:"model"`
-	Messages []struct {
-		Role    string `json:"role"`
-		Content string `json:"content"`
-	} `json:"messages"`
+	Model       string          `json:"model"`
+	Messages    []chatMessage   `json:"messages"`
+	Preset      string          `json:"preset"`
+	Stream      bool            `json:"stream"`
+	Temperature *float64        `json:"temperature"`
+	Cache       bool            `json:"cache"`
+	Tools       json.RawMessage `json:"tools"`
+	Models      []string        `json:"models"`
+	Provider    *Prefs          `json:"provider"`
+	StreamUsage bool            `json:"-"`
 }
 
 type chatResponse struct {
@@ -259,9 +308,46 @@ func (s *Service) complete(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, apierr.New(apierr.InvalidRequest, "нужны model и messages").WithParam("model"))
 		return
 	}
+	if stop := s.guardChat(w, r, key, &body); stop {
+		return
+	}
+	if s.Fair != nil {
+		defer s.Fair.Release(key.Account)
+	}
 	gen := r.Header.Get("X-Generation-Id")
 	if gen == "" {
 		gen = randID()
+	}
+	idemKey := r.Header.Get("Idempotency-Key")
+	if s.Idem != nil && idemKey != "" {
+		cached, _, replay, conflict := s.Idem.Begin(key.Account, idemKey, body.Stream, s.now())
+		if conflict {
+			writeErr(w, apierr.New(apierr.InvalidRequest, "запрос с этим ключом ещё выполняется"))
+			return
+		}
+		if replay {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(cached)
+			return
+		}
+		defer func() {
+			if !replay {
+				s.Idem.Abort(key.Account, idemKey)
+			}
+		}()
+	}
+	if s.Cache != nil && (body.Cache || (body.Temperature != nil && *body.Temperature == 0)) {
+		cacheKey := CacheKey(key.Account, body.Model, 0, messageText(body.Messages))
+		if hit, ok := s.Cache.Get(cacheKey, s.now()); ok {
+			_ = s.Ledger.Authorize(key.Account, gen, body.Model, 1, s.now())
+			_ = s.Ledger.Capture(key.Account, gen, 1)
+			w.Header().Set("X-Cache", "hit")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(hit)
+			return
+		}
 	}
 	hold := s.Hold
 	if hold <= 0 {
@@ -283,12 +369,19 @@ func (s *Service) complete(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, replay)
 		return
 	}
+	if body.Stream {
+		s.stream(w, r, key, body, gen, hold)
+		return
+	}
 	timeout := s.CallTimeout
 	if timeout <= 0 {
 		timeout = 2 * time.Second
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), timeout)
 	defer cancel()
+	if picked := s.picked(body.Model, body, r.Header.Get("X-Model-Variant")); picked != nil {
+		ctx = routing.WithPicked(ctx, picked)
+	}
 	var trace []routing.Attempt
 	reply, endpoint, callErr := s.Router.Model(ctx, body.Model, func(ctx context.Context, e routing.Endpoint) (adapters.Reply, error) {
 		if s.Mock == nil {
@@ -323,7 +416,22 @@ func (s *Service) complete(w http.ResponseWriter, r *http.Request) {
 	out.Usage.CachedTokens = reply.Usage.CacheRead
 	out.Usage.ReasoningTokens = reply.Usage.Reasoning
 	w.Header().Set("X-Generation-Id", gen)
-	writeJSON(w, http.StatusOK, out)
+	if len(trace) > 0 {
+		w.Header().Set("X-Routing-Provider", endpoint.Provider)
+		w.Header().Set("X-Routing-Reason", trace[len(trace)-1].Reason)
+	}
+	s.remember(key, gen, body.Model, endpoint, reply, len(trace), false)
+	raw, _ := json.Marshal(out)
+	if s.Idem != nil && idemKey != "" {
+		s.Idem.Finish(key.Account, idemKey, gen, raw, s.now())
+		idemKey = ""
+	}
+	if s.Cache != nil && (body.Cache || (body.Temperature != nil && *body.Temperature == 0)) {
+		s.Cache.Put(CacheKey(key.Account, body.Model, 0, messageText(body.Messages)), raw, time.Hour, s.now())
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(raw)
 }
 
 func (s *Service) endpoints(w http.ResponseWriter, r *http.Request) {

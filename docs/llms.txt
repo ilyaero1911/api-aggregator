@@ -1,0 +1,10 @@
+# NeuroGateway
+
+Шлюз к нескольким LLM с одним контрактом, похожим на OpenAI.
+
+- Документация методов: docs/api/README.md
+- Политика хранения: docs/policy/retention.md
+- DPA: docs/policy/dpa.md
+- Жалобы: docs/policy/abuse.md
+- Threat model: docs/security/threat-model.md
+- Поиск по этим файлам: go run ./cmd/docsearch docs

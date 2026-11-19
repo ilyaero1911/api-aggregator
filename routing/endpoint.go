@@ -20,6 +20,14 @@ type Endpoint struct {
 	Params       []string
 	DataPolicy   string
 	Status       string
+	Tools        bool
+	JSON         bool
+	Image        bool
+	Throughput   int
+	Free         bool
+	Online       bool
+	Thinking     bool
+	PromptPrice  int64
 }
 
 // Registry — эндпоинты по моделям.
