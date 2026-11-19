@@ -32,6 +32,19 @@ func TestEncodePooledMatchesMarshal(t *testing.T) {
 	}
 }
 
+func TestModelDeadlineOverride(t *testing.T) {
+	svc := &Service{Deadlines: map[string]ModelDeadline{
+		"slow": {Connect: time.Millisecond, FirstToken: 15 * time.Millisecond, Idle: time.Millisecond, Max: 40 * time.Millisecond},
+	}}
+	got := svc.deadline("slow")
+	if got.FirstToken != 15*time.Millisecond || got.Max != 40*time.Millisecond {
+		t.Fatal(got)
+	}
+	if svc.deadline("other").Max != 2*time.Second {
+		t.Fatal(svc.deadline("other"))
+	}
+}
+
 func TestAbuseBlocksKey(t *testing.T) {
 	keys := NewKeys(time.Minute)
 	keys.Put("secret", Key{Account: "acc", Active: true, OrgActive: true})

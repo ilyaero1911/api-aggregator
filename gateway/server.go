@@ -179,7 +179,29 @@ type Service struct {
 	Policies    map[string]OrgPolicy
 	Moderator   func(string) (bool, string)
 	StreamMock  func(ctx context.Context, model string, emit func(string) error) (adapters.Reply, error)
+	Deadlines   map[string]ModelDeadline
 	requests    atomic.Int64
+}
+
+// ModelDeadline — таймауты одной модели.
+type ModelDeadline struct {
+	Connect    time.Duration
+	FirstToken time.Duration
+	Idle       time.Duration
+	Max        time.Duration
+}
+
+func (s *Service) deadline(model string) ModelDeadline {
+	if s.Deadlines != nil {
+		if d, ok := s.Deadlines[model]; ok {
+			return d
+		}
+	}
+	max := s.CallTimeout
+	if max <= 0 {
+		max = 2 * time.Second
+	}
+	return ModelDeadline{Connect: max, FirstToken: max, Idle: max, Max: max}
 }
 
 func (s *Service) now() time.Time {
@@ -373,11 +395,7 @@ func (s *Service) complete(w http.ResponseWriter, r *http.Request) {
 		s.stream(w, r, key, body, gen, hold)
 		return
 	}
-	timeout := s.CallTimeout
-	if timeout <= 0 {
-		timeout = 2 * time.Second
-	}
-	ctx, cancel := context.WithTimeout(r.Context(), timeout)
+	ctx, cancel := context.WithTimeout(r.Context(), s.deadline(body.Model).Max)
 	defer cancel()
 	if picked := s.picked(body.Model, body, r.Header.Get("X-Model-Variant")); picked != nil {
 		ctx = routing.WithPicked(ctx, picked)

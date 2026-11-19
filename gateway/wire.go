@@ -318,7 +318,7 @@ func (s *Service) stream(w http.ResponseWriter, r *http.Request, key Key, body c
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("X-Generation-Id", gen)
 	flusher, _ := w.(http.Flusher)
-	ctx, cancel := context.WithCancel(r.Context())
+	ctx, cancel := context.WithTimeout(r.Context(), s.deadline(body.Model).Max)
 	defer cancel()
 	if s.StreamMock == nil {
 		_ = s.Ledger.Release(key.Account, gen)
