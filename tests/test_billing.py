@@ -163,6 +163,18 @@ class LedgerInvariantTest(unittest.TestCase):
         with self.assertRaises(AccountIsolationError):
             ledger.capture("b", "gen", 10)
 
+    def test_snapshot_survives_restart(self) -> None:
+        ledger = Ledger()
+        ledger.deposit("a", 1_000)
+        handle_completion(ledger, "a", "gen", 100, 80, lambda: None)
+        restored = Ledger.restore(ledger.snapshot())
+        again = handle_completion(restored, "a", "gen", 100, 80, lambda: None)
+        self.assertEqual(again["provider_called"], False)
+        self.assertEqual(restored.captures["gen"], 80)
+        self.assertEqual(restored.available["a"], 920)
+        with self.assertRaises(AccountIsolationError):
+            restored.capture("b", "gen", 80)
+
 
 class PricingAndFxTest(unittest.TestCase):
     def test_reference_quote(self) -> None:

@@ -242,6 +242,36 @@ class Ledger:
             row.update(meta)
             self.postings.append(row)
 
+    def snapshot(self) -> dict:
+        with self._lock:
+            return {
+                "available": dict(self.available),
+                "holds": dict(self.holds),
+                "captures": dict(self.captures),
+                "hold_owner": dict(self.hold_owner),
+                "capture_owner": dict(self.capture_owner),
+                "hold_at": dict(self.hold_at),
+                "overdraft": dict(self.overdraft),
+                "to_reconcile": dict(self.to_reconcile),
+                "postings": list(self.postings),
+                "seq": self._seq,
+            }
+
+    @classmethod
+    def restore(cls, data: dict) -> "Ledger":
+        ledger = cls()
+        ledger.available = dict(data.get("available", {}))
+        ledger.holds = dict(data.get("holds", {}))
+        ledger.captures = dict(data.get("captures", {}))
+        ledger.hold_owner = dict(data.get("hold_owner", {}))
+        ledger.capture_owner = dict(data.get("capture_owner", {}))
+        ledger.hold_at = dict(data.get("hold_at", {}))
+        ledger.overdraft = dict(data.get("overdraft", {}))
+        ledger.to_reconcile = dict(data.get("to_reconcile", {}))
+        ledger.postings = list(data.get("postings", []))
+        ledger._seq = int(data.get("seq", 0))
+        return ledger
+
 
 def handle_completion(
     ledger: Ledger,

@@ -193,6 +193,11 @@ func (l *Ledger) Authorize(account, generation, model string, estimate int64, no
 	return nil
 }
 
+func (l *Ledger) Captured(generation string) (int64, bool) {
+	amount, ok := l.captured[generation]
+	return amount, ok
+}
+
 func (l *Ledger) Capture(account, generation string, actual int64) error {
 	if actual < 0 {
 		return ErrAmount
